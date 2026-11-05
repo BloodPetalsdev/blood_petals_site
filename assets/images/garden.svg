@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="720" viewBox="0 0 640 720">
+<defs>
+<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#56263e"/><stop offset="1" stop-color="#96546a"/></linearGradient>
+<linearGradient id="ground" x2="0" y2="1"><stop stop-color="#e2aabc"/><stop offset="1" stop-color="#f1dfe4"/></linearGradient>
+<g id="flower"><path d="M0 0C-17-3-22-20-11-22-4-24 0-15 0-8 0-15 4-24 11-22 22-20 17-3 0 0" fill="#f3bfd0"/><path d="M0 0C5-17 22-18 24-8 27 3 11 8 0 0" fill="#eaa2bc"/><path d="M0 0C17 5 18 22 8 24-3 27-8 11 0 0" fill="#f6ced9"/><path d="M0 0C-5 17-22 18-24 8-27-3-11-8 0 0" fill="#efb3c9"/><circle r="3" fill="#ae5b79"/></g>
+<g id="petal"><path d="M0 0Q-15-18 0-25Q15-18 0 0" fill="#e7a1b9"/></g>
+</defs>
+<path fill="#f1dfe4" d="M0 0h640v720H0z"/>
+<path d="M103 591V291a217 217 0 0 1 434 0v300" fill="url(#sky)"/>
+<path d="M83 592V291a237 237 0 0 1 474 0v301" fill="none" stroke="#d7a9b9"/>
+<circle cx="408" cy="224" r="68" fill="#f8d5dd" opacity=".85"/>
+<path d="M104 501h432v99H104z" fill="#5e3449"/>
+<path d="m105 501 87-37 90 37 103-30 151 30" fill="#62384d"/>
+<g fill="#b77d91" opacity=".5"><path d="M127 521h24v35h-24zM168 521h24v35h-24zM209 521h24v35h-24zM250 521h24v35h-24zM390 521h24v35h-24zM431 521h24v35h-24zM472 521h24v35h-24z"/></g>
+<ellipse cx="320" cy="601" rx="253" ry="49" fill="url(#ground)"/>
+<path d="m298 581-49 70h144l-53-70" fill="#f9e7e9"/><path d="m298 581-49 70m91-70 53 70" stroke="#cfa2b1" fill="none"/>
+<path d="M230 587c18-82 15-153-5-216-18-44-48-75-88-109 57 21 91 56 111 90 3-59 25-100 59-146-21 59-28 117-18 168 28-46 72-65 116-72-48 26-81 58-106 106-20 39-17 104-8 179" fill="#582b40"/>
+<path d="M248 541c7-64 4-115-9-152m31 7c-7-68 3-124 26-166" stroke="#a1677a" fill="none" stroke-width="3"/>
+<g fill="#d18aa4"><ellipse cx="190" cy="271" rx="114" ry="72"/><ellipse cx="283" cy="223" rx="120" ry="81"/><ellipse cx="371" cy="293" rx="129" ry="63"/><ellipse cx="151" cy="327" rx="88" ry="52"/></g>
+<g fill="#e9abc2"><ellipse cx="171" cy="250" rx="87" ry="56"/><ellipse cx="275" cy="201" rx="100" ry="63"/><ellipse cx="375" cy="272" rx="103" ry="49"/><ellipse cx="124" cy="308" rx="61" ry="43"/></g>
+<g><use href="#flower" transform="translate(124 258) scale(1.2)"/><use href="#flower" transform="translate(181 230) scale(1.4) rotate(30)"/><use href="#flower" transform="translate(241 204) scale(1.3)"/><use href="#flower" transform="translate(303 179) scale(1.1) rotate(40)"/><use href="#flower" transform="translate(332 236) scale(1.5)"/><use href="#flower" transform="translate(400 263) scale(1.4) rotate(60)"/><use href="#flower" transform="translate(453 284) scale(.8)"/><use href="#flower" transform="translate(270 271) scale(1.3)"/><use href="#flower" transform="translate(201 293) scale(1.3) rotate(30)"/><use href="#flower" transform="translate(115 319) scale(1.4)"/><use href="#flower" transform="translate(158 345) scale(.8)"/><use href="#flower" transform="translate(359 308) scale(.9)"/></g>
+<g opacity=".85"><use href="#petal" transform="translate(450 386) rotate(35) scale(.7)"/><use href="#petal" transform="translate(376 431) rotate(-50) scale(.5)"/><use href="#petal" transform="translate(166 419) rotate(60) scale(.6)"/><use href="#petal" transform="translate(495 495) rotate(25) scale(.5)"/><use href="#petal" transform="translate(304 521) rotate(-40) scale(.5)"/><use href="#petal" transform="translate(88 161) rotate(-30) scale(.6)"/><use href="#petal" transform="translate(521 224) rotate(55) scale(.7)"/><use href="#petal" transform="translate(408 609) rotate(80) scale(.7)"/><use href="#petal" transform="translate(188 613) rotate(-55) scale(.6)"/><use href="#petal" transform="translate(332 647) rotate(65) scale(.6)"/></g>
+<path d="M73 650h494" stroke="#d5adba"/>
+</svg>
