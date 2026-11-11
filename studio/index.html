@@ -12,7 +12,7 @@
 @media (max-height:700px){.topbar{height:54px}.timeline-panel{height:190px}.panel-heading{height:56px}.timeline-topbar{height:45px}.left-footer{padding:10px}.inspector-section{margin-bottom:13px}.inspector-scroll{padding-bottom:12px}}
 @media (max-width:790px){body{overflow:auto}.app{min-width:0;min-height:760px;height:auto}.topbar{height:auto;min-height:58px;padding:9px;flex-wrap:wrap}.desktop-text,.brand-subtitle,.version{display:none}.brand-title{font-size:11px}.brand-icon{height:32px;width:32px;font-size:24px}.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:370px auto auto}.viewport-panel{grid-row:1}.sidebar.left{grid-row:2;height:160px;border-top:1px solid var(--line)}.sidebar.right{grid-row:3;border-top:1px solid var(--line)}.bone-tree{max-height:105px}.left-footer{display:none}.inspector-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}.selected-bone{grid-column:1/-1}.timeline-panel{height:230px}.timeline-topbar{flex-wrap:wrap;height:auto;padding:8px}.timeline-title{width:100%}.viewport-footer{font-size:9px}.timeline-bottom span{display:none}.app-footer{display:none}}
 
-/* Silent Garden Motion Studio — interface mobile (Alpha 0.2) */
+/* Silent Garden Motion Studio — interface mobile (Alpha 0.3) */
 .mobile-only{display:none!important}
 .backend-dialog{width:min(520px,calc(100vw - 28px));max-height:85dvh;overflow:auto}
 .backend-dialog label{display:block;margin:16px 0 7px;color:#d9bbcd;font-size:12px}
@@ -56,7 +56,7 @@
   .mobile-pose-heading{display:flex;align-items:center;gap:9px;min-width:0}
   .m-label{font-size:9px;color:#bba1b1;letter-spacing:.04em;white-space:nowrap}
   .mobile-pose-heading strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#ffdfef}
-  .mobile-pose-heading button{border:1px solid #70566e;color:#eec0db;background:#453149;border-radius:7px;font-size:16px;width:29px;height:27px}
+  .mobile-pose-heading button{border:1px solid #70566e;color:#eec0db;background:#453149;border-radius:7px;font-size:16px;width:30px;height:29px;flex:none;touch-action:manipulation}
   .mobile-pose-row{display:flex;align-items:center;gap:5px;min-height:30px}
   .mobile-axis{display:flex;gap:2px;background:#2b2133;padding:2px;border-radius:8px}
   .mobile-axis button{background:transparent;color:#b6a2b9;border:none;padding:8px 9px;min-width:27px;min-height:31px;border-radius:6px;font-weight:bold;font-size:11px}
@@ -123,7 +123,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.2</span>
+        <span class="version">ALPHA 0.3</span>
       </div>
       <div class="header-actions">
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -159,7 +159,7 @@
           <div id="loadingOverlay" class="loading-overlay hidden"><span class="spinner"></span><strong id="loadingTitle">Processando modelo...</strong><small id="loadingDescription">Aguarde</small></div>
           <div id="dropZone" class="drop-zone hidden"><strong>Solte seu FBX aqui ✿</strong><span>O arquivo é aberto no próprio navegador</span></div>
           <div class="mobile-pose-card mobile-only" id="mobilePoseCard" aria-label="Ferramentas rápidas de pose">
-            <div class="mobile-pose-heading"><span class="m-label">OSSO ATIVO</span><strong id="mobileBoneName">Selecione um osso</strong><button type="button" id="mobileCenterBtn" aria-label="Centralizar câmera" title="Centralizar câmera">◎</button></div>
+            <div class="mobile-pose-heading"><span class="m-label">OSSO ATIVO</span><strong id="mobileBoneName">Selecione um osso</strong><button type="button" id="mobileZoomOutBtn" aria-label="Afastar câmera" title="Afastar câmera">−</button><button type="button" id="mobileZoomInBtn" aria-label="Aproximar câmera" title="Aproximar câmera">＋</button><button type="button" id="mobileCenterBtn" aria-label="Enquadrar personagem" title="Enquadrar personagem">◎</button></div>
             <div class="mobile-pose-row">
               <div class="mobile-axis" role="group" aria-label="Eixo de rotação">
                 <button type="button" class="selected" data-mobile-axis="x">X</button>
@@ -272,7 +272,7 @@
     <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
   </dialog>
   <script type="module">
-/* Silent Garden Motion Studio — versão alpha 0.2 · Mobile Studio
+/* Silent Garden Motion Studio — versão alpha 0.3 · Mobile Studio
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -320,7 +320,12 @@ function makeClip(name, duration=3, fps=30) {
 }
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#1e1a25');
-scene.fog = new THREE.Fog('#1e1a25', 14, 45);
+// Sem névoa: o FBX não desaparece ao se afastar.
+scene.fog = null;
+// Tamanho visual separado do tamanho original do personagem.
+const displayRoot = new THREE.Group();
+displayRoot.name='SG_Motion_ViewportOnly';
+scene.add(displayRoot);
 const viewport = $('viewport');
 const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'default'});
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, matchMedia('(max-width:790px)').matches ? 1.25 : 1.5));
@@ -337,8 +342,8 @@ orbit.enableDamping = true; orbit.dampingFactor = .07; orbit.minDistance = .2; o
 const hemi = new THREE.HemisphereLight('#e0d8ff', '#57435c', 2.05); scene.add(hemi);
 const keyLight = new THREE.DirectionalLight('#fff5f0', 2.2); keyLight.position.set(4, 7, 5); scene.add(keyLight);
 const fillLight = new THREE.DirectionalLight('#c8addd', .8); fillLight.position.set(-5,3,-3); scene.add(fillLight);
-const grid = new THREE.GridHelper(200,100,'#655367','#45394a');
-grid.material.opacity = .24; grid.material.transparent = true; scene.add(grid);
+const grid = new THREE.GridHelper(20,20,'#655367','#45394a');
+grid.material.opacity = .14; grid.material.transparent = true; scene.add(grid);
 const axis = new THREE.AxesHelper(.35); axis.visible = false; scene.add(axis);
 const transform = new TransformControls(camera, renderer.domElement);
 transform.setMode('rotate'); transform.setSpace('local'); transform.setSize(.8);
@@ -431,7 +436,8 @@ function uniqueNamesCheck() {
 function clearModel() {
   state.playing=false;
   transform.detach();
-  if(state.model) scene.remove(state.model);
+  if(state.model) displayRoot.remove(state.model);
+  displayRoot.scale.setScalar(1);
   if(state.skeletonHelper){scene.remove(state.skeletonHelper);state.skeletonHelper.dispose?.();state.skeletonHelper=null;}
   for(const h of state.handles){scene.remove(h);h.material.dispose();}
   state.handles.length=0;
@@ -440,9 +446,13 @@ function clearModel() {
 function installModel(model, filename=null, isDemo=false) {
   clearModel();
   state.model = model;state.modelFilename=filename;state.modelIsDemo=isDemo;
-  scene.add(model); model.updateMatrixWorld(true);
+  // Normalizar somente a visualização, sem mexer no esqueleto nem na exportação.
+  const nativeBounds=new THREE.Box3().setFromObject(model);
+  const nativeHeight=nativeBounds.isEmpty()?1.9:Math.max(nativeBounds.getSize(Vec()).y,0.000001);
+  displayRoot.scale.setScalar(1.9/nativeHeight);
+  displayRoot.add(model); model.updateMatrixWorld(true);
   model.traverse(o => {if(o.isBone){state.bones.push(o);}});
-  if(!state.bones.length){scene.remove(model);state.model=null;throw new Error('O FBX não contém ossos detectáveis. Importe um personagem com Armature/Skeleton.');}
+  if(!state.bones.length){displayRoot.remove(model);state.model=null;throw new Error('O FBX não contém ossos detectáveis. Importe um personagem com Armature/Skeleton.');}
   for(const bone of state.bones){const id=getBoneId(bone);bone.userData.sgId=id;state.boneMap.set(id,bone);state.rest.set(id,capture(bone));}
   uniqueNamesCheck();
   const bbox=new THREE.Box3().setFromObject(model);
@@ -504,12 +514,22 @@ function createDemoWave() {
 function frameModel() {
   if(!pendingBounds) return;
   const {center,radius,height}=pendingBounds;
-  orbit.target.copy(center);
-  const dist=Math.max(radius, .2)*1.65;
-  camera.position.copy(center).add(Vec(dist*.55,dist*.34,dist));
+  // Enquadramento com margem maior, inclusive atrás do painel móvel.
+  const mobile=matchMedia('(max-width:790px)').matches;
+  const dist=Math.max(radius,.2)*(mobile?2.1:1.9);
+  const target=center.clone().add(Vec(0,mobile?-height*.12:0,0));
+  orbit.target.copy(target);
+  camera.position.copy(target).add(Vec(dist*.55,dist*.34,dist));
   camera.near=Math.max(height/2500,.001);
   camera.far=Math.max(dist*30,1000);
   camera.updateProjectionMatrix();orbit.minDistance=Math.max(height*.08,.01);orbit.maxDistance=Math.max(dist*9,100);
+  orbit.update();
+}
+function zoomCamera(multiplier) {
+  const offset=camera.position.clone().sub(orbit.target);
+  const distance=clamp(offset.length()*multiplier,orbit.minDistance,orbit.maxDistance);
+  if(offset.lengthSq()<1e-12)return;
+  camera.position.copy(orbit.target).add(offset.normalize().multiplyScalar(distance));
   orbit.update();
 }
 function selectBone(bone) {
@@ -656,7 +676,13 @@ function changeMode(mode){
   $('rotateBtn').classList.toggle('active',mode==='rotate');$('moveBtn').classList.toggle('active',mode==='translate');
   status(mode==='rotate'?'Gizmo de rotação ativo.':'Gizmo de movimento ativo.');
 }
-function updateSize(){const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+let prevViewportAspect=null;
+function updateSize(){
+  const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);
+  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  if(prevViewportAspect!==null&&Math.abs(prevViewportAspect-camera.aspect)>.4&&pendingBounds)frameModel();
+  prevViewportAspect=camera.aspect;
+}
 new ResizeObserver(updateSize).observe(viewport);
 function animate(now){
   requestAnimationFrame(animate);
@@ -750,6 +776,10 @@ async function makeGlb(){
   const clip=createAnimationClip();
   // O modelo exportado carrega posições base; as keyframes animam a pose de repouso.
   const old=state.bones.map(b=>capture(b));
+  // Desanexar a escala somente visual na exportação: FBX mantém os valores de origem.
+  const visualParent=state.model.parent;
+  visualParent?.remove(state.model);
+  scene.add(state.model);
   try{
     for(const bone of state.bones)applyTransform(bone,state.rest.get(bone.userData.sgId));
     state.model.updateMatrixWorld(true);
@@ -758,7 +788,10 @@ async function makeGlb(){
     if(!(result instanceof ArrayBuffer))throw new Error('Exportação GLB não gerou dados binários.');
     return new Blob([result],{type:'model/gltf-binary'});
   }finally{
-    state.bones.forEach((b,i)=>applyTransform(b,old[i]));state.model.updateMatrixWorld(true);
+    state.bones.forEach((b,i)=>applyTransform(b,old[i]));
+    scene.remove(state.model);
+    (visualParent||displayRoot).add(state.model);
+    state.model.updateMatrixWorld(true);
   }
 }
 async function exportGlb(){
@@ -830,6 +863,8 @@ function wireMobile(){
   $('mobileBackdrop').onclick=()=>setMobilePanel('editor');
   $('mobileOpenProjectBtn').onclick=()=>$('projectInput').click();
   $('mobileCenterBtn').onclick=frameModel;
+  $('mobileZoomOutBtn').onclick=()=>zoomCamera(1.25);
+  $('mobileZoomInBtn').onclick=()=>zoomCamera(.8);
   $('mobileScrub').addEventListener('input',e=>{state.playing=false;$('playBtn').textContent='▶';seek(Number(e.target.value));});
   $('mobileKeyBtn').onclick=()=>keyframe();
   $('mobileResetBtn').onclick=()=>{if(!state.selected)return;applyTransform(state.selected,state.rest.get(state.selected.userData.sgId));syncFields();};
