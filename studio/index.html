@@ -12,7 +12,7 @@
 @media (max-height:700px){.topbar{height:54px}.timeline-panel{height:190px}.panel-heading{height:56px}.timeline-topbar{height:45px}.left-footer{padding:10px}.inspector-section{margin-bottom:13px}.inspector-scroll{padding-bottom:12px}}
 @media (max-width:790px){body{overflow:auto}.app{min-width:0;min-height:760px;height:auto}.topbar{height:auto;min-height:58px;padding:9px;flex-wrap:wrap}.desktop-text,.brand-subtitle,.version{display:none}.brand-title{font-size:11px}.brand-icon{height:32px;width:32px;font-size:24px}.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:370px auto auto}.viewport-panel{grid-row:1}.sidebar.left{grid-row:2;height:160px;border-top:1px solid var(--line)}.sidebar.right{grid-row:3;border-top:1px solid var(--line)}.bone-tree{max-height:105px}.left-footer{display:none}.inspector-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}.selected-bone{grid-column:1/-1}.timeline-panel{height:230px}.timeline-topbar{flex-wrap:wrap;height:auto;padding:8px}.timeline-title{width:100%}.viewport-footer{font-size:9px}.timeline-bottom span{display:none}.app-footer{display:none}}
 
-/* Silent Garden Motion Studio — interface mobile (Alpha 0.3) */
+/* Silent Garden Motion Studio — interface mobile (Alpha 0.4) */
 .mobile-only{display:none!important}
 .backend-dialog{width:min(520px,calc(100vw - 28px));max-height:85dvh;overflow:auto}
 .backend-dialog label{display:block;margin:16px 0 7px;color:#d9bbcd;font-size:12px}
@@ -123,7 +123,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.3</span>
+        <span class="version">ALPHA 0.4</span>
       </div>
       <div class="header-actions">
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -272,7 +272,7 @@
     <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
   </dialog>
   <script type="module">
-/* Silent Garden Motion Studio — versão alpha 0.3 · Mobile Studio
+/* Silent Garden Motion Studio — versão alpha 0.4 · Mobile Studio
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -443,23 +443,41 @@ function clearModel() {
   state.handles.length=0;
   state.bones=[];state.boneMap.clear();state.rest.clear();state.selected=null;
 }
+// Calcula limites apenas das malhas VISÍVEIS (não do esqueleto completo).
+// Importadores FBX podem conter bones/controladores enormes e afastados da malha.
+function getVisibleCharacterBounds(root) {
+  root.updateWorldMatrix(true,true);
+  const bounds = new THREE.Box3();
+  let found = 0;
+  root.traverseVisible(object => {
+    if(!object.isMesh || !object.geometry) return;
+    const meshBounds = new THREE.Box3().setFromObject(object);
+    if(meshBounds.isEmpty()) return;
+    if (![meshBounds.min.x,meshBounds.min.y,meshBounds.min.z,
+          meshBounds.max.x,meshBounds.max.y,meshBounds.max.z].every(Number.isFinite)) return;
+    bounds.union(meshBounds);
+    found++;
+  });
+  return found ? bounds : new THREE.Box3().setFromObject(root);
+}
 function installModel(model, filename=null, isDemo=false) {
   clearModel();
   state.model = model;state.modelFilename=filename;state.modelIsDemo=isDemo;
   // Normalizar somente a visualização, sem mexer no esqueleto nem na exportação.
-  const nativeBounds=new THREE.Box3().setFromObject(model);
+  const nativeBounds=getVisibleCharacterBounds(model);
   const nativeHeight=nativeBounds.isEmpty()?1.9:Math.max(nativeBounds.getSize(Vec()).y,0.000001);
   displayRoot.scale.setScalar(1.9/nativeHeight);
-  displayRoot.add(model); model.updateMatrixWorld(true);
+  displayRoot.add(model);
+  displayRoot.updateWorldMatrix(true,true);
   model.traverse(o => {if(o.isBone){state.bones.push(o);}});
   if(!state.bones.length){displayRoot.remove(model);state.model=null;throw new Error('O FBX não contém ossos detectáveis. Importe um personagem com Armature/Skeleton.');}
   for(const bone of state.bones){const id=getBoneId(bone);bone.userData.sgId=id;state.boneMap.set(id,bone);state.rest.set(id,capture(bone));}
   uniqueNamesCheck();
-  const bbox=new THREE.Box3().setFromObject(model);
-  if(bbox.isEmpty()) bbox.set(Vec(-1,0,-1),Vec(1,2,1));
+  const bbox=getVisibleCharacterBounds(model);
+  if(bbox.isEmpty()) bbox.set(Vec(-.4,0,-.4),Vec(.4,1.9,.4));
   const size=bbox.getSize(Vec()); const center=bbox.getCenter(Vec());
-  const height=Math.max(size.y,.15);const radius=Math.max(size.length(),height)*1.45;
-  pendingBounds={center,radius,height,ground:bbox.min.y};
+  const height=Math.max(size.y,.01);const radius=Math.max(size.x,size.y,size.z)*.5;
+  pendingBounds={center,radius,height,size,ground:bbox.min.y};
   state.sceneScale=height;
   grid.position.y=bbox.min.y;
   state.skeletonHelper=new THREE.SkeletonHelper(model);
@@ -513,16 +531,24 @@ function createDemoWave() {
 }
 function frameModel() {
   if(!pendingBounds) return;
-  const {center,radius,height}=pendingBounds;
-  // Enquadramento com margem maior, inclusive atrás do painel móvel.
+  const {center,height,size}=pendingBounds;
   const mobile=matchMedia('(max-width:790px)').matches;
-  const dist=Math.max(radius,.2)*(mobile?2.1:1.9);
-  const target=center.clone().add(Vec(0,mobile?-height*.12:0,0));
+  // Distância calculada pela câmera e pelos limites da MALHA visível.
+  // Assim um armature FBX com ossos distantes não faz a personagem virar formiga.
+  const tanHalfFov=Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5);
+  const aspect=Math.max(camera.aspect, .2);
+  const fitY=(Math.max(size.y,.01)*.5)/tanHalfFov;
+  const fitX=(Math.max(size.x,.01)*.5)/(tanHalfFov*aspect);
+  const dist=(Math.max(fitX,fitY)+size.z*.5)*(mobile?1.35:1.22);
+  const target=center.clone().add(Vec(0,mobile?-height*.10:0,0));
   orbit.target.copy(target);
-  camera.position.copy(target).add(Vec(dist*.55,dist*.34,dist));
-  camera.near=Math.max(height/2500,.001);
-  camera.far=Math.max(dist*30,1000);
-  camera.updateProjectionMatrix();orbit.minDistance=Math.max(height*.08,.01);orbit.maxDistance=Math.max(dist*9,100);
+  camera.position.copy(target).add(Vec(.28,.10,1).normalize().multiplyScalar(Math.max(dist,.1)));
+  // Zoom realmente próximo, ideal para rosto e mãos, mesmo com modelos minúsculos.
+  camera.near=Math.max(height*.00008,.00001);
+  camera.far=Math.max(dist*250,1000);
+  camera.updateProjectionMatrix();
+  orbit.minDistance=Math.max(height*.0005,.00005);
+  orbit.maxDistance=Math.max(dist*100,200);
   orbit.update();
 }
 function zoomCamera(multiplier) {
@@ -680,7 +706,7 @@ let prevViewportAspect=null;
 function updateSize(){
   const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);
   renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-  if(prevViewportAspect!==null&&Math.abs(prevViewportAspect-camera.aspect)>.4&&pendingBounds)frameModel();
+  if(pendingBounds && (prevViewportAspect===null || Math.abs(prevViewportAspect-camera.aspect)>.18))frameModel();
   prevViewportAspect=camera.aspect;
 }
 new ResizeObserver(updateSize).observe(viewport);
@@ -864,7 +890,7 @@ function wireMobile(){
   $('mobileOpenProjectBtn').onclick=()=>$('projectInput').click();
   $('mobileCenterBtn').onclick=frameModel;
   $('mobileZoomOutBtn').onclick=()=>zoomCamera(1.25);
-  $('mobileZoomInBtn').onclick=()=>zoomCamera(.8);
+  $('mobileZoomInBtn').onclick=()=>zoomCamera(.55);
   $('mobileScrub').addEventListener('input',e=>{state.playing=false;$('playBtn').textContent='▶';seek(Number(e.target.value));});
   $('mobileKeyBtn').onclick=()=>keyframe();
   $('mobileResetBtn').onclick=()=>{if(!state.selected)return;applyTransform(state.selected,state.rest.get(state.selected.userData.sgId));syncFields();};
