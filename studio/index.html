@@ -12,7 +12,7 @@
 @media (max-height:700px){.topbar{height:54px}.timeline-panel{height:190px}.panel-heading{height:56px}.timeline-topbar{height:45px}.left-footer{padding:10px}.inspector-section{margin-bottom:13px}.inspector-scroll{padding-bottom:12px}}
 @media (max-width:790px){body{overflow:auto}.app{min-width:0;min-height:760px;height:auto}.topbar{height:auto;min-height:58px;padding:9px;flex-wrap:wrap}.desktop-text,.brand-subtitle,.version{display:none}.brand-title{font-size:11px}.brand-icon{height:32px;width:32px;font-size:24px}.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:370px auto auto}.viewport-panel{grid-row:1}.sidebar.left{grid-row:2;height:160px;border-top:1px solid var(--line)}.sidebar.right{grid-row:3;border-top:1px solid var(--line)}.bone-tree{max-height:105px}.left-footer{display:none}.inspector-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}.selected-bone{grid-column:1/-1}.timeline-panel{height:230px}.timeline-topbar{flex-wrap:wrap;height:auto;padding:8px}.timeline-title{width:100%}.viewport-footer{font-size:9px}.timeline-bottom span{display:none}.app-footer{display:none}}
 
-/* Silent Garden Motion Studio — interface mobile (Alpha 0.5) */
+/* Silent Garden Motion Studio — interface mobile (Alpha 0.6) */
 .mobile-only{display:none!important}
 .backend-dialog{width:min(520px,calc(100vw - 28px));max-height:85dvh;overflow:auto}
 .backend-dialog label{display:block;margin:16px 0 7px;color:#d9bbcd;font-size:12px}
@@ -194,6 +194,20 @@
   .mobile-dock button{font-size:9px;padding:0 2px}
   .viewport-shading .viewport-corner.bottom-left{display:none}
 }
+/* Alpha 0.6 · Materiais criáveis e importação acessível no Android */
+.mat-mesh-chooser{margin:12px 0 0}
+.mat-quick-actions{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:7px;margin:9px 0 12px}
+.mat-quick-actions .button{min-width:0;white-space:normal;height:auto;min-height:40px;padding:8px;text-align:center}
+.texture-file-label{border:1px dashed #866b82;border-radius:9px;padding:11px;background:#352c36;line-height:1.5}
+.texture-native-file{width:100%;max-width:100%;color:#ede1eb;font-size:11px;overflow:hidden;line-height:1.5}
+.texture-native-file::file-selector-button{background:#ac7898;border:0;border-radius:6px;color:#1f1520;padding:10px 12px;margin-right:9px;font-weight:750;cursor:pointer;min-height:37px}
+.texture-actions .button{white-space:normal;height:auto;min-height:40px}
+@media(max-width:790px){
+ .mat-quick-actions .button,.texture-actions .button{min-height:45px;font-size:12px}
+ .material-slot{min-height:40px}.mat-selected{margin-top:8px}
+ #materialInspector{padding-bottom:44px}
+ .texture-native-file{font-size:12px}
+}
 </style>
   <script type="importmap">
     {"imports":{
@@ -208,7 +222,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.5</span>
+        <span class="version">ALPHA 0.6</span>
       </div>
       <div class="header-actions">
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -324,12 +338,20 @@
           <section id="materialInspector" class="inspector-page hidden" aria-label="Materiais e texturas">
             <div class="mat-selected">
               <div class="mat-head"><span class="mat-icon">▧</span><div><small>OBJETO SELECIONADO</small><strong id="selectedMeshName">Escolha uma malha</strong></div></div>
-              <small id="meshUVStatus" class="mat-uv">Abra a aba Shading e selecione uma malha no modelo.</small>
+              <small id="meshUVStatus" class="mat-uv">Selecione uma malha para configurar materiais.</small>
+              <label class="mat-field mat-mesh-chooser" for="materialMeshSelect">Malha ativa
+                <select id="materialMeshSelect" aria-label="Escolher malha para editar"><option value="">Carregando malhas…</option></select>
+              </label>
             </div>
             <div class="inspector-section">
               <div class="section-heading">MATERIAL SLOTS <span id="materialCount">0</span></div>
               <div id="materialSlots" class="material-slots"><div class="mat-empty">Nenhum material selecionado</div></div>
-              <button type="button" class="button subtle full" id="materialFindBtn">▧ Escolher malha no modelo</button>
+              <div class="mat-quick-actions">
+                <button type="button" class="button primary" id="newMaterialBtn">＋ Criar material</button>
+                <button type="button" class="button subtle" id="duplicateMaterialBtn">⧉ Duplicar</button>
+              </div>
+              <p class="hint">Criar atribui um novo material à malha e ao slot selecionado. Se houver um material importado, ele é substituído neste slot; o FBX original não é alterado.</p>
+              <button type="button" class="button subtle full" id="materialFindBtn">▧ Próxima malha do personagem</button>
             </div>
             <div id="materialProperties" class="hidden">
               <div class="inspector-section">
@@ -358,7 +380,10 @@
                 </label>
                 <div class="texture-preview" id="texturePreview"><span id="texturePlaceholder">▧</span><img id="textureThumbnail" alt="Prévia da textura" hidden></div>
                 <p class="texture-name" id="textureName">Nenhuma textura neste canal</p>
-                <div class="texture-actions"><button id="pickTextureBtn" class="button primary" type="button">＋ Adicionar textura</button><button id="clearTextureBtn" class="button subtle" type="button">✕ Remover</button></div>
+                <label class="mat-field texture-file-label" for="textureInput">Imagem do dispositivo (PNG, JPG, WebP)
+                  <input type="file" id="textureInput" class="texture-native-file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-label="Importar imagem para a textura">
+                </label>
+                <div class="texture-actions"><button id="pickTextureBtn" class="button primary" type="button">↥ Escolher textura</button><button id="clearTextureBtn" class="button subtle" type="button">✕ Remover</button></div>
                 <div class="mat-two-fields"><label class="mat-field">Repetição U<input id="textureRepeatU" type="number" min="0.01" max="32" step="0.1" value="1"></label><label class="mat-field">Repetição V<input id="textureRepeatV" type="number" min="0.01" max="32" step="0.1" value="1"></label></div>
                 <label class="mat-checkbox"><input id="textureFlipY" type="checkbox" checked> Inverter imagem no eixo vertical (Flip Y)</label>
                 <p class="hint" id="textureUVHint">Texturas de imagem precisam que a malha tenha coordenadas UV.</p>
@@ -392,7 +417,6 @@
   </nav>
   <div id="mobileBackdrop" class="mobile-backdrop mobile-only hidden"></div>
   <input type="file" id="fbxInput" accept=".fbx" hidden>
-  <input type="file" id="textureInput" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden>
   <input type="file" id="projectInput" accept=".json,.sgmotion" hidden>
   <div id="toast" class="toast hidden" role="status"></div>
   <dialog id="helpDialog" class="help-dialog">
@@ -402,7 +426,7 @@
       <li><b>Selecionar um osso:</b> clique nos pontos rosa do modelo ou no painel esquerdo.</li>
       <li><b>Criar poses:</b> gire o osso, clique em “Keyframe”, avance o tempo e crie outra pose.</li>
       <li><b>Reproduzir:</b> pressione Espaço ou ▶ para visualizar a interpolação.</li>
-      <li><b>Shading e texturas:</b> escolha Shading, clique em Malhas e selecione cabelo, uniforme ou pele. Em Materiais, importe uma textura PNG/JPG/WebP no canal Base Color ou Normal Map.</li>
+      <li><b>Shading e texturas:</b> abra Shading (Texturas no celular), escolha a malha no seletor, toque em “Criar material” e depois selecione uma imagem do dispositivo. É possível editar cor, opacidade e mapas.</li>
       <li><b>Exportar:</b> use “Exportar animação .FBX”. O conversor precisa de um servidor com Blender.</li>
     </ol>
     <div class="dialog-note">O personagem de demonstração serve para aprender. Para exportar seu próprio personagem para a Unity, importe primeiro o FBX original da Ayame. O projeto JSON inclui as imagens importadas, mas não o arquivo FBX original.</div>
@@ -419,7 +443,7 @@
     <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
   </dialog>
   <script type="module">
-/* Silent Garden Motion Studio — versão alpha 0.5 · Mobile Studio
+/* Silent Garden Motion Studio — versão alpha 0.6 · Mobile Studio
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -590,6 +614,8 @@ function clearModel() {
   for(const h of state.handles){scene.remove(h);h.material.dispose();}
   state.handles.length=0;
   state.bones=[];state.boneMap.clear();state.rest.clear();state.selected=null;
+  // Evita aplicar texturas à malha da demo após importar outro FBX.
+  state.selectedMesh=null;state.selectedMaterialSlot=0;pendingBounds=null;
   state.selectedMesh=null;state.selectedMaterialSlot=0;
 }
 // Calcula limites apenas das malhas VISÍVEIS (não do esqueleto completo).
@@ -646,6 +672,8 @@ function installModel(model, filename=null, isDemo=false) {
   frameModel();
   state.clips=[makeClip(isDemo?'demo_wave':'new_animation')];state.clipIndex=0;state.time=0;
   state.sourceClips = isDemo ? [] : (model.animations||[]).slice();
+  state.selectedMesh=visibleModelMeshes()[0]||null;
+  state.selectedMaterialSlot=0;
   if (isDemo) createDemoWave();
   $('modelName').textContent=isDemo?'Ayame · modelo de demonstração':filename;
   $('modelInfo').textContent=isDemo?'Importe o FBX original para exportar':`${state.bones.length} ossos · FBX importado`;
@@ -655,6 +683,7 @@ function installModel(model, filename=null, isDemo=false) {
   updateClipSelectors();renderBoneTree();renderTimeline();refreshMaterials();
   $('originalClipsPanel').classList.toggle('hidden',state.sourceClips.length===0);
   updateSourceClips();selectBone(state.bones.find(b=>/rightarm/i.test(b.name))||state.bones[0]);
+  refreshMaterials();
   seek(0); status(isDemo?'Modelo de demonstração pronto. Selecione um osso e pressione K.':`${filename} carregado! Crie animações e exporte para a Unity.`);
 }
 function createDemoWave() {
@@ -1121,8 +1150,45 @@ function meshPath(mesh){
   return keys.join('.');
 }
 function meshForPath(path){return allModelMeshes().find(m=>meshPath(m)===path);}
-function meshMaterials(mesh){return mesh?(Array.isArray(mesh.material)?mesh.material:[mesh.material]):[];}
+function meshMaterials(mesh){return !mesh||!mesh.material?[]:(Array.isArray(mesh.material)?mesh.material:[mesh.material]);}
 function activeMaterial(){return meshMaterials(state.selectedMesh)[state.selectedMaterialSlot]||null;}
+function defaultMeshSelection(){
+  if(state.selectedMesh && allModelMeshes().includes(state.selectedMesh))return state.selectedMesh;
+  const next=visibleModelMeshes()[0]||allModelMeshes()[0]||null;
+  state.selectedMesh=next;state.selectedMaterialSlot=0;
+  return next;
+}
+function assignMaterialToMesh(mesh,slot,material,{clearTextures=true}={}){
+  if(!mesh||!material)return;
+  const previous=meshMaterials(mesh);
+  if(Array.isArray(mesh.material)){
+    const updated=mesh.material.slice();updated[slot]=material;mesh.material=updated;
+  }else mesh.material=material;
+  mesh.userData.sgOwnedSlots ||= {};
+  mesh.userData.sgOwnedSlots[slot]=true;
+  mesh.userData.sgEditedSlots ||= {};
+  mesh.userData.sgEditedSlots[slot]=true;
+  mesh.userData.sgTextureInfo ||= {};
+  if(clearTextures)mesh.userData.sgTextureInfo[slot]={};
+  material.needsUpdate=true;
+}
+function createNewMaterial({duplicate=false,silent=false}={}){
+  const mesh=defaultMeshSelection();
+  if(!mesh){if(!silent)toast('Importe um modelo FBX ou abra a demo para criar um material.',true);return null;}
+  let slot=state.selectedMaterialSlot;
+  if(slot>=meshMaterials(mesh).length)slot=0;
+  state.selectedMaterialSlot=slot;
+  const current=activeMaterial();
+  const number=(mesh.userData.sgMaterialSequence=(mesh.userData.sgMaterialSequence||0)+1);
+  const mat=duplicate&&current?current.clone():new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.72,metalness:0,side:THREE.FrontSide});
+  mat.name=duplicate ? `${current?.name||'Material'}_Copy_${number}`:`SG_Material_${number}`;
+  const previousInfo=duplicate?structuredClone(activeMaterialData()||{}):{};
+  assignMaterialToMesh(mesh,slot,mat);
+  if(duplicate)mesh.userData.sgTextureInfo[slot]=previousInfo;
+  refreshMaterials();renderBoneTree();
+  if(!silent){toast(`${duplicate?'Material duplicado':'Material criado'} e aplicado em ${mesh.name||'malha'}.`);status(`Material ${mat.name} atribuído à malha.`);}
+  return mat;
+}
 function activeMaterialData(){
   const mesh=state.selectedMesh;if(!mesh)return null;
   mesh.userData.sgTextureInfo ||= {};
@@ -1168,7 +1234,7 @@ function setWorkspace(mode){
   $('viewport').classList.toggle('viewport-shading',mode==='shading');
   if(mode==='shading'){
     state.outlinerMode='meshes';setInspectorTab('materials');transform.detach();
-    if(!state.selectedMesh)state.selectedMesh=visibleModelMeshes()[0]||null;
+    defaultMeshSelection();
   }else if(mode==='animation'){
     state.outlinerMode='bones';setInspectorTab('pose');
     if(state.selected)transform.attach(state.selected);
@@ -1245,7 +1311,14 @@ function refreshMaterials(){
   $('meshUVStatus').classList.toggle('uv-warning',Boolean(mesh&&!uv));
   $('textureUVHint').textContent=uv?'Coordenadas UV detectadas. Ajuste a repetição se necessário.':'⚠ Sem UV: a textura pode não aparecer corretamente. Prepare o UV no Blender.';
   const materials=meshMaterials(mesh);
+  const meshPicker=$('materialMeshSelect');
+  // Visível no celular: não é necessário abrir a lista de objetos escondida.
+  const all=allModelMeshes(),currentPath=mesh?meshPath(mesh):'';
+  meshPicker.replaceChildren();
+  if(!all.length){const opt=new Option('Nenhuma malha disponível','');meshPicker.add(opt);meshPicker.disabled=true;}
+  else{meshPicker.disabled=false;all.forEach((m,i)=>meshPicker.add(new Option(`${m.name||`Malha ${i+1}`}${m.geometry?.attributes?.uv?' · UV ✓':' · sem UV'}`,meshPath(m))));meshPicker.value=currentPath;}
   $('materialCount').textContent=materials.length;
+  $('duplicateMaterialBtn').disabled=!activeMaterial();
   $('materialProperties').classList.toggle('hidden',!materials.length);
   materials.forEach((mat,i)=>{
     const b=document.createElement('button');b.type='button';b.className='material-slot'+(i===state.selectedMaterialSlot?' active':'');
@@ -1255,6 +1328,7 @@ function refreshMaterials(){
   });
   if(!materials.length){const empty=document.createElement('div');empty.className='mat-empty';empty.textContent='A malha não possui material.';slots.append(empty);return;}
   const mat=activeMaterial();
+  if(!mat){$('materialProperties').classList.add('hidden');return;}
   $('materialName').value=mat.name||'Material';
   $('materialColor').value='#'+(mat.color?.getHexString()||'ffffff');
   for(const [input,valField,prop,defaultValue] of [['materialRoughness','roughnessValue','roughness',.7],['materialMetalness','metalnessValue','metalness',0],['materialOpacity','opacityValue','opacity',1]]){
@@ -1291,9 +1365,9 @@ function readImageDataUrl(file){
   });
 }
 async function applyTextureFile(file){
-  if(!state.selectedMesh){setWorkspace('shading');toast('Selecione uma malha antes de aplicar a textura.',true);return;}
+  if(!defaultMeshSelection()){setWorkspace('shading');toast('Importe um FBX com malha antes de aplicar a textura.',true);return;}
   const types=['image/png','image/jpeg','image/webp'];
-  if(!types.includes(file?.type)){toast('Formato inválido. Use PNG, JPG ou WebP.',true);return;}
+  if(!types.includes(file?.type)&& !/\.(png|jpg|jpeg|webp)$/i.test(file?.name||'')){toast('Formato inválido. Use PNG, JPG ou WebP.',true);return;}
   if(file.size>8*1024*1024){toast('Imagem acima de 8 MB. Reduza antes de importar para não travar o celular.',true);return;}
   const selectedMesh=state.selectedMesh,selectedSlot=state.selectedMaterialSlot,channel=$('textureChannel').value;
   try{
@@ -1302,7 +1376,8 @@ async function applyTextureFile(file){
     const original=activeMaterial()?.[channel];
     const texture=await makeTexture(dataUrl,channel,original);
     if(state.selectedMesh!==selectedMesh||state.selectedMaterialSlot!==selectedSlot){texture.dispose();throw new Error('A seleção mudou durante a importação. Tente novamente.');}
-    const mat=cloneWritableMaterial();if(!mat)return;
+    if(!activeMaterial())createNewMaterial({silent:true});
+    const mat=cloneWritableMaterial();if(!mat)throw new Error('Não foi possível atribuir material à malha.');
     // Mat shared textures untouched. Loaded images only belong to this material instance.
     mat[channel]=texture;
     if(channel==='alphaMap')mat.transparent=true;
@@ -1349,8 +1424,9 @@ async function restoreMaterials(materials){
   let count=0;
   for(const entry of materials.slice(0,1000)){
     const mesh=meshForPath(entry.meshPath);if(!mesh)continue;
-    const slot=Math.floor(Number(entry.slot));if(slot<0||slot>=meshMaterials(mesh).length)continue;
+    const slot=Math.floor(Number(entry.slot));if(slot<0||slot>Math.max(meshMaterials(mesh).length-1,0))continue;
     state.selectedMesh=mesh;state.selectedMaterialSlot=slot;
+    if(!activeMaterial())createNewMaterial({silent:true});
     const mat=cloneWritableMaterial();if(!mat)continue;
     const p=entry.props||{};
     if(typeof p.name==='string')mat.name=p.name.slice(0,90);
@@ -1372,6 +1448,7 @@ async function restoreMaterials(materials){
     }
     count++;
   }
+  state.selectedMesh=visibleModelMeshes()[0]||null;state.selectedMaterialSlot=0;
   refreshMaterials();renderBoneTree();
   if(count)status(`${count} materiais do projeto foram restaurados.`);
 }
@@ -1382,9 +1459,18 @@ function wireShading(){
   document.querySelectorAll('[data-outliner]').forEach(b=>b.onclick=()=>{
     state.outlinerMode=b.dataset.outliner;refreshOutlinerButtons();renderBoneTree();
   });
-  $('materialFindBtn').onclick=()=>{setWorkspace('shading');const mesh=visibleModelMeshes()[0];if(mesh)selectMesh(mesh);};
+  $('materialFindBtn').onclick=()=>{
+    setWorkspace('shading');const meshes=allModelMeshes();if(!meshes.length)return;
+    const i=meshes.indexOf(state.selectedMesh);selectMesh(meshes[(i+1)%meshes.length]);
+  };
+  $('materialMeshSelect').onchange=e=>{const mesh=meshForPath(e.target.value);if(mesh)selectMesh(mesh);};
+  $('newMaterialBtn').onclick=()=>createNewMaterial();
+  $('duplicateMaterialBtn').onclick=()=>createNewMaterial({duplicate:true});
   $('textureChannel').onchange=refreshTexturePreview;
-  $('pickTextureBtn').onclick=()=>{if(!state.selectedMesh){toast('Selecione uma malha primeiro.',true);return;} $('textureInput').click();};
+  $('pickTextureBtn').onclick=()=>{
+    if(!defaultMeshSelection()){toast('Importe um personagem FBX primeiro.',true);return;}
+    $('textureInput').click();
+  };
   $('textureInput').onchange=async evt=>{const f=evt.target.files?.[0];if(f)await applyTextureFile(f);evt.target.value='';};
   $('clearTextureBtn').onclick=clearActiveTexture;
   $('materialName').onchange=e=>{const mat=cloneWritableMaterial();if(mat){mat.name=e.target.value.trim()||'Material';refreshMaterials();}};
