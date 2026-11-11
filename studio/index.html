@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15121b">
+  <title>Silent Garden Motion Studio — Blood Petals</title>
+  <style>
+:root{color-scheme:dark;--bg:#111017;--panel:#1b1922;--panel2:#211e29;--deep:#14121b;--line:#35303b;--muted:#918999;--soft:#beb7c4;--text:#f2edf3;--rose:#e5a5c6;--pink:#a75b85;--bright:#ffbfdb;--green:#86cba6;--red:#e17d8b;--yellow:#ffd19b;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:13px}
+*{box-sizing:border-box}html,body{width:100%;height:100%;padding:0;margin:0}body{background:var(--bg);color:var(--text);overflow:hidden}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rose);outline-offset:1px}button{transition:background .15s,border-color .15s,color .15s}.app{display:flex;flex-direction:column;min-width:760px;width:100%;height:100dvh}.topbar{height:66px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:#18151e;border-bottom:1px solid var(--line);padding:0 24px;gap:12px}.brand{display:flex;gap:11px;align-items:center;min-width:0}.brand-icon{width:39px;height:39px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:#ffe1ee;font-size:31px;background:linear-gradient(145deg,#ab6c91,#5b3b60);box-shadow:0 0 28px #ae60832b}.brand-title{font-size:14px;white-space:nowrap;font-weight:790;letter-spacing:.095em}.brand-title span{color:var(--rose)}.brand-subtitle{color:var(--muted);font-size:10px;letter-spacing:.09em;margin-top:3px}.version{margin-left:12px;font-size:9px;border:1px solid #72526c;border-radius:4px;padding:5px 6px;color:var(--rose);white-space:nowrap}.header-actions{display:flex;align-items:center;gap:8px}.button{border-radius:7px;border:1px solid var(--line);height:34px;padding:0 14px;background:var(--panel2);color:var(--text);white-space:nowrap;font-size:12px;font-weight:600}.button:hover{background:#37303e;border-color:#6e596c}.button.ghost{background:transparent}.button.primary{background:#b27798;color:#211320;border-color:#d29ab7;font-weight:750}.button.primary:hover{background:#d99bbb}.button.pink{background:#5d3b53;color:#ffdaec;border-color:#8e5f7b}.button.export{height:39px;background:linear-gradient(120deg,#c38ca8,#ab7194);color:#20131f;border:0;font-weight:800}.button.subtle{background:#28242e;text-align:left}.button.subtle:hover{background:#403444}.button.full{width:100%}.backend-pill{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted);white-space:nowrap;border:1px solid #393240;padding:6px 9px;border-radius:99px}.backend-pill i,.live-pip{width:7px;height:7px;display:inline-block;border-radius:50%;background:var(--yellow)}.backend-pill.ready i,.live-pip{background:var(--green)}.backend-pill.offline i{background:var(--red)}.workspace{display:grid;grid-template-columns:235px minmax(0,1fr) 261px;flex:1;min-height:190px}.sidebar{min-width:0;background:var(--panel);display:flex;flex-direction:column}.sidebar.left{border-right:1px solid var(--line)}.sidebar.right{border-left:1px solid var(--line)}.panel-heading{height:73px;padding:15px 15px 11px;display:flex;align-items:center;justify-content:space-between}.eyebrow,.section-heading{font-size:9px;font-weight:780;letter-spacing:.12em;color:#aa9ba9}.panel-heading h2{font-size:14px;letter-spacing:.005em;margin:6px 0 0;font-weight:690}.panel-heading h2 span{font-size:11px;background:#39303c;color:#bfb6c3;padding:1px 6px;border-radius:10px;font-weight:500;margin-left:6px}.icon-btn{background:transparent;border:0;color:#a89ba9;font-size:18px;border-radius:5px;padding:5px 9px}.icon-btn:hover{background:#322b37}.searchbar{height:33px;background:#28242f;border:1px solid #3b3543;border-radius:6px;display:flex;gap:7px;align-items:center;color:#d1b5c4;padding:0 10px;margin:0 12px 12px}.searchbar input{width:100%;min-width:0;border:0;background:transparent;color:var(--text);outline:0;font-size:11px}.searchbar input::placeholder{color:#8e8493}.bone-tree{flex:1;overflow:auto;min-height:70px;padding:0 9px 12px}.bone-row{height:29px;display:flex;align-items:center;gap:7px;border-radius:5px;padding:0 8px;color:#b8acbc;font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;cursor:pointer}.bone-row:hover{background:#302a36;color:#f6edf7}.bone-row.selected{background:#5c4057;color:#ffd9e9}.bone-ic{font-size:12px;color:#bf92aa}.bone-row.selected .bone-ic{color:#ffd1e7}.left-footer{border-top:1px solid var(--line);padding:15px 12px;display:flex;flex-direction:column;gap:12px}.file-info{display:flex;gap:9px;align-items:center}.file-icon{width:35px;height:35px;border-radius:7px;display:grid;place-items:center;background:#513b50;color:var(--rose);font-size:19px}.file-text{overflow:hidden;display:flex;flex-direction:column;gap:3px}.file-text strong{font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.file-text small{color:var(--muted);font-size:10px}.viewport-panel{display:flex;flex-direction:column;min-width:0;background:#18171e}.viewport-toolbar{height:45px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 13px;border-bottom:1px solid #302b37}.tool-group{display:flex;gap:4px}.tool{border:1px solid transparent;border-radius:6px;padding:6px 9px;display:flex;gap:7px;align-items:center;background:transparent;color:#99909e;font-size:11px}.tool:hover{background:#322b39}.tool.active{background:#493343;border-color:#735168;color:#f7c6de}.separator{height:20px;border-left:1px solid var(--line);margin:0 5px}.viewport-mode{margin-left:auto;color:#716c79;font-size:9px;letter-spacing:.13em;white-space:nowrap}.viewport{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#302938,#18151e 75%)}.viewport canvas{width:100%;height:100%;display:block;outline:0}.viewport-corner{position:absolute;pointer-events:none;z-index:2;display:flex;gap:8px;align-items:center;color:#bcb1c0;font-size:10px}.top-left{top:14px;left:14px;background:#1e1a25bc;padding:7px 10px;border-radius:6px}.bottom-left{bottom:14px;left:14px;color:#807887}.axis-dot{background:var(--rose);height:7px;width:7px;border-radius:50%}.keyboard-badge{border:1px solid #5c5360;padding:3px 4px;border-radius:3px;font-size:9px;color:#a79eaa}.viewport-footer{height:29px;flex-shrink:0;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:#99919c;font-size:10px;gap:8px}.status-left{display:flex;align-items:center;gap:8px;min-width:0}.status-left span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inspector-icon{font-size:17px;color:var(--rose)}.inspector-scroll{overflow-y:auto;flex:1;padding:2px 13px 25px}.selected-bone{display:flex;gap:11px;align-items:center;border:1px solid #4c3b4b;background:#2a222e;border-radius:8px;padding:11px;margin-bottom:22px}.selected-icon{color:#e7a5c7;font-size:20px}.selected-bone div{display:flex;flex-direction:column;gap:5px;overflow:hidden}.selected-bone small{color:#b19cac;font-size:9px;letter-spacing:.07em}.selected-bone strong{font-size:12px;overflow:hidden;text-overflow:ellipsis}.inspector-section{margin-bottom:22px}.section-heading{margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}.section-heading span{letter-spacing:.02em;font-size:9px;color:#736d7a;font-weight:500}.vector-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.vector-fields label{display:flex;align-items:center;border:1px solid #423943;border-radius:6px;background:#28222c;min-width:0}.axis{font-size:10px;font-weight:800;margin:0 5px 0 7px}.axis.x{color:#eb8997}.axis.y{color:#93c6a8}.axis.z{color:#8bacdf}.vector-fields input{width:100%;min-width:0;border:0;color:#ddd3df;background:transparent;font-size:11px;padding:8px 2px;outline:0;font-variant-numeric:tabular-nums}.vector-fields input:disabled{color:#77717e}.vector-fields input::-webkit-inner-spin-button{appearance:none}.stack-buttons{display:flex;flex-direction:column;gap:7px}.stack-buttons kbd{font-size:9px;background:#43394a;border-radius:3px;padding:2px 5px;float:right}.form-row{margin:10px 0;display:flex;flex-direction:column;gap:6px}.form-row label{color:#9e94a2;font-size:10px}.form-row select,.form-row input,select{height:32px;min-width:0;background:#29252f;color:#f3eaf3;border:1px solid #493f4e;border-radius:6px;padding:0 9px;width:100%}select{font-size:11px}.hint{color:#9f94a1;font-size:10px;line-height:1.55;margin:0 0 10px}.inspector-section .button+.button{margin-top:7px}.original-clips{border:1px dashed #644b60;border-radius:8px;padding:10px}.original-clips select{margin-bottom:8px}.timeline-panel{height:224px;flex-shrink:0;background:#1c1922;border-top:1px solid var(--line);display:flex;flex-direction:column}.timeline-topbar{height:52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 13px;gap:10px}.timeline-title{display:flex;gap:8px;align-items:center;min-width:0}.timeline-title strong{font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.timeline-title .eyebrow{margin-right:7px}.key-count{font-size:10px;color:var(--muted);background:#39303c;border-radius:10px;padding:2px 6px;white-space:nowrap}.transport{display:flex;align-items:center;gap:4px}.transport button{background:transparent;color:#c8bccc;border:0;border-radius:6px;width:27px;height:27px;font-size:11px}.transport button:hover{background:#3b3040}.transport .play-button{background:#ad7295;color:#2d1c2a;width:32px;height:32px;font-size:15px}.time-actions{display:flex;align-items:center;gap:10px}.time-display{font-size:12px;font-variant-numeric:tabular-nums;color:#e6c1d5;white-space:nowrap}.small-toggle{border:1px solid #594456;background:#4b3446;color:#e0b3cf;border-radius:6px;padding:6px 9px;font-size:10px}.small-toggle:not(.active){background:#25202a;color:#867a87}.timeline-body{flex:1;min-height:0;display:flex;overflow:hidden}.track-names{width:180px;flex-shrink:0;overflow-y:hidden;border-right:1px solid #403647;background:#211d26}.ruler-pad{height:28px;border-bottom:1px solid #3b323d;color:#8f8392;padding:8px 9px;font-size:9px}.track-name{height:27px;border-bottom:1px solid #342e38;color:#aa9dac;padding:7px 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;cursor:pointer}.track-name:hover{background:#302735}.track-name.selected{color:#ffe1ef;background:#4b3548}.timeline-canvas{position:relative;min-width:0;flex:1;overflow:hidden;cursor:crosshair}.timeline-ruler{height:28px;position:relative;border-bottom:1px solid #4a3b48;background:repeating-linear-gradient(90deg,#26212b,#26212b 1px,#211d26 1px,#211d26 8.33%)}.ruler-label{position:absolute;top:7px;transform:translateX(3px);font-size:9px;color:#ad9bad;pointer-events:none}.timeline-rows{height:calc(100% - 28px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#665167 transparent}.timeline-row{height:27px;position:relative;border-bottom:1px solid #342e38;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#322934 calc(25% - 1px),#322934 25%)}.timeline-row:nth-child(even){background-color:#211d25}.timeline-row.selected{background-color:#33283a}.key-marker{position:absolute;top:8px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:#d9a0bf;border:1px solid #ffd5e9;cursor:pointer;z-index:3}.key-marker:hover{background:#ffe8f4;scale:1.2}.playhead{position:absolute;top:0;bottom:0;left:0;z-index:4;pointer-events:none;border-left:1px solid #f9c2df;filter:drop-shadow(0 0 2px #dd8db4)}.playhead span{display:block;width:10px;height:10px;transform:translateX(-5px);background:#f4bbd5;clip-path:polygon(0 0,100% 0,50% 100%)}.timeline-bottom{height:25px;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:0 13px;color:#8e8290;font-size:10px;border-top:1px solid var(--line)}.app-footer{height:23px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:0 14px;color:#766e79;font-size:9px;background:#131018}.hidden{display:none!important}.loading-overlay,.drop-zone{position:absolute;inset:0;z-index:7;background:#15111dcf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:var(--text)}.loading-overlay small,.drop-zone span{color:var(--muted)}.drop-zone{background:#2e1f35d9;border:3px dashed #d3a2c0;inset:15px;border-radius:16px}.spinner{height:32px;width:32px;border-radius:100%;border:3px solid #53374a;border-top-color:#edb7d2;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.toast{position:fixed;z-index:15;right:20px;bottom:25px;background:#33293b;border:1px solid #8d6082;border-radius:10px;padding:14px 17px;max-width:min(430px,90vw);color:#ffecf4;box-shadow:0 15px 35px #0008;font-size:12px;line-height:1.5;white-space:pre-wrap}.toast.error{border-color:#b86b7a}.help-dialog{max-width:510px;width:calc(100vw - 40px);background:#24202b;color:#f0e8f0;border:1px solid #74516b;border-radius:13px;padding:23px;box-shadow:0 25px 90px #0009}.help-dialog::backdrop{background:#08050bca}.dialog-header{display:flex;justify-content:space-between;align-items:start;gap:15px}.dialog-header h2{font-size:20px;margin:8px 0 15px}.help-dialog ol{padding-left:23px;line-height:1.6;font-size:12px}.help-dialog li{margin:11px 0}.dialog-note{background:#463348;font-size:11px;padding:12px;border-left:3px solid #d899b8;margin:15px 0;line-height:1.55}.help-dialog .button{margin-top:10px}
+@media (max-width:1100px){.workspace{grid-template-columns:197px minmax(0,1fr) 230px}.topbar{padding:0 12px}.version{display:none}.backend-pill{display:none}.viewport-mode{display:none}.tool span{display:none}.timeline-title .eyebrow{display:none}.track-names{width:130px}.timeline-bottom span:last-child{display:none}}
+@media (max-height:700px){.topbar{height:54px}.timeline-panel{height:190px}.panel-heading{height:56px}.timeline-topbar{height:45px}.left-footer{padding:10px}.inspector-section{margin-bottom:13px}.inspector-scroll{padding-bottom:12px}}
+@media (max-width:790px){body{overflow:auto}.app{min-width:0;min-height:760px;height:auto}.topbar{height:auto;min-height:58px;padding:9px;flex-wrap:wrap}.desktop-text,.brand-subtitle,.version{display:none}.brand-title{font-size:11px}.brand-icon{height:32px;width:32px;font-size:24px}.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:370px auto auto}.viewport-panel{grid-row:1}.sidebar.left{grid-row:2;height:160px;border-top:1px solid var(--line)}.sidebar.right{grid-row:3;border-top:1px solid var(--line)}.bone-tree{max-height:105px}.left-footer{display:none}.inspector-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}.selected-bone{grid-column:1/-1}.timeline-panel{height:230px}.timeline-topbar{flex-wrap:wrap;height:auto;padding:8px}.timeline-title{width:100%}.viewport-footer{font-size:9px}.timeline-bottom span{display:none}.app-footer{display:none}}
+
+/* Silent Garden Motion Studio — interface mobile (Alpha 0.2) */
+.mobile-only{display:none!important}
+.backend-dialog{width:min(520px,calc(100vw - 28px));max-height:85dvh;overflow:auto}
+.backend-dialog label{display:block;margin:16px 0 7px;color:#d9bbcd;font-size:12px}
+.backend-dialog .field{display:block;width:100%;box-sizing:border-box;height:44px;padding:10px 12px;background:#1c1822;color:#fff;border:1px solid #65526b;border-radius:9px;font-size:14px}
+.backend-dialog .hint{font-size:12px;margin:15px 0}
+@media(max-width:790px){
+  html{height:auto;overflow-x:hidden}
+  body{height:auto;min-height:100dvh;margin:0;overscroll-behavior-y:contain}
+  .mobile-only{display:flex!important}
+  .app{height:auto;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));overflow:visible;min-width:0}
+  .topbar{position:sticky;top:0;z-index:12;min-height:58px;padding:8px 10px;gap:7px;box-sizing:border-box;box-shadow:0 6px 20px #130e1d55;background:#1c1723f5;backdrop-filter:blur(15px)}
+  .brand{min-width:0;gap:7px}.brand-title{font-size:12px;letter-spacing:.03em}.brand-icon{font-size:22px;width:31px;height:31px}.header-actions{gap:5px;flex-wrap:nowrap}
+  .header-actions .button{padding:9px 11px;min-height:39px;font-size:12px;white-space:nowrap}.header-actions #importBtn{font-size:11px}
+  .workspace{display:flex;flex-direction:column;flex:initial;min-height:0;width:100%;overflow:visible}
+  .viewport-panel{display:flex;flex-direction:column;height:clamp(390px,60dvh,650px);flex:none;min-height:0;order:0}
+  .viewport-toolbar{height:43px;min-height:43px;gap:4px;padding:4px 8px;box-sizing:border-box;overflow-x:auto;scrollbar-width:none}
+  .viewport-toolbar::-webkit-scrollbar{display:none}
+  .tool{min-height:33px;padding:6px 11px;font-size:14px}.tool span{display:none}
+  .viewport{min-height:0;flex:1;touch-action:pan-x pan-y}
+  .viewport canvas{touch-action:none;user-select:none;-webkit-user-select:none}
+  .viewport-corner.top-left{font-size:10px;top:8px;left:8px;max-width:calc(100% - 60px);white-space:nowrap;overflow:hidden}
+  .viewport-corner.bottom-left{display:none}
+  .viewport-footer{height:25px;min-height:25px;padding:0 8px;font-size:10px}
+  .viewport-footer #statsText{display:none}
+  .sidebar.left,.sidebar.right{position:fixed;inset:auto 0 calc(74px + env(safe-area-inset-bottom,0px));height:min(63dvh,520px);width:100%;max-width:100%;z-index:30;display:none;box-sizing:border-box;overflow:hidden;background:#211a29;border:1px solid #755071;border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -14px 65px #000a;grid-row:auto;min-height:0}
+  .app.mobile-open-left .sidebar.left{display:flex!important;flex-direction:column}
+  .app.mobile-open-right .sidebar.right{display:flex!important;flex-direction:column}
+  .sidebar .panel-heading{height:58px;flex:none;padding:8px 16px}
+  .sidebar .searchbar{margin:8px 13px;height:42px;flex:none}
+  .sidebar .bone-tree{overflow-y:auto;max-height:none;flex:1;min-height:70px;padding-bottom:14px}
+  .sidebar .bone-row{min-height:43px;padding-top:11px;padding-bottom:11px;font-size:14px}
+  .sidebar .left-footer{display:flex;padding:12px 16px 16px;flex:none}
+  .sidebar .inspector-scroll{display:block;overflow-y:auto;padding:12px 16px 20px;max-height:none}
+  .sidebar .selected-bone{margin-bottom:18px;padding:12px}.sidebar .inspector-section{margin-bottom:22px}
+  .sidebar .vector-fields input{min-height:43px;font-size:16px}
+  .sidebar .form-row input,.sidebar .form-row select,.sidebar .inspector-section select{height:44px;font-size:14px}
+  .sidebar .button{min-height:43px;font-size:13px}
+  .mobile-backdrop{position:fixed;inset:0;z-index:20;background:#08050cc4;display:block!important;backdrop-filter:blur(3px)}
+  .mobile-backdrop.hidden{display:none!important}
+  .mobile-pose-card{position:absolute;left:9px;right:9px;bottom:8px;z-index:4;display:flex;flex-direction:column;gap:7px;padding:9px 11px;border-radius:13px;border:1px solid #b781a08a;background:#251a31e8;box-shadow:0 8px 30px #0008;backdrop-filter:blur(14px)}
+  .mobile-pose-heading{display:flex;align-items:center;gap:9px;min-width:0}
+  .m-label{font-size:9px;color:#bba1b1;letter-spacing:.04em;white-space:nowrap}
+  .mobile-pose-heading strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#ffdfef}
+  .mobile-pose-heading button{border:1px solid #70566e;color:#eec0db;background:#453149;border-radius:7px;font-size:16px;width:29px;height:27px}
+  .mobile-pose-row{display:flex;align-items:center;gap:5px;min-height:30px}
+  .mobile-axis{display:flex;gap:2px;background:#2b2133;padding:2px;border-radius:8px}
+  .mobile-axis button{background:transparent;color:#b6a2b9;border:none;padding:8px 9px;min-width:27px;min-height:31px;border-radius:6px;font-weight:bold;font-size:11px}
+  .mobile-axis button.selected{background:#ad7599;color:#241625}
+  .mobile-pose-row>button{min-width:34px;min-height:36px;border:1px solid #654961;color:#f8d9ec;background:#463149;border-radius:8px;font-size:10px}
+  #mobileAngle{flex:1;min-width:24px;width:100%;accent-color:#e7a2c7;height:30px;touch-action:none}
+  .mobile-angle-label{min-width:35px;text-align:right;font-size:11px;font-variant-numeric:tabular-nums;color:#f7c0db}
+  .mobile-pose-actions{display:flex;align-items:center;gap:7px}
+  .mobile-pose-actions button{min-height:32px;border:1px solid #76566f;background:#503549;color:#ffe2ef;padding:6px 10px;border-radius:7px;font-size:11px;white-space:nowrap}
+  .mobile-pose-actions .mobile-key{background:#d1a0c0;color:#291728;font-weight:700;border-color:#e8bbd7}
+  .mobile-pose-actions span{font-size:9px;color:#c5abbc;line-height:1.15;min-width:0}
+  .timeline-panel{height:235px;min-height:235px;flex:none;order:2;margin-bottom:6px}
+  .timeline-topbar{padding:5px 9px;gap:5px;min-height:53px;height:auto;display:flex;align-items:center;flex-wrap:nowrap}
+  .timeline-title{display:none}
+  .mobile-clip-picker{display:flex;gap:5px;min-width:0;max-width:38%;flex:1}
+  .mobile-clip-picker select{height:35px;min-width:0;max-width:100%;font-size:11px;padding:0 5px}
+  .mobile-clip-picker button{flex:none;width:31px;height:35px;color:#ffdaea;border:1px solid #6d5168;background:#3d2c40;border-radius:8px;font-size:17px}
+  .transport{gap:2px;flex:none}
+  .transport button{width:28px;min-height:34px;height:34px;font-size:10px}
+  .transport #firstFrameBtn,.transport #lastFrameBtn{display:none}
+  .transport .play-button{height:36px;width:36px;font-size:15px}
+  .time-actions{gap:3px;min-width:0;flex:none}
+  .time-display{display:none}
+  .time-actions #loopBtn{display:none}
+  .time-actions #addKeyBtn{padding:0 9px;min-height:34px;font-size:10px}
+  .mobile-scrubber{display:flex;align-items:center;gap:8px;padding:5px 9px;min-height:34px;background:#241d2a}
+  .mobile-scrubber span{font-size:10px;color:#dfb3cb;font-variant-numeric:tabular-nums}
+  .mobile-scrubber input{flex:1;min-width:30px;accent-color:#e5a3c7;touch-action:none}
+  .timeline-body{height:115px;max-height:115px;flex:1;overflow:hidden}
+  .track-names{width:92px;font-size:10px}
+  .ruler-pad{height:30px;font-size:8px}.track-name{height:37px;box-sizing:border-box;padding:11px 7px;font-size:10px}
+  .timeline-ruler{height:30px}.timeline-rows{height:calc(100% - 30px)}.timeline-row{height:37px;box-sizing:border-box}
+  .key-marker{height:14px;width:14px;top:11px}.timeline-bottom{display:none}
+  .mobile-dock{position:fixed;z-index:40;bottom:0;left:0;right:0;height:calc(70px + env(safe-area-inset-bottom,0px));padding:6px 7px calc(5px + env(safe-area-inset-bottom,0px));box-sizing:border-box;display:flex;justify-content:space-evenly;gap:5px;background:#19131ff8;border-top:1px solid #564053;box-shadow:0 -4px 20px #120914a0;backdrop-filter:blur(15px)}
+  .mobile-dock button{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;min-width:0;min-height:50px;border:1px solid transparent;border-radius:11px;background:transparent;color:#bdaabd;gap:3px;font-size:10px;font-weight:650}
+  .mobile-dock button span{font-size:19px;line-height:21px}
+  .mobile-dock button.active{color:#ffcee7;background:#50334c;border-color:#785772}
+  #toast{bottom:calc(86px + env(safe-area-inset-bottom,0px));left:10px;right:10px;max-width:none;font-size:12px}
+  .help-dialog{padding:18px;max-height:80dvh;overflow:auto}
+  .app-footer{display:none}
+}
+@media(max-width:380px){
+  .topbar .header-actions .button{padding:8px}.brand-title{font-size:10px}.header-actions{gap:2px}
+  .mobile-pose-row{gap:3px}.mobile-axis button{padding:7px 6px;min-width:23px}.mobile-pose-actions span{display:none}
+  .timeline-topbar{padding:5px 6px;gap:3px}.mobile-clip-picker{max-width:35%}.time-actions #addKeyBtn{padding:0 6px}.transport button{width:25px}
+}
+@media(orientation:landscape) and (max-height:480px) and (max-width:950px){
+  .viewport-panel{height:70dvh;min-height:280px}
+  .mobile-pose-card{max-width:350px;left:auto;right:8px;bottom:6px}
+  .mobile-dock{height:58px}.app{padding-bottom:64px}
+}
+
+  </style>
+  <script type="importmap">
+    {"imports":{
+      "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }}
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">✿</div>
+        <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
+        <span class="version">ALPHA 0.2</span>
+      </div>
+      <div class="header-actions">
+        <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
+        <button id="helpBtn" class="button ghost" title="Como usar">? <span class="desktop-text">Ajuda</span></button>
+        <button id="mobileOpenProjectBtn" class="button ghost mobile-only" title="Abrir projeto">📂</button>
+        <button id="saveBtn" class="button ghost" title="Salvar projeto JSON">◈ <span class="desktop-text">Salvar projeto</span></button>
+        <button id="importBtn" class="button primary">＋ Importar FBX</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar left">
+        <div class="panel-heading"><div><span class="eyebrow">SCENE COLLECTION</span><h2>Esqueleto <span id="boneCount">0</span></h2></div><button id="expandBonesBtn" class="icon-btn" title="Exibir todos">⌄</button></div>
+        <div class="searchbar"><span>⌕</span><input id="boneSearch" placeholder="Buscar osso..." autocomplete="off" aria-label="Buscar osso"></div>
+        <div id="boneTree" class="bone-tree"></div>
+        <div class="left-footer">
+          <div class="section-heading">PROJETO ATUAL</div>
+          <div class="file-info"><span class="file-icon">▣</span><div class="file-text"><strong id="modelName">Modelo de demonstração</strong><small id="modelInfo">Use um FBX para exportar</small></div></div>
+          <button id="openProjectBtn" class="button subtle full">↥ Abrir projeto .json</button>
+        </div>
+      </aside>
+
+      <section class="viewport-panel">
+        <div class="viewport-toolbar">
+          <div class="tool-group"><button id="rotateBtn" class="tool active" title="Rotacionar (R)">⟳ <span>Rotação</span></button><button id="moveBtn" class="tool" title="Mover (G)">✥ <span>Mover</span></button></div>
+          <div class="separator"></div>
+          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
+          <span class="viewport-mode">PERSPECTIVE · 3D</span>
+        </div>
+        <div id="viewport" class="viewport" aria-label="Área de visualização 3D">
+          <div class="viewport-corner top-left"><span class="axis-dot"></span> <span id="viewportLabel">Ayame · Demo Rig</span></div>
+          <div class="viewport-corner bottom-left"><span class="keyboard-badge">ARRASTAR</span> Orbitar <span class="keyboard-badge">SCROLL</span> Zoom <span class="keyboard-badge">CLICK</span> Selecionar</div>
+          <div id="loadingOverlay" class="loading-overlay hidden"><span class="spinner"></span><strong id="loadingTitle">Processando modelo...</strong><small id="loadingDescription">Aguarde</small></div>
+          <div id="dropZone" class="drop-zone hidden"><strong>Solte seu FBX aqui ✿</strong><span>O arquivo é aberto no próprio navegador</span></div>
+          <div class="mobile-pose-card mobile-only" id="mobilePoseCard" aria-label="Ferramentas rápidas de pose">
+            <div class="mobile-pose-heading"><span class="m-label">OSSO ATIVO</span><strong id="mobileBoneName">Selecione um osso</strong><button type="button" id="mobileCenterBtn" aria-label="Centralizar câmera" title="Centralizar câmera">◎</button></div>
+            <div class="mobile-pose-row">
+              <div class="mobile-axis" role="group" aria-label="Eixo de rotação">
+                <button type="button" class="selected" data-mobile-axis="x">X</button>
+                <button type="button" data-mobile-axis="y">Y</button>
+                <button type="button" data-mobile-axis="z">Z</button>
+              </div>
+              <button type="button" id="mobileMinus" aria-label="Diminuir 5 graus">−5°</button>
+              <input type="range" id="mobileAngle" min="-180" max="180" value="0" step="1" aria-label="Rotação do osso em graus">
+              <button type="button" id="mobilePlus" aria-label="Aumentar 5 graus">+5°</button>
+              <span id="mobileAngleLabel" class="mobile-angle-label">0°</span>
+            </div>
+            <div class="mobile-pose-actions"><button id="mobileKeyBtn" type="button" class="mobile-key">◆ Keyframe</button><button id="mobileResetBtn" type="button" title="Restaurar osso">↺ Reset</button><span>Arraste a personagem com 1 dedo · zoom com 2</span></div>
+          </div>
+        </div>
+        <div class="viewport-footer"><div class="status-left"><span class="live-pip"></span><span id="statusText">Pronto para animar. Selecione um osso.</span></div><span id="statsText">—</span></div>
+      </section>
+
+      <aside class="sidebar right">
+        <div class="panel-heading"><div><span class="eyebrow">INSPECTOR</span><h2>Transformações</h2></div><span class="inspector-icon">◇</span></div>
+        <div class="inspector-scroll">
+          <div class="selected-bone"><span class="selected-icon">♧</span><div><small>OSSO SELECIONADO</small><strong id="selectedName">Nenhum osso</strong></div></div>
+          <div class="inspector-section">
+            <div class="section-heading">ROTAÇÃO <span>GRAUS</span></div>
+            <div class="vector-fields" id="rotationFields">
+              <label><span class="axis x">X</span><input id="rx" type="number" step="1" value="0" disabled></label>
+              <label><span class="axis y">Y</span><input id="ry" type="number" step="1" value="0" disabled></label>
+              <label><span class="axis z">Z</span><input id="rz" type="number" step="1" value="0" disabled></label>
+            </div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">POSIÇÃO <span>UNIDADES</span></div>
+            <div class="vector-fields">
+              <label><span class="axis x">X</span><input id="px" type="number" step="0.01" value="0" disabled></label>
+              <label><span class="axis y">Y</span><input id="py" type="number" step="0.01" value="0" disabled></label>
+              <label><span class="axis z">Z</span><input id="pz" type="number" step="0.01" value="0" disabled></label>
+            </div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">FERRAMENTAS</div>
+            <div class="stack-buttons"><button id="keyframeSideBtn" class="button subtle full">◆ Inserir keyframe <kbd>K</kbd></button><button id="resetBoneBtn" class="button subtle full">↺ Restaurar pose do osso</button></div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">ANIMAÇÃO</div>
+            <div class="form-row"><label for="clipSelect">Clipe em edição</label><select id="clipSelect"></select></div>
+            <div class="form-row"><label for="durationInput">Duração (segundos)</label><input id="durationInput" class="field" type="number" min="0.1" max="120" step="0.5" value="3"></div>
+            <div class="form-row"><label for="fpsInput">Quadros por segundo</label><select id="fpsInput"><option value="24">24 FPS</option><option selected value="30">30 FPS</option><option value="60">60 FPS</option></select></div>
+            <button id="newClipBtn" class="button subtle full">＋ Criar nova animação</button>
+          </div>
+          <div class="inspector-section original-clips hidden" id="originalClipsPanel">
+            <div class="section-heading">CLIPES DO FBX ORIGINAL</div>
+            <select id="originalClipSelect"></select>
+            <button id="loadOriginalBtn" class="button subtle full">↳ Importar clip para a timeline</button>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">EXPORTAR PARA O JOGO</div>
+            <p class="hint">FBX com animação embutida para importar como <b>Legacy</b> na Unity.</p>
+            <button id="exportFbxBtn" class="button export full">↗ Exportar animação .FBX</button>
+            <button id="exportGlbBtn" class="button subtle full">↗ Exportar prévia .GLB</button>
+            <button id="connectBackendBtn" class="button subtle full">⚙ Configurar conversor FBX online</button>
+            <p class="hint">O site funciona sem servidor próprio. A exportação FBX requer um servidor com Blender. Não publique arquivos privados da equipe em repositórios públicos.</p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <section class="timeline-panel">
+      <div class="timeline-topbar">
+        <div class="mobile-clip-picker mobile-only"><select id="mobileClipSelect" aria-label="Animação atual"></select><button id="mobileNewClipBtn" type="button" title="Nova animação">＋</button></div>
+        <div class="timeline-title"><span class="eyebrow">ANIMATION EDITOR</span><strong id="timelineClipName">demo_wave</strong><span id="keyCount" class="key-count">0 keys</span></div>
+        <div class="transport"><button id="firstFrameBtn" title="Início">|◀</button><button id="prevFrameBtn" title="Quadro anterior">◀</button><button id="playBtn" class="play-button" title="Reproduzir (Espaço)">▶</button><button id="nextFrameBtn" title="Próximo quadro">▶</button><button id="lastFrameBtn" title="Fim">▶|</button></div>
+        <div class="time-actions"><span id="timeLabel" class="time-display">00:00.00</span><button id="loopBtn" class="small-toggle active" title="Repetir animação">↻ Loop</button><button id="addKeyBtn" class="button pink">◆ Keyframe</button></div>
+      </div>
+      <div class="mobile-scrubber mobile-only"><span id="mobileTimeLabel">0.00s</span><input id="mobileScrub" aria-label="Percorrer timeline" type="range" min="0" max="3" step="0.01" value="0"><span id="mobileDurationLabel">3.00s</span></div>
+      <div id="timelineBody" class="timeline-body"><div id="timelineTrackNames" class="track-names"></div><div id="timelineCanvas" class="timeline-canvas"><div id="timelineRuler" class="timeline-ruler"></div><div id="timelineRows" class="timeline-rows"></div><div id="playhead" class="playhead"><span></span></div></div></div>
+      <div class="timeline-bottom"><span>✦ Rotacione ossos → avance a timeline → insira keyframes.</span><span>SPACE reproduzir · K keyframe · R rotação · G mover</span></div>
+    </section>
+    <footer class="app-footer"><span>Silent Garden Team • Blood Petals</span><span>Feito para criar movimentos, não complicações. ✿</span></footer>
+  </div>
+
+  <nav class="mobile-dock mobile-only" id="mobileDock" aria-label="Navegação do estúdio">
+    <button class="active" data-mobile-panel="editor"><span>✦</span> Animar</button>
+    <button data-mobile-panel="bones"><span>♧</span> Ossos</button>
+    <button data-mobile-panel="pose"><span>◈</span> Ajustes</button>
+    <button data-mobile-panel="export"><span>↗</span> Exportar</button>
+  </nav>
+  <div id="mobileBackdrop" class="mobile-backdrop mobile-only hidden"></div>
+  <input type="file" id="fbxInput" accept=".fbx" hidden>
+  <input type="file" id="projectInput" accept=".json,.sgmotion" hidden>
+  <div id="toast" class="toast hidden" role="status"></div>
+  <dialog id="helpDialog" class="help-dialog">
+    <div class="dialog-header"><div><span class="eyebrow">QUICK START</span><h2>Bem-vindo ao Motion Studio ✿</h2></div><button id="closeHelpBtn" class="icon-btn">✕</button></div>
+    <ol>
+      <li><b>Importar FBX:</b> arraste seu modelo ou clique em “Importar FBX”. Ele fica no seu computador.</li>
+      <li><b>Selecionar um osso:</b> clique nos pontos rosa do modelo ou no painel esquerdo.</li>
+      <li><b>Criar poses:</b> gire o osso, clique em “Keyframe”, avance o tempo e crie outra pose.</li>
+      <li><b>Reproduzir:</b> pressione Espaço ou ▶ para visualizar a interpolação.</li>
+      <li><b>Exportar:</b> use “Exportar animação .FBX”. O conversor precisa de um servidor com Blender.</li>
+    </ol>
+    <div class="dialog-note">O personagem de demonstração serve para aprender. Para exportar seu próprio personagem para a Unity, importe primeiro o FBX original da Ayame. O projeto JSON não contém o arquivo FBX.</div>
+    <button id="gotItBtn" class="button primary full">Começar a animar ✿</button>
+  </dialog>
+  <dialog id="backendDialog" class="help-dialog backend-dialog">
+    <div class="dialog-header"><div><span class="eyebrow">CONVERSOR FBX</span><h2>Servidor Blender ✿</h2></div><button id="backendCloseBtn" class="icon-btn" type="button">✕</button></div>
+    <p class="hint">Para exportar arquivos FBX pelo celular, conecte um servidor privado que execute o Blender. O endereço e o token são fornecidos pelo administrador da equipe.</p>
+    <label for="backendUrl">Endereço HTTPS do servidor (vazio = mesmo site)</label>
+    <input id="backendUrl" class="field" placeholder="https://seu-servidor.example.com" autocomplete="url" inputmode="url">
+    <label for="backendToken">Chave de acesso da equipe (não salvar no site)</label>
+    <input id="backendToken" class="field" type="password" placeholder="Chave privada" autocomplete="off">
+    <p class="hint">A chave fica apenas nesta sessão do navegador. Não compartilhe essa chave em repositórios públicos.</p>
+    <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
+  </dialog>
+  <script type="module">
+/* Silent Garden Motion Studio — versão alpha 0.2 · Mobile Studio
+   Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
+   O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const formatTime = (t) => `00:${String(Math.floor(t)).padStart(2, '0')}.${String(Math.round((t % 1) * 100)).padStart(2, '0')}`;
+const tidy = (s) => (s || 'animation').replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 70);
+const deg = THREE.MathUtils.radToDeg;
+const rad = THREE.MathUtils.degToRad;
+let toastTimer;
+function toast(msg, error = false) {
+  const el = $('toast'); el.textContent = msg; el.classList.toggle('error', error); el.classList.remove('hidden');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), error ? 7500 : 4500);
+}
+function status(message) { $('statusText').textContent = message; }
+function loading(show, title = '', desc = '') {
+  $('loadingOverlay').classList.toggle('hidden', !show);
+  if (title) $('loadingTitle').textContent = title;
+  if (desc) $('loadingDescription').textContent = desc;
+}
+function download(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a'); link.href = url; link.download = name;
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
+const Vec = (x = 0, y = 0, z = 0) => new THREE.Vector3(x,y,z);
+
+const state = {
+  model: null, modelIsDemo: true, modelFilename: null,
+  bones: [], boneMap: new Map(), rest: new Map(), selected: null, handles: [],
+  sourceClips: [], clips: [], clipIndex: 0, time: 0, playing: false,
+  loop: true, rigVisible: true, gridVisible: true, editMode: 'rotate',
+  sceneScale: 1.9, skeletonHelper: null, converterReady: false,
+  importedFile: null, lastFrameAt: performance.now(), exportBusy: false,
+};
+function currentClip() { return state.clips[state.clipIndex]; }
+function makeClip(name, duration=3, fps=30) {
+  return { name: name || 'new_animation', duration, fps, tracks: {} };
+}
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#1e1a25');
+scene.fog = new THREE.Fog('#1e1a25', 14, 45);
+const viewport = $('viewport');
+const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'default'});
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, matchMedia('(max-width:790px)').matches ? 1.25 : 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(Math.max(1, viewport.clientWidth), Math.max(1, viewport.clientHeight));
+renderer.shadowMap.enabled = false;
+viewport.prepend(renderer.domElement);
+const camera = new THREE.PerspectiveCamera(43,1,.01,5000);
+camera.position.set(3, 2.2, 4.5);
+const orbit = new OrbitControls(camera, renderer.domElement);
+orbit.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+renderer.domElement.style.touchAction = 'none';
+orbit.enableDamping = true; orbit.dampingFactor = .07; orbit.minDistance = .2; orbit.maxDistance = 2000;
+const hemi = new THREE.HemisphereLight('#e0d8ff', '#57435c', 2.05); scene.add(hemi);
+const keyLight = new THREE.DirectionalLight('#fff5f0', 2.2); keyLight.position.set(4, 7, 5); scene.add(keyLight);
+const fillLight = new THREE.DirectionalLight('#c8addd', .8); fillLight.position.set(-5,3,-3); scene.add(fillLight);
+const grid = new THREE.GridHelper(200,100,'#655367','#45394a');
+grid.material.opacity = .24; grid.material.transparent = true; scene.add(grid);
+const axis = new THREE.AxesHelper(.35); axis.visible = false; scene.add(axis);
+const transform = new TransformControls(camera, renderer.domElement);
+transform.setMode('rotate'); transform.setSpace('local'); transform.setSize(.8);
+scene.add(transform.getHelper());
+transform.addEventListener('dragging-changed', (evt) => {orbit.enabled = !evt.value;});
+transform.addEventListener('objectChange', () => {
+  if (!state.selected) return;
+  syncFields();
+  status(`Pose alterada: ${state.selected.name}. Pressione K para registrar o keyframe.`);
+});
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const sphereGeometry = new THREE.SphereGeometry(1, 10, 8);
+const UP = Vec(0,1,0);
+const scratchVector = new THREE.Vector3();
+let pendingBounds = null;
+
+function mesh(parent, geom, material, position = [0,0,0], rotation = null) {
+  const m = new THREE.Mesh(geom, material); m.position.set(...position);
+  if (rotation) m.rotation.set(...rotation);
+  m.castShadow = false; parent.add(m); return m;
+}
+function createDemoModel() {
+  const root = new THREE.Group(); root.name = 'Ayame_Demo';
+  const mat = (color, roughness=.8) => new THREE.MeshStandardMaterial({color, roughness,metalness:0,flatShading:false});
+  const skin = mat('#edc6ad'), shirt = mat('#e8dce6'), blue = mat('#35425e'), dark = mat('#222032'), hair = mat('#282031'), rose = mat('#bb7896');
+  const joint = (parent, name, x,y,z) => {const b = new THREE.Bone(); b.name=name;b.position.set(x,y,z);parent.add(b);return b;};
+  const hips = joint(root,'Hips',0,1.03,0);
+  const spine = joint(hips,'Spine',0,.22,0);
+  const chest = joint(spine,'Chest',0,.26,0);
+  const neck = joint(chest,'Neck',0,.21,0);
+  const head = joint(neck,'Head',0,.16,0);
+  const lShoulder = joint(chest,'LeftShoulder',-.19,.14,0);
+  const lUpper = joint(lShoulder,'LeftArm',-.08,-.04,0);
+  const lFore = joint(lUpper,'LeftForeArm',-.05,-.30,0);
+  const lHand = joint(lFore,'LeftHand',-.02,-.28,0);
+  const rShoulder = joint(chest,'RightShoulder',.19,.14,0);
+  const rUpper = joint(rShoulder,'RightArm',.08,-.04,0);
+  const rFore = joint(rUpper,'RightForeArm',.05,-.30,0);
+  const rHand = joint(rFore,'RightHand',.02,-.28,0);
+  const lLeg = joint(hips,'LeftUpLeg',-.105,-.08,0);
+  const lLow = joint(lLeg,'LeftLeg',0,-.47,0);
+  const lFoot = joint(lLow,'LeftFoot',0,-.46,.05);
+  const rLeg = joint(hips,'RightUpLeg',.105,-.08,0);
+  const rLow = joint(rLeg,'RightLeg',0,-.47,0);
+  const rFoot = joint(rLow,'RightFoot',0,-.46,.05);
+  // Malha de exemplo simples, presa aos bones para mostrar as edições em tempo real.
+  mesh(hips,new THREE.CylinderGeometry(.17,.20,.24,16),blue,[0,.10,0]);
+  mesh(spine,new THREE.CylinderGeometry(.21,.145,.43,16),shirt,[0,.19,0]);
+  mesh(spine,new THREE.CylinderGeometry(.12,.245,.24,4),blue,[0,-.15,0],[0,Math.PI/4,0]);
+  mesh(chest,new THREE.CylinderGeometry(.12,.13,.17,12),shirt,[0,.09,0]);
+  mesh(chest,new THREE.BoxGeometry(.1,.14,.023),rose,[0,.03,.178]);
+  mesh(head,new THREE.SphereGeometry(.137,20,14),skin,[0,.04,0]);
+  mesh(head,new THREE.SphereGeometry(.148,20,14,0,Math.PI*2,0,Math.PI*.54),hair,[0,.09,0]);
+  mesh(head,new THREE.SphereGeometry(.041,9,8),hair,[-.117,.03,-.012]);
+  mesh(head,new THREE.SphereGeometry(.041,9,8),hair,[.117,.03,-.012]);
+  const eye = mat('#31263b');
+  for (const x of [-.05,.05]) mesh(head,new THREE.SphereGeometry(.012,8,8),eye,[x,.046,.129]);
+  const limb = (bone, radius, length, material) => mesh(bone,new THREE.CylinderGeometry(radius*.85,radius,length,12),material,[0,-length/2,0]);
+  limb(lUpper,.079,.31,shirt); limb(rUpper,.079,.31,shirt);
+  limb(lFore,.052,.29,skin); limb(rFore,.052,.29,skin);
+  mesh(lHand,new THREE.SphereGeometry(.052,10,8),skin); mesh(rHand,new THREE.SphereGeometry(.052,10,8),skin);
+  limb(lLeg,.095,.44,skin); limb(rLeg,.095,.44,skin);
+  limb(lLow,.066,.46,skin); limb(rLow,.066,.46,skin);
+  mesh(lFoot,new THREE.BoxGeometry(.145,.10,.27),dark,[0,-.025,.07]);
+  mesh(rFoot,new THREE.BoxGeometry(.145,.10,.27),dark,[0,-.025,.07]);
+  // Detalhes do uniforme, ancorados ao peito.
+  mesh(chest,new THREE.BoxGeometry(.27,.065,.02),blue,[0,.14,.15]);
+  root.updateMatrixWorld(true);
+  return root;
+}
+function getBoneId(bone) {
+  const chain=[]; let p=bone;
+  while(p && p!==state.model){if(p.isBone) chain.unshift(p.name||'Bone');p=p.parent;}
+  return chain.join('/');
+}
+function capture(bone) {
+  return { position: bone.position.toArray(), quaternion: bone.quaternion.toArray(), scale: bone.scale.toArray() };
+}
+function applyTransform(bone, pose) {
+  bone.position.fromArray(pose.position);
+  bone.quaternion.fromArray(pose.quaternion);
+  bone.scale.fromArray(pose.scale);
+}
+function uniqueNamesCheck() {
+  const seen = new Set(); let repeat=0;
+  for (const b of state.bones) {if(seen.has(b.name)) repeat++;seen.add(b.name);}
+  if(repeat) toast(`${repeat} nomes de ossos duplicados: a exportação de animação pode ficar ambígua.`,true);
+}
+function clearModel() {
+  state.playing=false;
+  transform.detach();
+  if(state.model) scene.remove(state.model);
+  if(state.skeletonHelper){scene.remove(state.skeletonHelper);state.skeletonHelper.dispose?.();state.skeletonHelper=null;}
+  for(const h of state.handles){scene.remove(h);h.material.dispose();}
+  state.handles.length=0;
+  state.bones=[];state.boneMap.clear();state.rest.clear();state.selected=null;
+}
+function installModel(model, filename=null, isDemo=false) {
+  clearModel();
+  state.model = model;state.modelFilename=filename;state.modelIsDemo=isDemo;
+  scene.add(model); model.updateMatrixWorld(true);
+  model.traverse(o => {if(o.isBone){state.bones.push(o);}});
+  if(!state.bones.length){scene.remove(model);state.model=null;throw new Error('O FBX não contém ossos detectáveis. Importe um personagem com Armature/Skeleton.');}
+  for(const bone of state.bones){const id=getBoneId(bone);bone.userData.sgId=id;state.boneMap.set(id,bone);state.rest.set(id,capture(bone));}
+  uniqueNamesCheck();
+  const bbox=new THREE.Box3().setFromObject(model);
+  if(bbox.isEmpty()) bbox.set(Vec(-1,0,-1),Vec(1,2,1));
+  const size=bbox.getSize(Vec()); const center=bbox.getCenter(Vec());
+  const height=Math.max(size.y,.15);const radius=Math.max(size.length(),height)*1.45;
+  pendingBounds={center,radius,height,ground:bbox.min.y};
+  state.sceneScale=height;
+  grid.position.y=bbox.min.y;
+  state.skeletonHelper=new THREE.SkeletonHelper(model);
+  state.skeletonHelper.material.color.set('#c285aa');
+  state.skeletonHelper.material.opacity=.5;
+  state.skeletonHelper.material.transparent=true;
+  state.skeletonHelper.visible=state.rigVisible;
+  scene.add(state.skeletonHelper);
+  const handleSize=clamp(height*.013,.008,height*.045);
+  for(const bone of state.bones){
+    const handle=new THREE.Mesh(sphereGeometry,new THREE.MeshBasicMaterial({color:'#e6a2c6',depthTest:false,transparent:true,opacity:.85}));
+    handle.scale.setScalar(handleSize);handle.renderOrder=999;handle.userData.bone=bone;handle.visible=state.rigVisible;
+    state.handles.push(handle);scene.add(handle);
+  }
+  frameModel();
+  state.clips=[makeClip(isDemo?'demo_wave':'new_animation')];state.clipIndex=0;state.time=0;
+  state.sourceClips = isDemo ? [] : (model.animations||[]).slice();
+  if (isDemo) createDemoWave();
+  $('modelName').textContent=isDemo?'Ayame · modelo de demonstração':filename;
+  $('modelInfo').textContent=isDemo?'Importe o FBX original para exportar':`${state.bones.length} ossos · FBX importado`;
+  $('viewportLabel').textContent=isDemo?'Ayame · Demo Rig':filename;
+  $('statsText').textContent=`${state.bones.length} bones`;
+  $('boneCount').textContent=state.bones.length;
+  updateClipSelectors();renderBoneTree();renderTimeline();
+  $('originalClipsPanel').classList.toggle('hidden',state.sourceClips.length===0);
+  updateSourceClips();selectBone(state.bones.find(b=>/rightarm/i.test(b.name))||state.bones[0]);
+  seek(0); status(isDemo?'Modelo de demonstração pronto. Selecione um osso e pressione K.':`${filename} carregado! Crie animações e exporte para a Unity.`);
+}
+function createDemoWave() {
+  const clip=currentClip();clip.duration=2;
+  const r=state.bones.find(b=>b.name==='RightArm');
+  const elbow=state.bones.find(b=>b.name==='RightForeArm');
+  if(!r||!elbow) return;
+  function q(x,y,z){const quat=new THREE.Quaternion().setFromEuler(new THREE.Euler(rad(x),rad(y),rad(z),'XYZ'));return quat.toArray();}
+  const rid=r.userData.sgId,eid=elbow.userData.sgId;
+  const base=state.rest.get(rid),baseE=state.rest.get(eid);
+  clip.tracks[rid]=[
+    {time:0,pose:{...structuredClone(base),quaternion:q(0,0,0)}},
+    {time:.5,pose:{...structuredClone(base),quaternion:q(-8,0,-115)}},
+    {time:1.1,pose:{...structuredClone(base),quaternion:q(-5,0,-105)}},
+    {time:1.5,pose:{...structuredClone(base),quaternion:q(-8,0,-115)}},
+    {time:2,pose:{...structuredClone(base),quaternion:q(0,0,0)}}
+  ];
+  clip.tracks[eid]=[
+    {time:0,pose:structuredClone(baseE)},
+    {time:.5,pose:{...structuredClone(baseE),quaternion:q(0,0,-25)}},
+    {time:1,pose:{...structuredClone(baseE),quaternion:q(0,0,15)}},
+    {time:1.5,pose:{...structuredClone(baseE),quaternion:q(0,0,-25)}},
+    {time:2,pose:structuredClone(baseE)}
+  ];
+}
+function frameModel() {
+  if(!pendingBounds) return;
+  const {center,radius,height}=pendingBounds;
+  orbit.target.copy(center);
+  const dist=Math.max(radius, .2)*1.65;
+  camera.position.copy(center).add(Vec(dist*.55,dist*.34,dist));
+  camera.near=Math.max(height/2500,.001);
+  camera.far=Math.max(dist*30,1000);
+  camera.updateProjectionMatrix();orbit.minDistance=Math.max(height*.08,.01);orbit.maxDistance=Math.max(dist*9,100);
+  orbit.update();
+}
+function selectBone(bone) {
+  if(!bone) return;
+  state.selected=bone;transform.attach(bone);
+  $('selectedName').textContent=bone.name||'Unnamed Bone';
+  $('mobileBoneName').textContent=bone.name||'Osso';
+  syncFields();renderBoneTree();renderTimeline();
+  if (matchMedia('(max-width:790px)').matches && document.querySelector('.app').classList.contains('mobile-open-left')) setMobilePanel('editor');
+}
+function syncFields(){
+  if(!state.selected) return;
+  const bone=state.selected;const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');
+  const angle=deg(e[mobileAxis]);
+  const range=$('mobileAngle');if(document.activeElement!==range)range.value=String(Math.round(clamp(angle,-180,180)));
+  $('mobileAngleLabel').textContent=`${Math.round(angle)}°`;
+  for(const [key,value] of [['rx',deg(e.x)],['ry',deg(e.y)],['rz',deg(e.z)],['px',bone.position.x],['py',bone.position.y],['pz',bone.position.z]]){
+    const el=$(key);el.disabled=false;if(document.activeElement!==el)el.value=Number(value.toFixed(key.startsWith('r')?1:3));
+  }
+}
+function renderBoneTree(){
+  const host=$('boneTree');host.replaceChildren();
+  const search=$('boneSearch').value.trim().toLowerCase();
+  for(const bone of state.bones){
+    const id=bone.userData.sgId;if(search && !bone.name.toLowerCase().includes(search)) continue;
+    const depth=Math.min(4,id.split('/').length-1);
+    const row=document.createElement('div');row.className='bone-row'+(state.selected===bone?' selected':'');
+    row.style.paddingLeft=`${8+depth*11}px`;row.title=id;
+    const ico=document.createElement('span');ico.className='bone-ic';ico.textContent=depth?'◇':'♧';
+    const name=document.createElement('span');name.textContent=bone.name||'Unnamed Bone';
+    row.append(ico,name);row.addEventListener('click',()=>selectBone(bone));host.append(row);
+  }
+  if(!host.children.length)host.textContent='Nenhum osso encontrado.';
+}
+function updateClipSelectors(){
+  const sel=$('clipSelect');sel.replaceChildren();
+  state.clips.forEach((clip,i)=>{const o=new Option(clip.name, String(i));sel.add(o);});
+  sel.value=String(state.clipIndex);
+  const mobile=$('mobileClipSelect');mobile.replaceChildren();
+  state.clips.forEach((clip,i)=>mobile.add(new Option(clip.name,String(i))));mobile.value=String(state.clipIndex);
+  const clip=currentClip();$('timelineClipName').textContent=clip.name;
+  if($('mobileClipSelect').value!==String(state.clipIndex))$('mobileClipSelect').value=String(state.clipIndex);
+  $('durationInput').value=clip.duration;$('fpsInput').value=String(clip.fps);
+}
+function updateSourceClips(){
+  const select=$('originalClipSelect');select.replaceChildren();
+  state.sourceClips.forEach((c,i)=>select.add(new Option(`${c.name||'Clip '+(i+1)} (${c.duration.toFixed(1)}s)`,String(i))));
+}
+function poseAt(id, time, clip=currentClip()) {
+  const rest=state.rest.get(id);
+  if(!rest) return null;
+  const arr=clip.tracks[id];if(!arr?.length) return rest;
+  if(time<=arr[0].time) return arr[0].pose;
+  if(time>=arr[arr.length-1].time) return arr[arr.length-1].pose;
+  let a=arr[0],b=arr[arr.length-1];
+  for(let i=0;i<arr.length-1;i++){if(time>=arr[i].time&&time<=arr[i+1].time){a=arr[i];b=arr[i+1];break;}}
+  const t=clamp((time-a.time)/Math.max(.0001,b.time-a.time),0,1);
+  const v=t*t*(3-2*t);
+  const position=new THREE.Vector3().fromArray(a.pose.position).lerp(new THREE.Vector3().fromArray(b.pose.position),v).toArray();
+  const scale=new THREE.Vector3().fromArray(a.pose.scale).lerp(new THREE.Vector3().fromArray(b.pose.scale),v).toArray();
+  const quaternion=new THREE.Quaternion().fromArray(a.pose.quaternion).slerp(new THREE.Quaternion().fromArray(b.pose.quaternion),v).toArray();
+  return {position,quaternion,scale};
+}
+function applyPose(time){
+  for(const bone of state.bones){const pose=poseAt(bone.userData.sgId,time);if(pose)applyTransform(bone,pose);}
+  state.model?.updateMatrixWorld(true);
+  syncFields();
+}
+function seek(next){
+  state.time=clamp(Number(next)||0,0,currentClip().duration);
+  applyPose(state.time);
+  updatePlayhead();
+}
+function updatePlayhead(){
+  const d=Math.max(.01,currentClip().duration),t=state.time;
+  $('playhead').style.left=`${(100*t/d).toFixed(4)}%`;
+  $('timeLabel').textContent=formatTime(t);
+  const ms=$('mobileScrub');ms.max=String(d);if(document.activeElement!==ms)ms.value=String(t);
+  $('mobileTimeLabel').textContent=`${t.toFixed(2)}s`;
+  $('mobileDurationLabel').textContent=`${d.toFixed(2)}s`;
+}
+function keyframe(bone=state.selected){
+  if(!bone){toast('Selecione um osso primeiro.',true);return;}
+  const clip=currentClip(), id=bone.userData.sgId;
+  const frames=clip.tracks[id]||(clip.tracks[id]=[]);
+  const time=Math.round(state.time*clip.fps)/clip.fps;
+  const key={time,pose:capture(bone)};
+  const ix=frames.findIndex(k=>Math.abs(k.time-time)<.0005);
+  if(ix>=0) frames[ix]=key;else frames.push(key);
+  frames.sort((a,b)=>a.time-b.time);
+  renderTimeline();status(`◆ Keyframe de ${bone.name} criado em ${time.toFixed(2)}s.`);
+  toast(`◆ Keyframe salvo: ${bone.name} · ${time.toFixed(2)}s`);
+}
+function removeKey(boneId,time){
+  const list=currentClip().tracks[boneId];if(!list)return;
+  const i=list.findIndex(k=>Math.abs(k.time-time)<.0005);
+  if(i>=0){list.splice(i,1);if(!list.length)delete currentClip().tracks[boneId];renderTimeline();seek(state.time);toast('Keyframe removido.');}
+}
+function renderTimeline(){
+  if(!state.clips.length)return;
+  const clip=currentClip();$('timelineClipName').textContent=clip.name;
+  if($('mobileClipSelect').value!==String(state.clipIndex))$('mobileClipSelect').value=String(state.clipIndex);
+  const total=Object.values(clip.tracks).reduce((sum,frames)=>sum+frames.length,0);
+  $('keyCount').textContent=`${total} keys`;
+  const names=$('timelineTrackNames'),rows=$('timelineRows'),ruler=$('timelineRuler');
+  names.replaceChildren();rows.replaceChildren();ruler.replaceChildren();
+  const pad=document.createElement('div');pad.className='ruler-pad';pad.textContent='BONES / TRACKS';names.append(pad);
+  const ticks=Math.min(12,Math.max(2,Math.round(clip.duration)));
+  for(let i=0;i<=ticks;i++){
+    const mark=document.createElement('span');mark.className='ruler-label';mark.style.left=`${i/ticks*100}%`;
+    mark.textContent=`${(clip.duration*i/ticks).toFixed(1)}s`;ruler.append(mark);
+  }
+  for(const bone of state.bones){
+    const id=bone.userData.sgId,selected=state.selected===bone;
+    const label=document.createElement('div');label.className='track-name'+(selected?' selected':'');
+    label.textContent=(id.split('/').length>1?'· ':'')+(bone.name||'Bone');label.title=id;
+    label.addEventListener('click',()=>selectBone(bone));names.append(label);
+    const row=document.createElement('div');row.className='timeline-row'+(selected?' selected':'');
+    row.addEventListener('click',(evt)=>{
+      if(evt.target.closest('.key-marker'))return;
+      state.playing=false;const rect=row.getBoundingClientRect();seek(((evt.clientX-rect.left)/rect.width)*clip.duration);
+      selectBone(bone);
+    });
+    for(const k of clip.tracks[id]||[]){
+      const dot=document.createElement('div');dot.className='key-marker';dot.style.left=`${100*k.time/clip.duration}%`;
+      dot.title=`${bone.name}: ${k.time.toFixed(2)}s. Clique para selecionar; botão direito para remover.`;
+      dot.addEventListener('click',(evt)=>{evt.stopPropagation();state.playing=false;seek(k.time);selectBone(bone);});
+      dot.addEventListener('contextmenu',(evt)=>{evt.preventDefault();evt.stopPropagation();removeKey(id,k.time);});
+      row.append(dot);
+    }
+    rows.append(row);
+  }
+  // Rolar nomes e trilhas juntos.
+  rows.onscroll=()=>{names.scrollTop=rows.scrollTop;};
+  updatePlayhead();
+}
+function togglePlay(){
+  state.playing=!state.playing;state.lastFrameAt=performance.now();
+  if(state.playing&&state.time>=currentClip().duration)seek(0);
+  $('playBtn').textContent=state.playing?'Ⅱ':'▶';
+}
+function changeMode(mode){
+  state.editMode=mode;transform.setMode(mode==='rotate'?'rotate':'translate');
+  $('rotateBtn').classList.toggle('active',mode==='rotate');$('moveBtn').classList.toggle('active',mode==='translate');
+  status(mode==='rotate'?'Gizmo de rotação ativo.':'Gizmo de movimento ativo.');
+}
+function updateSize(){const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(updateSize).observe(viewport);
+function animate(now){
+  requestAnimationFrame(animate);
+  const elapsed=Math.min(.1,(now-state.lastFrameAt)/1000);
+  state.lastFrameAt=now;
+  if(state.playing){
+    const end=currentClip().duration;let t=state.time+elapsed;
+    if(t>=end){if(state.loop){t=t%end;}else{t=end;state.playing=false;$('playBtn').textContent='▶';}}
+    seek(t);
+  }
+  transform.enabled=!state.playing;
+  orbit.update();
+  for(const h of state.handles){h.userData.bone.getWorldPosition(scratchVector);h.position.copy(scratchVector);const selected=h.userData.bone===state.selected;h.material.color.set(selected?'#ffe1f0':'#d698b5');h.material.opacity=selected?1:.72;h.scale.setScalar(clamp(state.sceneScale*(selected?.019:.012),.008,state.sceneScale*.045));}
+  renderer.render(scene,camera);
+}
+
+async function importFBX(file){
+  if(!file||!file.name.toLowerCase().endsWith('.fbx')){toast('Escolha um arquivo .FBX válido.',true);return;}
+  if(file.size>120*1024*1024){toast('Este FBX tem mais de 120 MB. Simplifique o modelo antes de abrir.',true);return;}
+  loading(true,'Abrindo personagem FBX…','Lendo malha, esqueleto e animações locais');
+  await new Promise(resolve=>setTimeout(resolve,40));
+  try{
+    const bytes=await file.arrayBuffer();
+    const group=new FBXLoader().parse(bytes,'');
+    group.name=group.name||file.name.replace(/\.fbx$/i,'');
+    installModel(group,file.name,false);
+    state.importedFile=file;
+    if(state.sourceClips.length)toast(`${file.name} importado! ${state.sourceClips.length} animação(ões) original(is) detectada(s).`);
+    else toast(`${file.name} importado com sucesso!`);
+  }catch(e){console.error(e);toast('Não foi possível ler o FBX: '+e.message,true);status('Erro de importação. Verifique se o FBX contém Armature.');}
+  finally{loading(false);}
+}
+
+function serializeProject(){
+  return {app:'SilentGardenMotionStudio',version:1,modelFilename:state.modelFilename,clipIndex:state.clipIndex,
+    clips:state.clips.map(c=>({name:c.name,duration:c.duration,fps:c.fps,tracks:c.tracks})),
+    boneNames:state.bones.map(b=>({path:b.userData.sgId,name:b.name}))};
+}
+function saveProject(){
+  const project=serializeProject();const name=tidy(state.modelFilename?.replace(/\.fbx$/i,'')||'demo');
+  download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),`${name}_silentgarden.sgmotion.json`);
+  toast('Projeto salvo. Guarde também seu FBX original!');
+}
+async function openProject(file){
+  try{
+    const p=JSON.parse(await file.text());
+    if(p.app!=='SilentGardenMotionStudio'||p.version!==1||!Array.isArray(p.clips)||!p.clips.length)throw new Error('Formato de projeto não reconhecido.');
+    if(p.modelFilename&&p.modelFilename!==state.modelFilename)throw new Error(`Este projeto pertence ao modelo “${p.modelFilename}”. Importe esse FBX primeiro.`);
+    const imported=p.clips.map(c=>({name:String(c.name||'animation'),duration:clamp(Number(c.duration)||3,.1,120),fps:[24,30,60].includes(Number(c.fps))?Number(c.fps):30,tracks:{}}));
+    let loaded=0,unmatched=0;
+    p.clips.forEach((c,i)=>{
+      for(const [id,frames] of Object.entries(c.tracks||{})){
+        let bone=state.boneMap.get(id);
+        if(!bone){const n=id.split('/').at(-1);bone=state.bones.find(b=>b.name===n);}
+        if(!bone){unmatched++;continue;}
+        if(!Array.isArray(frames))continue;
+        imported[i].tracks[bone.userData.sgId]=frames.filter(f=>Number.isFinite(f.time)&&f.pose&&
+          f.pose.position?.length===3&&f.pose.quaternion?.length===4&&f.pose.scale?.length===3)
+          .map(f=>({time:clamp(f.time,0,imported[i].duration),pose:f.pose})).sort((a,b)=>a.time-b.time);
+        loaded++;
+      }
+    });
+    state.clips=imported;state.clipIndex=clamp(p.clipIndex||0,0,imported.length-1);state.playing=false;
+    updateClipSelectors();renderTimeline();seek(0);
+    toast(`Projeto aberto: ${loaded} trilhas restauradas.${unmatched?' '+unmatched+' ossos não correspondem.':''}`);
+  }catch(e){toast(`Não foi possível abrir o projeto: ${e.message}`,true);}
+}
+function createAnimationClip(){
+  const c=currentClip();const times=[];
+  const tracks=[];const frameCount=Math.max(2,Math.ceil(c.duration*c.fps)+1);
+  for(let i=0;i<frameCount;i++)times.push(Math.min(c.duration,i/c.fps));
+  for(const bone of state.bones){
+    const id=bone.userData.sgId;
+    if(!(c.tracks[id]||[]).length)continue;
+    const pos=[],quat=[],sca=[];
+    for(const time of times){
+      const p=poseAt(id,time,c);
+      pos.push(...p.position);quat.push(...p.quaternion);sca.push(...p.scale);
+    }
+    // GLTFExporter associa tracks ao node pelo nome (bones do FBX).
+    const bName=bone.name;
+    tracks.push(new THREE.VectorKeyframeTrack(`${bName}.position`,times,pos));
+    tracks.push(new THREE.QuaternionKeyframeTrack(`${bName}.quaternion`,times,quat));
+    tracks.push(new THREE.VectorKeyframeTrack(`${bName}.scale`,times,sca));
+  }
+  if(!tracks.length)throw new Error('Esta animação está vazia. Selecione um osso e adicione keyframes.');
+  return new THREE.AnimationClip(c.name,c.duration,tracks);
+}
+async function makeGlb(){
+  if(state.modelIsDemo)throw new Error('Importe o FBX da Ayame antes de exportar. O Demo Rig é apenas um exercício.');
+  const clip=createAnimationClip();
+  // O modelo exportado carrega posições base; as keyframes animam a pose de repouso.
+  const old=state.bones.map(b=>capture(b));
+  try{
+    for(const bone of state.bones)applyTransform(bone,state.rest.get(bone.userData.sgId));
+    state.model.updateMatrixWorld(true);
+    // Se um FBX contiver tracks antigos, só exportamos a animação nova.
+    const result=await new GLTFExporter().parseAsync(state.model,{binary:true,animations:[clip],onlyVisible:false,trs:true,maxTextureSize:4096});
+    if(!(result instanceof ArrayBuffer))throw new Error('Exportação GLB não gerou dados binários.');
+    return new Blob([result],{type:'model/gltf-binary'});
+  }finally{
+    state.bones.forEach((b,i)=>applyTransform(b,old[i]));state.model.updateMatrixWorld(true);
+  }
+}
+async function exportGlb(){
+  if(state.exportBusy)return;state.exportBusy=true;
+  loading(true,'Preparando GLB animado…','Bake dos keyframes');
+  try{
+    const blob=await makeGlb();
+    download(blob,`${tidy(currentClip().name)}.glb`);
+    toast('GLB exportado! Para a Unity Legacy, use o botão Exportar FBX.');
+  }catch(e){console.error(e);toast(e.message,true);}finally{state.exportBusy=false;loading(false);}
+}
+const SETTINGS_URL_KEY='sgmotion_backend_url';
+let backendToken='';
+let mobileAxis='x';
+let backendBase=(localStorage.getItem(SETTINGS_URL_KEY)||'').replace(/\/$/,'');
+function backendApi(path){return backendBase+path;}
+function backendHeaders(){return backendToken?{'Authorization':`Bearer ${backendToken}`}:{ };}
+function setBackendPill(textValue, ready){
+  const pill=$('backendPill');pill.classList.toggle('ready',ready);pill.classList.toggle('offline',!ready);
+  pill.replaceChildren();const dot=document.createElement('i');pill.append(dot,document.createTextNode(' '+textValue));
+}
+async function checkBackend(){
+  const ctrl=new AbortController();const stop=setTimeout(()=>ctrl.abort(),5000);
+  try{
+    const r=await fetch(backendApi('/api/status'),{cache:'no-store',signal:ctrl.signal,headers:backendHeaders()});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();state.converterReady=Boolean(data.blenderFound);
+    setBackendPill(state.converterReady?'Conversor FBX pronto':'Blender não disponível',state.converterReady);
+  }catch(e){state.converterReady=false;setBackendPill('FBX precisa de servidor',false);}
+  finally{clearTimeout(stop);}
+}
+async function exportFbx(){
+  if(state.exportBusy)return;
+  if(!state.converterReady){
+    toast('Conecte um servidor com Blender em “Configurar conversor FBX online” para exportar FBX.',true);
+    $('backendDialog').showModal();return;
+  }
+  state.exportBusy=true;
+  loading(true,'Exportando animação FBX…','Preparando modelo e enviando ao conversor autorizado');
+  try{
+    const glb=await makeGlb();const form=new FormData();
+    form.append('model',glb,`${tidy(currentClip().name)}.glb`);
+    form.append('fps',String(currentClip().fps));
+    form.append('name',tidy(currentClip().name));
+    const r=await fetch(backendApi('/api/export-fbx'),{method:'POST',body:form,headers:backendHeaders()});
+    if(!r.ok){let info;try{info=await r.json();}catch{info={error:`HTTP ${r.status}`};}throw new Error(info.error||`HTTP ${r.status}`);}
+    const fbx=await r.blob();download(fbx,`${tidy(currentClip().name)}.fbx`);
+    toast('✿ Animação FBX exportada! Importe na Unity e configure como Legacy.');
+  }catch(e){console.error(e);toast(`Falha na exportação: ${e.message}`,true);}finally{state.exportBusy=false;loading(false);}
+}
+function setMobilePanel(panel){
+  const app=document.querySelector('.app');
+  app.classList.toggle('mobile-open-left',panel==='bones');
+  app.classList.toggle('mobile-open-right',panel==='pose'||panel==='export');
+  $('mobileBackdrop').classList.toggle('hidden',panel==='editor');
+  for(const button of document.querySelectorAll('[data-mobile-panel]')) button.classList.toggle('active',button.dataset.mobilePanel===panel);
+  if(panel==='export') requestAnimationFrame(()=>{const target=$('connectBackendBtn');target?.scrollIntoView({block:'end',behavior:'smooth'});});
+}
+function setMobileAngle(value){
+  const bone=state.selected;if(!bone){toast('Selecione um osso na tela ou em Ossos.',true);return;}
+  const a=clamp(Number(value)||0,-180,180);
+  const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e[mobileAxis]=rad(a);
+  bone.quaternion.setFromEuler(e);bone.updateMatrixWorld(true);syncFields();
+  $('mobileAngle').value=String(Math.round(a));$('mobileAngleLabel').textContent=`${Math.round(a)}°`;
+  status(`Pose: ${bone.name}, eixo ${mobileAxis.toUpperCase()} = ${Math.round(a)}°. Toque em Keyframe para gravar.`);
+}
+function wireMobile(){
+  for(const btn of document.querySelectorAll('[data-mobile-panel]'))btn.addEventListener('click',()=>setMobilePanel(btn.dataset.mobilePanel));
+  $('mobileBackdrop').onclick=()=>setMobilePanel('editor');
+  $('mobileOpenProjectBtn').onclick=()=>$('projectInput').click();
+  $('mobileCenterBtn').onclick=frameModel;
+  $('mobileScrub').addEventListener('input',e=>{state.playing=false;$('playBtn').textContent='▶';seek(Number(e.target.value));});
+  $('mobileKeyBtn').onclick=()=>keyframe();
+  $('mobileResetBtn').onclick=()=>{if(!state.selected)return;applyTransform(state.selected,state.rest.get(state.selected.userData.sgId));syncFields();};
+  for(const btn of document.querySelectorAll('[data-mobile-axis]')){
+    btn.onclick=()=>{mobileAxis=btn.dataset.mobileAxis;for(const b of document.querySelectorAll('[data-mobile-axis]'))b.classList.toggle('selected',b===btn);syncFields();};
+  }
+  $('mobileAngle').addEventListener('input',e=>setMobileAngle(e.target.value));
+  $('mobileMinus').onclick=()=>setMobileAngle(Number($('mobileAngle').value)-5);
+  $('mobilePlus').onclick=()=>setMobileAngle(Number($('mobileAngle').value)+5);
+  $('mobileClipSelect').onchange=e=>{state.playing=false;state.clipIndex=Number(e.target.value);updateClipSelectors();renderTimeline();seek(0);};
+  $('mobileNewClipBtn').onclick=()=>$('newClipBtn').click();
+  const dlg=$('backendDialog');
+  $('connectBackendBtn').onclick=()=>{ $('backendUrl').value=backendBase;$('backendToken').value=backendToken;dlg.showModal();};
+  $('backendCloseBtn').onclick=()=>dlg.close();
+  $('backendConnectBtn').onclick=async()=>{
+    const input=$('backendUrl').value.trim().replace(/\/$/,'');
+    if(input){
+      try{const url=new URL(input);if(url.protocol!=='https:'&&!(['localhost','127.0.0.1'].includes(url.hostname)&&url.protocol==='http:'))throw new Error('HTTPS obrigatório, exceto localhost');
+      if(url.username||url.password||url.search||url.hash||url.pathname!=='/')throw new Error('Informe apenas a origem do servidor (sem caminho).');}
+      catch(e){toast(`URL inválida: ${e.message}`,true);return;}
+    }
+    backendBase=input;backendToken=$('backendToken').value.trim();localStorage.setItem(SETTINGS_URL_KEY,backendBase);dlg.close();
+    await checkBackend();toast(state.converterReady?'Conversor conectado!':'Não foi possível conectar o Blender. Confira URL e configuração.',!state.converterReady);
+  };
+}
+
+async function importOriginalClip(){
+  const clip=state.sourceClips[Number($('originalClipSelect').value)];
+  if(!clip)return;
+  if(clip.duration>60){toast('Clips maiores que 60s ainda não são suportados nesta versão.',true);return;}
+  loading(true,'Convertendo clip original…','Lendo quadros e poses');
+  await new Promise(resolve=>setTimeout(resolve,30));
+  try{
+    const sampler=new THREE.AnimationMixer(state.model);
+    const rest=state.bones.map(b=>capture(b));
+    const anim=makeClip(clip.name||'imported_animation',Math.max(.1,clip.duration),30);
+    const action=sampler.clipAction(clip);action.setLoop(THREE.LoopOnce,1);action.clampWhenFinished=true;action.play();
+    const frameCount=Math.min(601,Math.ceil(anim.duration*15)+1);
+    for(let frame=0;frame<frameCount;frame++){
+      const t=(frame/(frameCount-1))*anim.duration;
+      sampler.setTime(t);
+      for(const bone of state.bones){
+        const id=bone.userData.sgId;
+        (anim.tracks[id]||(anim.tracks[id]=[])).push({time:t,pose:capture(bone)});
+      }
+    }
+    action.stop();sampler.stopAllAction();
+    state.bones.forEach((b,i)=>applyTransform(b,rest[i]));
+    state.clips.push(anim);state.clipIndex=state.clips.length-1;
+    updateClipSelectors();renderTimeline();seek(0);
+    toast(`Clip “${anim.name}” copiado para a timeline (${frameCount} amostras).`);
+  }catch(e){console.error(e);toast(`Não foi possível importar o clip: ${e.message}`,true);}
+  finally{loading(false);}
+}
+
+function wire(){
+  $('importBtn').onclick=()=>$('fbxInput').click();
+  $('fbxInput').onchange=(evt)=>{const f=evt.target.files?.[0];if(f)importFBX(f);evt.target.value='';};
+  $('saveBtn').onclick=saveProject;
+  $('openProjectBtn').onclick=()=>$('projectInput').click();
+  $('projectInput').onchange=(evt)=>{const f=evt.target.files?.[0];if(f)openProject(f);evt.target.value='';};
+  $('helpBtn').onclick=()=>$('helpDialog').showModal();
+  $('closeHelpBtn').onclick=$('gotItBtn').onclick=()=>$('helpDialog').close();
+  $('boneSearch').oninput=renderBoneTree;
+  $('expandBonesBtn').onclick=()=>{$('boneSearch').value='';renderBoneTree();};
+  $('rotateBtn').onclick=()=>changeMode('rotate');$('moveBtn').onclick=()=>changeMode('translate');
+  $('rigBtn').onclick=()=>{state.rigVisible=!state.rigVisible;$('rigBtn').classList.toggle('active',state.rigVisible);for(const h of state.handles)h.visible=state.rigVisible;if(state.skeletonHelper)state.skeletonHelper.visible=state.rigVisible;};
+  $('gridBtn').onclick=()=>{state.gridVisible=!state.gridVisible;grid.visible=state.gridVisible;$('gridBtn').classList.toggle('active',state.gridVisible);};
+  $('resetCameraBtn').onclick=frameModel;
+  for(const key of ['rx','ry','rz','px','py','pz']) {
+    $(key).addEventListener('change',()=>{
+      const bone=state.selected;if(!bone)return;
+      const value=Number($(key).value);if(!Number.isFinite(value))return;
+      if(key[0]==='r'){
+        const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e['xyz'['rx ry rz'.split(' ').indexOf(key)]]=rad(value);bone.quaternion.setFromEuler(e);
+      }else bone.position['xyz'['px py pz'.split(' ').indexOf(key)]]=value;
+      bone.updateMatrixWorld(true);syncFields();status(`Alteração em ${bone.name}. Pressione K para registrar.`);
+    });
+  }
+  $('keyframeSideBtn').onclick=$('addKeyBtn').onclick=()=>keyframe();
+  $('resetBoneBtn').onclick=()=>{if(!state.selected)return;applyTransform(state.selected,state.rest.get(state.selected.userData.sgId));syncFields();status('Osso restaurado. Pressione K para registrar essa pose.');};
+  $('clipSelect').onchange=(evt)=>{state.playing=false;state.clipIndex=Number(evt.target.value);updateClipSelectors();renderTimeline();seek(0);};
+  $('newClipBtn').onclick=()=>{const name=prompt('Nome da nova animação (ex.: f02_talking_00):',`animation_${String(state.clips.length+1).padStart(2,'0')}`);if(name===null)return;
+    const clean=tidy(name.trim());if(!clean){toast('Informe um nome de animação.',true);return;}
+    state.clips.push(makeClip(clean));state.clipIndex=state.clips.length-1;state.playing=false;updateClipSelectors();renderTimeline();seek(0);toast(`Nova animação “${clean}” criada.`);
+  };
+  $('durationInput').onchange=(evt)=>{const d=clamp(Number(evt.target.value)||3,.1,120);currentClip().duration=d;
+    for(const frames of Object.values(currentClip().tracks))for(const f of frames)f.time=Math.min(f.time,d);
+    for(const frames of Object.values(currentClip().tracks))frames.sort((a,b)=>a.time-b.time);
+    evt.target.value=d;seek(state.time);renderTimeline();};
+  $('fpsInput').onchange=(evt)=>{currentClip().fps=Number(evt.target.value);};
+  $('loadOriginalBtn').onclick=importOriginalClip;
+  $('exportGlbBtn').onclick=exportGlb;$('exportFbxBtn').onclick=exportFbx;
+  $('loopBtn').onclick=()=>{state.loop=!state.loop;$('loopBtn').classList.toggle('active',state.loop);};
+  $('playBtn').onclick=togglePlay;
+  $('firstFrameBtn').onclick=()=>{state.playing=false;$('playBtn').textContent='▶';seek(0);};
+  $('lastFrameBtn').onclick=()=>{state.playing=false;$('playBtn').textContent='▶';seek(currentClip().duration);};
+  $('prevFrameBtn').onclick=()=>{state.playing=false;$('playBtn').textContent='▶';seek(state.time-1/currentClip().fps);};
+  $('nextFrameBtn').onclick=()=>{state.playing=false;$('playBtn').textContent='▶';seek(state.time+1/currentClip().fps);};
+  $('timelineRuler').addEventListener('click',(evt)=>{state.playing=false;const rect=$('timelineRuler').getBoundingClientRect();seek((evt.clientX-rect.left)/rect.width*currentClip().duration);});
+  renderer.domElement.addEventListener('pointerdown',(evt)=>{
+    if(!state.rigVisible||evt.button!==0||transform.dragging)return;
+    const rect=renderer.domElement.getBoundingClientRect();pointer.x=(evt.clientX-rect.left)/rect.width*2-1;pointer.y=-(evt.clientY-rect.top)/rect.height*2+1;
+    raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(state.handles.filter(h=>h.visible),false);
+    if(hits.length)selectBone(hits[0].object.userData.bone);
+  });
+  document.addEventListener('keydown',(evt)=>{
+    if(evt.target instanceof HTMLInputElement||evt.target instanceof HTMLSelectElement||evt.target instanceof HTMLTextAreaElement||$('helpDialog').open)return;
+    if(evt.ctrlKey||evt.metaKey||evt.altKey)return;
+    if(evt.code==='Space'){evt.preventDefault();togglePlay();}
+    else if(evt.key.toLowerCase()==='k'){evt.preventDefault();keyframe();}
+    else if(evt.key.toLowerCase()==='r')changeMode('rotate');
+    else if(evt.key.toLowerCase()==='g')changeMode('translate');
+  });
+  const dz=$('dropZone');
+  document.addEventListener('dragenter',(evt)=>{if(evt.dataTransfer?.types?.includes('Files')){evt.preventDefault();dz.classList.remove('hidden');}});
+  document.addEventListener('dragover',(evt)=>{if(evt.dataTransfer?.types?.includes('Files'))evt.preventDefault();});
+  document.addEventListener('dragleave',(evt)=>{if(!evt.relatedTarget||evt.relatedTarget===document.documentElement)dz.classList.add('hidden');});
+  document.addEventListener('drop',(evt)=>{
+    evt.preventDefault();dz.classList.add('hidden');const f=evt.dataTransfer?.files?.[0];
+    if(f){if(f.name.toLowerCase().endsWith('.fbx'))importFBX(f);else if(f.name.toLowerCase().endsWith('.json'))openProject(f);else toast('Solte um FBX ou projeto JSON.',true);}
+  });
+}
+wire();
+wireMobile();
+installModel(createDemoModel(),null,true);
+checkBackend();
+requestAnimationFrame(animate);
+
+  </script>
+</body>
+</html>
