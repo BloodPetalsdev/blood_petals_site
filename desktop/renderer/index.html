@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'sha256-UIiVg22PC4ABTdJ22WSTrliOLGvfsog+qnGKL+MGxbk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15121b">
+  <title>Silent Garden Motion Studio — Blood Petals</title>
+  <style>
+:root{color-scheme:dark;--bg:#111017;--panel:#1b1922;--panel2:#211e29;--deep:#14121b;--line:#35303b;--muted:#918999;--soft:#beb7c4;--text:#f2edf3;--rose:#e5a5c6;--pink:#a75b85;--bright:#ffbfdb;--green:#86cba6;--red:#e17d8b;--yellow:#ffd19b;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:13px}
+*{box-sizing:border-box}html,body{width:100%;height:100%;padding:0;margin:0}body{background:var(--bg);color:var(--text);overflow:hidden}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--rose);outline-offset:1px}button{transition:background .15s,border-color .15s,color .15s}.app{display:flex;flex-direction:column;min-width:760px;width:100%;height:100dvh}.topbar{height:66px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:#18151e;border-bottom:1px solid var(--line);padding:0 24px;gap:12px}.brand{display:flex;gap:11px;align-items:center;min-width:0}.brand-icon{width:39px;height:39px;display:flex;align-items:center;justify-content:center;border-radius:12px;color:#ffe1ee;font-size:31px;background:linear-gradient(145deg,#ab6c91,#5b3b60);box-shadow:0 0 28px #ae60832b}.brand-title{font-size:14px;white-space:nowrap;font-weight:790;letter-spacing:.095em}.brand-title span{color:var(--rose)}.brand-subtitle{color:var(--muted);font-size:10px;letter-spacing:.09em;margin-top:3px}.version{margin-left:12px;font-size:9px;border:1px solid #72526c;border-radius:4px;padding:5px 6px;color:var(--rose);white-space:nowrap}.header-actions{display:flex;align-items:center;gap:8px}.button{border-radius:7px;border:1px solid var(--line);height:34px;padding:0 14px;background:var(--panel2);color:var(--text);white-space:nowrap;font-size:12px;font-weight:600}.button:hover{background:#37303e;border-color:#6e596c}.button.ghost{background:transparent}.button.primary{background:#b27798;color:#211320;border-color:#d29ab7;font-weight:750}.button.primary:hover{background:#d99bbb}.button.pink{background:#5d3b53;color:#ffdaec;border-color:#8e5f7b}.button.export{height:39px;background:linear-gradient(120deg,#c38ca8,#ab7194);color:#20131f;border:0;font-weight:800}.button.subtle{background:#28242e;text-align:left}.button.subtle:hover{background:#403444}.button.full{width:100%}.backend-pill{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted);white-space:nowrap;border:1px solid #393240;padding:6px 9px;border-radius:99px}.backend-pill i,.live-pip{width:7px;height:7px;display:inline-block;border-radius:50%;background:var(--yellow)}.backend-pill.ready i,.live-pip{background:var(--green)}.backend-pill.offline i{background:var(--red)}.workspace{display:grid;grid-template-columns:235px minmax(0,1fr) 261px;flex:1;min-height:190px}.sidebar{min-width:0;background:var(--panel);display:flex;flex-direction:column}.sidebar.left{border-right:1px solid var(--line)}.sidebar.right{border-left:1px solid var(--line)}.panel-heading{height:73px;padding:15px 15px 11px;display:flex;align-items:center;justify-content:space-between}.eyebrow,.section-heading{font-size:9px;font-weight:780;letter-spacing:.12em;color:#aa9ba9}.panel-heading h2{font-size:14px;letter-spacing:.005em;margin:6px 0 0;font-weight:690}.panel-heading h2 span{font-size:11px;background:#39303c;color:#bfb6c3;padding:1px 6px;border-radius:10px;font-weight:500;margin-left:6px}.icon-btn{background:transparent;border:0;color:#a89ba9;font-size:18px;border-radius:5px;padding:5px 9px}.icon-btn:hover{background:#322b37}.searchbar{height:33px;background:#28242f;border:1px solid #3b3543;border-radius:6px;display:flex;gap:7px;align-items:center;color:#d1b5c4;padding:0 10px;margin:0 12px 12px}.searchbar input{width:100%;min-width:0;border:0;background:transparent;color:var(--text);outline:0;font-size:11px}.searchbar input::placeholder{color:#8e8493}.bone-tree{flex:1;overflow:auto;min-height:70px;padding:0 9px 12px}.bone-row{height:29px;display:flex;align-items:center;gap:7px;border-radius:5px;padding:0 8px;color:#b8acbc;font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;cursor:pointer}.bone-row:hover{background:#302a36;color:#f6edf7}.bone-row.selected{background:#5c4057;color:#ffd9e9}.bone-ic{font-size:12px;color:#bf92aa}.bone-row.selected .bone-ic{color:#ffd1e7}.left-footer{border-top:1px solid var(--line);padding:15px 12px;display:flex;flex-direction:column;gap:12px}.file-info{display:flex;gap:9px;align-items:center}.file-icon{width:35px;height:35px;border-radius:7px;display:grid;place-items:center;background:#513b50;color:var(--rose);font-size:19px}.file-text{overflow:hidden;display:flex;flex-direction:column;gap:3px}.file-text strong{font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.file-text small{color:var(--muted);font-size:10px}.viewport-panel{display:flex;flex-direction:column;min-width:0;background:#18171e}.viewport-toolbar{height:45px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 13px;border-bottom:1px solid #302b37}.tool-group{display:flex;gap:4px}.tool{border:1px solid transparent;border-radius:6px;padding:6px 9px;display:flex;gap:7px;align-items:center;background:transparent;color:#99909e;font-size:11px}.tool:hover{background:#322b39}.tool.active{background:#493343;border-color:#735168;color:#f7c6de}.separator{height:20px;border-left:1px solid var(--line);margin:0 5px}.viewport-mode{margin-left:auto;color:#716c79;font-size:9px;letter-spacing:.13em;white-space:nowrap}.viewport{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#302938,#18151e 75%)}.viewport canvas{width:100%;height:100%;display:block;outline:0}.viewport-corner{position:absolute;pointer-events:none;z-index:2;display:flex;gap:8px;align-items:center;color:#bcb1c0;font-size:10px}.top-left{top:14px;left:14px;background:#1e1a25bc;padding:7px 10px;border-radius:6px}.bottom-left{bottom:14px;left:14px;color:#807887}.axis-dot{background:var(--rose);height:7px;width:7px;border-radius:50%}.keyboard-badge{border:1px solid #5c5360;padding:3px 4px;border-radius:3px;font-size:9px;color:#a79eaa}.viewport-footer{height:29px;flex-shrink:0;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:#99919c;font-size:10px;gap:8px}.status-left{display:flex;align-items:center;gap:8px;min-width:0}.status-left span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inspector-icon{font-size:17px;color:var(--rose)}.inspector-scroll{overflow-y:auto;flex:1;padding:2px 13px 25px}.selected-bone{display:flex;gap:11px;align-items:center;border:1px solid #4c3b4b;background:#2a222e;border-radius:8px;padding:11px;margin-bottom:22px}.selected-icon{color:#e7a5c7;font-size:20px}.selected-bone div{display:flex;flex-direction:column;gap:5px;overflow:hidden}.selected-bone small{color:#b19cac;font-size:9px;letter-spacing:.07em}.selected-bone strong{font-size:12px;overflow:hidden;text-overflow:ellipsis}.inspector-section{margin-bottom:22px}.section-heading{margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}.section-heading span{letter-spacing:.02em;font-size:9px;color:#736d7a;font-weight:500}.vector-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.vector-fields label{display:flex;align-items:center;border:1px solid #423943;border-radius:6px;background:#28222c;min-width:0}.axis{font-size:10px;font-weight:800;margin:0 5px 0 7px}.axis.x{color:#eb8997}.axis.y{color:#93c6a8}.axis.z{color:#8bacdf}.vector-fields input{width:100%;min-width:0;border:0;color:#ddd3df;background:transparent;font-size:11px;padding:8px 2px;outline:0;font-variant-numeric:tabular-nums}.vector-fields input:disabled{color:#77717e}.vector-fields input::-webkit-inner-spin-button{appearance:none}.stack-buttons{display:flex;flex-direction:column;gap:7px}.stack-buttons kbd{font-size:9px;background:#43394a;border-radius:3px;padding:2px 5px;float:right}.form-row{margin:10px 0;display:flex;flex-direction:column;gap:6px}.form-row label{color:#9e94a2;font-size:10px}.form-row select,.form-row input,select{height:32px;min-width:0;background:#29252f;color:#f3eaf3;border:1px solid #493f4e;border-radius:6px;padding:0 9px;width:100%}select{font-size:11px}.hint{color:#9f94a1;font-size:10px;line-height:1.55;margin:0 0 10px}.inspector-section .button+.button{margin-top:7px}.original-clips{border:1px dashed #644b60;border-radius:8px;padding:10px}.original-clips select{margin-bottom:8px}.timeline-panel{height:224px;flex-shrink:0;background:#1c1922;border-top:1px solid var(--line);display:flex;flex-direction:column}.timeline-topbar{height:52px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 13px;gap:10px}.timeline-title{display:flex;gap:8px;align-items:center;min-width:0}.timeline-title strong{font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.timeline-title .eyebrow{margin-right:7px}.key-count{font-size:10px;color:var(--muted);background:#39303c;border-radius:10px;padding:2px 6px;white-space:nowrap}.transport{display:flex;align-items:center;gap:4px}.transport button{background:transparent;color:#c8bccc;border:0;border-radius:6px;width:27px;height:27px;font-size:11px}.transport button:hover{background:#3b3040}.transport .play-button{background:#ad7295;color:#2d1c2a;width:32px;height:32px;font-size:15px}.time-actions{display:flex;align-items:center;gap:10px}.time-display{font-size:12px;font-variant-numeric:tabular-nums;color:#e6c1d5;white-space:nowrap}.small-toggle{border:1px solid #594456;background:#4b3446;color:#e0b3cf;border-radius:6px;padding:6px 9px;font-size:10px}.small-toggle:not(.active){background:#25202a;color:#867a87}.timeline-body{flex:1;min-height:0;display:flex;overflow:hidden}.track-names{width:180px;flex-shrink:0;overflow-y:hidden;border-right:1px solid #403647;background:#211d26}.ruler-pad{height:28px;border-bottom:1px solid #3b323d;color:#8f8392;padding:8px 9px;font-size:9px}.track-name{height:27px;border-bottom:1px solid #342e38;color:#aa9dac;padding:7px 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;cursor:pointer}.track-name:hover{background:#302735}.track-name.selected{color:#ffe1ef;background:#4b3548}.timeline-canvas{position:relative;min-width:0;flex:1;overflow:hidden;cursor:crosshair}.timeline-ruler{height:28px;position:relative;border-bottom:1px solid #4a3b48;background:repeating-linear-gradient(90deg,#26212b,#26212b 1px,#211d26 1px,#211d26 8.33%)}.ruler-label{position:absolute;top:7px;transform:translateX(3px);font-size:9px;color:#ad9bad;pointer-events:none}.timeline-rows{height:calc(100% - 28px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#665167 transparent}.timeline-row{height:27px;position:relative;border-bottom:1px solid #342e38;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#322934 calc(25% - 1px),#322934 25%)}.timeline-row:nth-child(even){background-color:#211d25}.timeline-row.selected{background-color:#33283a}.key-marker{position:absolute;top:8px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:#d9a0bf;border:1px solid #ffd5e9;cursor:pointer;z-index:3}.key-marker:hover{background:#ffe8f4;scale:1.2}.playhead{position:absolute;top:0;bottom:0;left:0;z-index:4;pointer-events:none;border-left:1px solid #f9c2df;filter:drop-shadow(0 0 2px #dd8db4)}.playhead span{display:block;width:10px;height:10px;transform:translateX(-5px);background:#f4bbd5;clip-path:polygon(0 0,100% 0,50% 100%)}.timeline-bottom{height:25px;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:0 13px;color:#8e8290;font-size:10px;border-top:1px solid var(--line)}.app-footer{height:23px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:0 14px;color:#766e79;font-size:9px;background:#131018}.hidden{display:none!important}.loading-overlay,.drop-zone{position:absolute;inset:0;z-index:7;background:#15111dcf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:var(--text)}.loading-overlay small,.drop-zone span{color:var(--muted)}.drop-zone{background:#2e1f35d9;border:3px dashed #d3a2c0;inset:15px;border-radius:16px}.spinner{height:32px;width:32px;border-radius:100%;border:3px solid #53374a;border-top-color:#edb7d2;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.toast{position:fixed;z-index:15;right:20px;bottom:25px;background:#33293b;border:1px solid #8d6082;border-radius:10px;padding:14px 17px;max-width:min(430px,90vw);color:#ffecf4;box-shadow:0 15px 35px #0008;font-size:12px;line-height:1.5;white-space:pre-wrap}.toast.error{border-color:#b86b7a}.help-dialog{max-width:510px;width:calc(100vw - 40px);background:#24202b;color:#f0e8f0;border:1px solid #74516b;border-radius:13px;padding:23px;box-shadow:0 25px 90px #0009}.help-dialog::backdrop{background:#08050bca}.dialog-header{display:flex;justify-content:space-between;align-items:start;gap:15px}.dialog-header h2{font-size:20px;margin:8px 0 15px}.help-dialog ol{padding-left:23px;line-height:1.6;font-size:12px}.help-dialog li{margin:11px 0}.dialog-note{background:#463348;font-size:11px;padding:12px;border-left:3px solid #d899b8;margin:15px 0;line-height:1.55}.help-dialog .button{margin-top:10px}
+@media (max-width:1100px){.workspace{grid-template-columns:197px minmax(0,1fr) 230px}.topbar{padding:0 12px}.version{display:none}.backend-pill{display:none}.viewport-mode{display:none}.tool span{display:none}.timeline-title .eyebrow{display:none}.track-names{width:130px}.timeline-bottom span:last-child{display:none}}
+@media (max-height:700px){.topbar{height:54px}.timeline-panel{height:190px}.panel-heading{height:56px}.timeline-topbar{height:45px}.left-footer{padding:10px}.inspector-section{margin-bottom:13px}.inspector-scroll{padding-bottom:12px}}
+@media (max-width:790px){body{overflow:auto}.app{min-width:0;min-height:760px;height:auto}.topbar{height:auto;min-height:58px;padding:9px;flex-wrap:wrap}.desktop-text,.brand-subtitle,.version{display:none}.brand-title{font-size:11px}.brand-icon{height:32px;width:32px;font-size:24px}.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:370px auto auto}.viewport-panel{grid-row:1}.sidebar.left{grid-row:2;height:160px;border-top:1px solid var(--line)}.sidebar.right{grid-row:3;border-top:1px solid var(--line)}.bone-tree{max-height:105px}.left-footer{display:none}.inspector-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px}.selected-bone{grid-column:1/-1}.timeline-panel{height:230px}.timeline-topbar{flex-wrap:wrap;height:auto;padding:8px}.timeline-title{width:100%}.viewport-footer{font-size:9px}.timeline-bottom span{display:none}.app-footer{display:none}}
+
+/* Silent Garden Motion Studio — interface mobile (Alpha 0.6) */
+.mobile-only{display:none!important}
+.backend-dialog{width:min(520px,calc(100vw - 28px));max-height:85dvh;overflow:auto}
+.backend-dialog label{display:block;margin:16px 0 7px;color:#d9bbcd;font-size:12px}
+.backend-dialog .field{display:block;width:100%;box-sizing:border-box;height:44px;padding:10px 12px;background:#1c1822;color:#fff;border:1px solid #65526b;border-radius:9px;font-size:14px}
+.backend-dialog .hint{font-size:12px;margin:15px 0}
+@media(max-width:790px){
+  html{height:auto;overflow-x:hidden}
+  body{height:auto;min-height:100dvh;margin:0;overscroll-behavior-y:contain}
+  .mobile-only{display:flex!important}
+  .app{height:auto;min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));overflow:visible;min-width:0}
+  .topbar{position:sticky;top:0;z-index:12;min-height:58px;padding:8px 10px;gap:7px;box-sizing:border-box;box-shadow:0 6px 20px #130e1d55;background:#1c1723f5;backdrop-filter:blur(15px)}
+  .brand{min-width:0;gap:7px}.brand-title{font-size:12px;letter-spacing:.03em}.brand-icon{font-size:22px;width:31px;height:31px}.header-actions{gap:5px;flex-wrap:nowrap}
+  .header-actions .button{padding:9px 11px;min-height:39px;font-size:12px;white-space:nowrap}.header-actions #importBtn{font-size:11px}
+  .workspace{display:flex;flex-direction:column;flex:initial;min-height:0;width:100%;overflow:visible}
+  .viewport-panel{display:flex;flex-direction:column;height:clamp(390px,60dvh,650px);flex:none;min-height:0;order:0}
+  .viewport-toolbar{height:43px;min-height:43px;gap:4px;padding:4px 8px;box-sizing:border-box;overflow-x:auto;scrollbar-width:none}
+  .viewport-toolbar::-webkit-scrollbar{display:none}
+  .tool{min-height:33px;padding:6px 11px;font-size:14px}.tool span{display:none}
+  .viewport{min-height:0;flex:1;touch-action:pan-x pan-y}
+  .viewport canvas{touch-action:none;user-select:none;-webkit-user-select:none}
+  .viewport-corner.top-left{font-size:10px;top:8px;left:8px;max-width:calc(100% - 60px);white-space:nowrap;overflow:hidden}
+  .viewport-corner.bottom-left{display:none}
+  .viewport-footer{height:25px;min-height:25px;padding:0 8px;font-size:10px}
+  .viewport-footer #statsText{display:none}
+  .sidebar.left,.sidebar.right{position:fixed;inset:auto 0 calc(74px + env(safe-area-inset-bottom,0px));height:min(63dvh,520px);width:100%;max-width:100%;z-index:30;display:none;box-sizing:border-box;overflow:hidden;background:#211a29;border:1px solid #755071;border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -14px 65px #000a;grid-row:auto;min-height:0}
+  .app.mobile-open-left .sidebar.left{display:flex!important;flex-direction:column}
+  .app.mobile-open-right .sidebar.right{display:flex!important;flex-direction:column}
+  .sidebar .panel-heading{height:58px;flex:none;padding:8px 16px}
+  .sidebar .searchbar{margin:8px 13px;height:42px;flex:none}
+  .sidebar .bone-tree{overflow-y:auto;max-height:none;flex:1;min-height:70px;padding-bottom:14px}
+  .sidebar .bone-row{min-height:43px;padding-top:11px;padding-bottom:11px;font-size:14px}
+  .sidebar .left-footer{display:flex;padding:12px 16px 16px;flex:none}
+  .sidebar .inspector-scroll{display:block;overflow-y:auto;padding:12px 16px 20px;max-height:none}
+  .sidebar .selected-bone{margin-bottom:18px;padding:12px}.sidebar .inspector-section{margin-bottom:22px}
+  .sidebar .vector-fields input{min-height:43px;font-size:16px}
+  .sidebar .form-row input,.sidebar .form-row select,.sidebar .inspector-section select{height:44px;font-size:14px}
+  .sidebar .button{min-height:43px;font-size:13px}
+  .mobile-backdrop{position:fixed;inset:0;z-index:20;background:#08050cc4;display:block!important;backdrop-filter:blur(3px)}
+  .mobile-backdrop.hidden{display:none!important}
+  .mobile-pose-card{position:absolute;left:9px;right:9px;bottom:8px;z-index:4;display:flex;flex-direction:column;gap:7px;padding:9px 11px;border-radius:13px;border:1px solid #b781a08a;background:#251a31e8;box-shadow:0 8px 30px #0008;backdrop-filter:blur(14px)}
+  .mobile-pose-heading{display:flex;align-items:center;gap:9px;min-width:0}
+  .m-label{font-size:9px;color:#bba1b1;letter-spacing:.04em;white-space:nowrap}
+  .mobile-pose-heading strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#ffdfef}
+  .mobile-pose-heading button{border:1px solid #70566e;color:#eec0db;background:#453149;border-radius:7px;font-size:16px;width:30px;height:29px;flex:none;touch-action:manipulation}
+  .mobile-pose-row{display:flex;align-items:center;gap:5px;min-height:30px}
+  .mobile-axis{display:flex;gap:2px;background:#2b2133;padding:2px;border-radius:8px}
+  .mobile-axis button{background:transparent;color:#b6a2b9;border:none;padding:8px 9px;min-width:27px;min-height:31px;border-radius:6px;font-weight:bold;font-size:11px}
+  .mobile-axis button.selected{background:#ad7599;color:#241625}
+  .mobile-pose-row>button{min-width:34px;min-height:36px;border:1px solid #654961;color:#f8d9ec;background:#463149;border-radius:8px;font-size:10px}
+  #mobileAngle{flex:1;min-width:24px;width:100%;accent-color:#e7a2c7;height:30px;touch-action:none}
+  .mobile-angle-label{min-width:35px;text-align:right;font-size:11px;font-variant-numeric:tabular-nums;color:#f7c0db}
+  .mobile-pose-actions{display:flex;align-items:center;gap:7px}
+  .mobile-pose-actions button{min-height:32px;border:1px solid #76566f;background:#503549;color:#ffe2ef;padding:6px 10px;border-radius:7px;font-size:11px;white-space:nowrap}
+  .mobile-pose-actions .mobile-key{background:#d1a0c0;color:#291728;font-weight:700;border-color:#e8bbd7}
+  .mobile-pose-actions span{font-size:9px;color:#c5abbc;line-height:1.15;min-width:0}
+  .timeline-panel{height:235px;min-height:235px;flex:none;order:2;margin-bottom:6px}
+  .timeline-topbar{padding:5px 9px;gap:5px;min-height:53px;height:auto;display:flex;align-items:center;flex-wrap:nowrap}
+  .timeline-title{display:none}
+  .mobile-clip-picker{display:flex;gap:5px;min-width:0;max-width:38%;flex:1}
+  .mobile-clip-picker select{height:35px;min-width:0;max-width:100%;font-size:11px;padding:0 5px}
+  .mobile-clip-picker button{flex:none;width:31px;height:35px;color:#ffdaea;border:1px solid #6d5168;background:#3d2c40;border-radius:8px;font-size:17px}
+  .transport{gap:2px;flex:none}
+  .transport button{width:28px;min-height:34px;height:34px;font-size:10px}
+  .transport #firstFrameBtn,.transport #lastFrameBtn{display:none}
+  .transport .play-button{height:36px;width:36px;font-size:15px}
+  .time-actions{gap:3px;min-width:0;flex:none}
+  .time-display{display:none}
+  .time-actions #loopBtn{display:none}
+  .time-actions #addKeyBtn{padding:0 9px;min-height:34px;font-size:10px}
+  .mobile-scrubber{display:flex;align-items:center;gap:8px;padding:5px 9px;min-height:34px;background:#241d2a}
+  .mobile-scrubber span{font-size:10px;color:#dfb3cb;font-variant-numeric:tabular-nums}
+  .mobile-scrubber input{flex:1;min-width:30px;accent-color:#e5a3c7;touch-action:none}
+  .timeline-body{height:115px;max-height:115px;flex:1;overflow:hidden}
+  .track-names{width:92px;font-size:10px}
+  .ruler-pad{height:30px;font-size:8px}.track-name{height:37px;box-sizing:border-box;padding:11px 7px;font-size:10px}
+  .timeline-ruler{height:30px}.timeline-rows{height:calc(100% - 30px)}.timeline-row{height:37px;box-sizing:border-box}
+  .key-marker{height:14px;width:14px;top:11px}.timeline-bottom{display:none}
+  .mobile-dock{position:fixed;z-index:40;bottom:0;left:0;right:0;height:calc(70px + env(safe-area-inset-bottom,0px));padding:6px 7px calc(5px + env(safe-area-inset-bottom,0px));box-sizing:border-box;display:flex;justify-content:space-evenly;gap:5px;background:#19131ff8;border-top:1px solid #564053;box-shadow:0 -4px 20px #120914a0;backdrop-filter:blur(15px)}
+  .mobile-dock button{display:flex;flex-direction:column;justify-content:center;align-items:center;flex:1;min-width:0;min-height:50px;border:1px solid transparent;border-radius:11px;background:transparent;color:#bdaabd;gap:3px;font-size:10px;font-weight:650}
+  .mobile-dock button span{font-size:19px;line-height:21px}
+  .mobile-dock button.active{color:#ffcee7;background:#50334c;border-color:#785772}
+  #toast{bottom:calc(86px + env(safe-area-inset-bottom,0px));left:10px;right:10px;max-width:none;font-size:12px}
+  .help-dialog{padding:18px;max-height:80dvh;overflow:auto}
+  .app-footer{display:none}
+}
+@media(max-width:380px){
+  .topbar .header-actions .button{padding:8px}.brand-title{font-size:10px}.header-actions{gap:2px}
+  .mobile-pose-row{gap:3px}.mobile-axis button{padding:7px 6px;min-width:23px}.mobile-pose-actions span{display:none}
+  .timeline-topbar{padding:5px 6px;gap:3px}.mobile-clip-picker{max-width:35%}.time-actions #addKeyBtn{padding:0 6px}.transport button{width:25px}
+}
+@media(orientation:landscape) and (max-height:480px) and (max-width:950px){
+  .viewport-panel{height:70dvh;min-height:280px}
+  .mobile-pose-card{max-width:350px;left:auto;right:8px;bottom:6px}
+  .mobile-dock{height:58px}.app{padding-bottom:64px}
+}
+
+
+/* =============== SILENT GARDEN / WORKBENCH 0.5 =============== */
+:root{--bg:#121218;--panel:#1e1e25;--panel2:#28262e;--deep:#15151c;--line:#38353d;--muted:#aba3ae;--rose:#dea6c6;--pink:#986c8c;--text:#f0eaf1}
+.topbar{height:54px;padding:0 14px;background:#1a191f}
+.brand-icon{width:32px;height:32px;font-size:23px;border-radius:8px;box-shadow:none}
+.brand-subtitle{font-size:9px}
+.workspace-tabs{flex-shrink:0;min-height:38px;background:#242229;border-bottom:1px solid #45404a;display:flex;align-items:stretch;padding:0 12px;gap:13px;overflow-x:auto;scrollbar-width:none}
+.workspace-tabs::-webkit-scrollbar{display:none}
+.workspace-switch{display:flex;align-items:stretch;gap:5px}
+.workspace-tab{border:0;border-bottom:2px solid transparent;color:#aba5ae;background:transparent;padding:0 13px;white-space:nowrap;font-size:11px;font-weight:650;letter-spacing:.02em}
+.workspace-tab:hover{background:#38323c;color:#f7e9f3}
+.workspace-tab.active{color:#ffdaf0;border-bottom-color:#d4a0bd;background:#36303a}
+.work-new{font-size:8px;border-radius:3px;background:#624459;color:#ffd6e6;padding:2px 3px;margin-left:3px}
+.file-menu{display:flex;gap:2px;align-items:stretch;border-right:1px solid #46404a;padding-right:11px}
+.menu-flower{align-self:center;color:#e4abc8;font-size:18px;margin-right:4px}
+.menu-link{color:#bcb5bf;background:none;border:0;padding:0 6px;font-size:11px}
+.menu-link:hover{color:#fff;background:#36313a}
+.workspace-hint{margin-left:auto;align-self:center;color:#7a737f;font-size:9px;letter-spacing:.1em;white-space:nowrap}
+.workspace{grid-template-columns:230px minmax(0,1fr) 292px}
+.timeline-panel{height:217px}
+.sidebar{background:#202027}
+.viewport-panel{background:#1b1a20}
+.viewport{background:radial-gradient(ellipse at 50% 40%,#35303c,#1a1920 70%)}
+.outliner-modes{display:flex;gap:5px;padding:1px 11px 10px}
+.outliner-mode{flex:1;padding:7px 8px;border:1px solid #3c3541;border-radius:5px;color:#9c949f;background:#27232e;font-size:11px}
+.outliner-mode.active{background:#604558;border-color:#936f87;color:#ffe0ef}
+.inspector-tabs{display:flex;flex-shrink:0;gap:3px;padding:0 12px 10px;border-bottom:1px solid #35303b}
+.inspector-tabs button{flex:1;background:#292631;border:1px solid #403742;border-radius:6px;color:#b7acbd;min-height:32px;font-size:10px}
+.inspector-tabs button:hover{background:#3e3443}
+.inspector-tabs button.active{background:#664b61;color:#ffe0ef;border-color:#99748d}
+.inspector-page.hidden{display:none!important}
+.mat-selected{background:#292631;border:1px solid #4e404e;padding:12px;border-radius:8px;margin:12px 0 18px}
+.mat-head{display:flex;gap:10px;align-items:center}
+.mat-head>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mat-head small{font-size:9px;color:#b5a5b6;letter-spacing:.04em}
+.mat-head strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mat-icon{font-size:23px;color:#efb8d6}
+.mat-uv{display:block;margin-top:7px;font-size:10px;color:#b8aeb9;line-height:1.5}
+.material-slots{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.material-slot{display:flex;align-items:center;gap:8px;border:1px solid #433942;color:#d2c2d2;background:#292630;border-radius:7px;padding:8px;font-size:11px;text-align:left}
+.material-slot.active{background:#553d52;border-color:#9b748c;color:#ffe0ef}
+.slot-dot{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid #a898a7;flex-shrink:0}
+.slot-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mat-empty{padding:12px 6px;color:#b2a7b2;font-size:11px}
+.material-preview{display:flex;gap:10px;align-items:center;border:1px solid #483d49;background:#29252d;padding:8px;border-radius:7px;margin-bottom:14px}
+.mat-swatch{width:46px;height:46px;border-radius:7px;border:1px solid #a99aa7;background-color:#c7a9c4;background-size:cover;background-position:center;flex-shrink:0}
+.material-preview>div:last-child{display:flex;flex-direction:column;gap:4px;min-width:0}
+.material-preview strong{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.material-preview small{color:#a89ca8;font-size:10px}
+.mat-field{display:flex;flex-direction:column;gap:7px;color:#c3b7c4;font-size:11px;margin:13px 0;position:relative}
+.mat-field input:not([type="range"]):not([type="color"]),.mat-field select{height:34px;background:#2b2730;border:1px solid #544555;color:#eee5ee;border-radius:6px;padding:5px 8px;width:100%}
+.mat-field input[type="range"]{width:100%;height:6px;accent-color:#d7a0c0;touch-action:pan-x;margin:6px 0 8px}
+.mat-val{position:absolute;right:2px;top:0;color:#e8c3da;font-variant-numeric:tabular-nums}
+.mat-field.mat-inline{flex-direction:row;align-items:center;justify-content:space-between}
+.mat-field input[type="color"]{width:52px;height:31px;border:1px solid #594c58;background:#302b36;border-radius:5px;padding:2px}
+.mat-checkbox{display:flex;align-items:center;gap:8px;color:#c2b4c2;font-size:11px;margin:10px 0;line-height:1.35}
+.mat-checkbox input{accent-color:#d5a0c1;width:16px;height:16px}
+.texture-preview{height:135px;border:1px dashed #786078;border-radius:8px;background-color:#3a3039;background-image:linear-gradient(45deg,#453945 25%,transparent 25%),linear-gradient(-45deg,#453945 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#453945 75%),linear-gradient(-45deg,transparent 75%,#453945 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;display:grid;place-items:center;overflow:hidden}
+.texture-preview span{color:#bda9b9;font-size:30px}
+.texture-preview img{width:100%;height:100%;object-fit:contain}
+.texture-preview img[hidden]{display:none}
+.texture-name{color:#b4a5b4;font-size:10px;overflow-wrap:anywhere;line-height:1.5;margin:8px 0 12px}
+.texture-actions{display:flex;gap:6px}.texture-actions .button{flex:1;padding:0 8px}
+.mat-two-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.material-texture-section .section-heading{margin-bottom:10px}
+.uv-warning{color:#e7b8a6!important}
+.viewport-shading .mobile-pose-card{display:none!important}
+.viewport-shading #viewportModeLabel{color:#e3bbd3}
+.mesh-row .bone-ic{color:#8bc0d5}
+.mesh-row.selected{background:#4a5364;color:#e3f4ff}
+@media(max-width:1100px){.workspace{grid-template-columns:190px minmax(0,1fr) 250px}.workspace-hint{display:none}}
+@media(max-width:790px){
+  .topbar{height:auto;min-height:56px;padding:7px 9px}
+  .workspace-tabs{padding:0 5px;gap:4px;min-height:40px;position:relative;z-index:9}
+  .workspace-tab{padding:0 11px;font-size:11px}
+  .file-menu{padding-right:4px;gap:0}.menu-link{padding:0 4px;font-size:10px}.menu-flower{display:none}
+  .workspace{grid-template-columns:minmax(0,1fr)}
+  .outliner-modes{padding:6px 12px}
+  .inspector-tabs{padding:6px 10px}
+  .inspector-scroll{display:block!important;overflow:auto}
+  #materialInspector{padding:0 7px 18px}
+  .sidebar.right{z-index:55}
+  .mobile-dock button{font-size:9px;padding:0 2px}
+  .viewport-shading .viewport-corner.bottom-left{display:none}
+}
+/* Alpha 0.6 · Materiais criáveis e importação acessível no Android */
+.mat-mesh-chooser{margin:12px 0 0}
+.mat-quick-actions{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:7px;margin:9px 0 12px}
+.mat-quick-actions .button{min-width:0;white-space:normal;height:auto;min-height:40px;padding:8px;text-align:center}
+.texture-file-label{border:1px dashed #866b82;border-radius:9px;padding:11px;background:#352c36;line-height:1.5}
+.texture-native-file{width:100%;max-width:100%;color:#ede1eb;font-size:11px;overflow:hidden;line-height:1.5}
+.texture-native-file::file-selector-button{background:#ac7898;border:0;border-radius:6px;color:#1f1520;padding:10px 12px;margin-right:9px;font-weight:750;cursor:pointer;min-height:37px}
+.texture-actions .button{white-space:normal;height:auto;min-height:40px}
+@media(max-width:790px){
+ .mat-quick-actions .button,.texture-actions .button{min-height:45px;font-size:12px}
+ .material-slot{min-height:40px}.mat-selected{margin-top:8px}
+ #materialInspector{padding-bottom:44px}
+ .texture-native-file{font-size:12px}
+}
+
+/* Alpha 0.7 · Desktop-first professional interface */
+.desktop-commandbar{display:none}
+.desktop-command-group{display:flex;align-items:center;gap:8px}
+.desktop-command{height:34px;padding:0 12px;border-radius:8px;border:1px solid #4a434d;background:#27252d;color:#e8e0ea;font-size:12px;font-weight:650;letter-spacing:.01em}
+.desktop-command:hover{background:#36333d;border-color:#6c6370}
+.desktop-command.primary{background:linear-gradient(180deg,#d49abb,#b8799d);color:#21151f;border-color:#d2a2be}
+.desktop-command.primary:hover{background:linear-gradient(180deg,#deabc8,#c987aa)}
+.desktop-command.accent{background:#4d3647;border-color:#7c5970;color:#ffe1ef}
+.desktop-chipbar{display:flex;align-items:center;gap:8px;min-width:0;flex:1;justify-content:flex-end}
+.desktop-chip{display:flex;align-items:center;gap:7px;min-width:0;height:34px;padding:0 11px;border-radius:8px;border:1px solid #413b46;background:#211f27;color:#cfc7d2}
+.desktop-chip label{font-size:10px;letter-spacing:.08em;color:#9f98a5;text-transform:uppercase}
+.desktop-chip strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.footer-cluster{display:flex;align-items:center;gap:14px;min-width:0}
+.footer-tag{display:flex;align-items:center;gap:7px;min-width:0;color:#b9b2bc}
+.footer-tag label{font-size:10px;color:#877f89;text-transform:uppercase;letter-spacing:.08em}
+.footer-tag strong{font-size:11px;color:#ece6ef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.footer-sep{width:1px;height:13px;background:#4a4450}
+.pc-app-title{font-size:11px;color:#ffdeed;font-weight:700;letter-spacing:.08em}
+@media(min-width:791px){
+  body{background:#0d0f14}
+  .app{min-width:1180px;background:linear-gradient(180deg,#14161d,#101117)}
+  .topbar{height:58px;padding:0 16px;border-bottom-color:#312d37;background:linear-gradient(180deg,#171920,#14161c)}
+  .brand-title{font-size:13px;letter-spacing:.11em}
+  .header-actions .button{height:32px;border-radius:8px}
+  .workspace-tabs{min-height:36px;padding:0 10px;border-bottom-color:#35323a;background:#171920;box-shadow:inset 0 -1px 0 #232129}
+  .workspace-tab{font-size:11px;padding:0 14px}
+  .menu-link{font-size:11px}
+  .workspace-hint{font-size:10px;color:#857d89}
+  .desktop-commandbar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #2f2c34;background:#13161c;box-shadow:inset 0 -1px 0 #1e2128}
+  .workspace{grid-template-columns:280px minmax(0,1fr) 350px;gap:0;background:#111319}
+  .sidebar.left,.sidebar.right,.viewport-panel,.timeline-panel{box-shadow:0 0 0 1px rgba(255,255,255,.025) inset}
+  .sidebar{background:linear-gradient(180deg,#1a1d24,#181b21)}
+  .viewport-panel{background:linear-gradient(180deg,#14171d,#101218)}
+  .viewport-toolbar{height:48px;padding:0 12px;border-bottom-color:#2f3138;background:#14171d}
+  .tool{min-height:34px;padding:7px 11px;border-radius:8px}
+  .tool.active{background:#4d3848;border-color:#7b6071}
+  .viewport{background:radial-gradient(ellipse at 50% 38%,#2b313d,#13161d 72%)}
+  .viewport-footer{height:31px;background:#11141a;border-top-color:#292d35;color:#a39cab}
+  .panel-heading{padding:10px 12px;border-bottom:1px solid #2e3138;background:#161920;position:sticky;top:0;z-index:2}
+  .panel-heading h2{font-size:15px;letter-spacing:.02em}
+  .searchbar{padding:10px 12px}
+  .bone-tree{padding:0 8px 10px}
+  .bone-row{border-radius:8px}
+  .bone-row.selected{background:#433345;border-color:#7a5c71}
+  .outliner-modes{padding:8px 12px 10px}
+  .outliner-mode{min-height:33px;border-radius:8px}
+  .inspector-tabs{padding:10px 12px;border-bottom-color:#2e3138;gap:6px;background:#171a21;position:sticky;top:54px;z-index:2}
+  .inspector-tabs button{min-height:35px;border-radius:8px;font-size:11px}
+  .inspector-scroll{padding:10px 12px 30px;background:linear-gradient(180deg,#1c1f26,#171a21)}
+  .selected-bone,.mat-selected,.material-preview,.texture-preview{border-radius:10px}
+  .timeline-panel{height:240px;border-top:1px solid #30333b;background:linear-gradient(180deg,#191c23,#15181f)}
+  .timeline-topbar{padding:0 12px;height:50px;background:#171a20;border-bottom-color:#2f3138}
+  .timeline-bottom{height:30px;background:#11141a;border-top-color:#292d35;color:#9f99a8}
+  .app-footer{display:flex;height:28px;padding:0 12px;align-items:center;justify-content:space-between;background:#0d1015;border-top:1px solid #2b2f37;color:#b5afba;font-size:11px;gap:12px}
+}
+@media(max-width:790px){
+  .desktop-commandbar{display:none!important}
+}
+
+</style>
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">✿</div>
+        <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
+        <span class="version">ALPHA 0.7 · PC</span>
+      </div>
+      <div class="header-actions">
+        <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
+        <button id="helpBtn" class="button ghost" title="Como usar">? <span class="desktop-text">Ajuda</span></button>
+        <button id="mobileOpenProjectBtn" class="button ghost mobile-only" title="Abrir projeto">📂</button>
+        <button id="saveBtn" class="button ghost" title="Salvar projeto JSON">◈ <span class="desktop-text">Salvar projeto</span></button>
+        <button id="importBtn" class="button primary">＋ Importar FBX</button>
+      </div>
+    </header>
+
+    <nav class="workspace-tabs" aria-label="Áreas de trabalho">
+      <div class="file-menu"><span class="menu-flower">✿</span><button id="quickImportBtn" class="menu-link" type="button">Arquivo</button><button id="quickSaveBtn" class="menu-link" type="button">Salvar</button></div>
+      <div class="workspace-switch">
+        <button class="workspace-tab" data-workspace="layout" type="button">Layout</button>
+        <button class="workspace-tab active" data-workspace="animation" type="button">Animation</button>
+        <button class="workspace-tab" data-workspace="shading" type="button">Shading <span class="work-new">NOVO</span></button>
+      </div><span class="workspace-hint">BLOOD PETALS · ANIMATION PIPELINE</span>
+    </nav>
+    <div class="desktop-commandbar" aria-label="Desktop quick actions">
+      <div class="desktop-command-group">
+        <button id="pcImportBtn" class="desktop-command primary" type="button">＋ Import FBX</button>
+        <button id="pcOpenProjectBtn" class="desktop-command" type="button">↥ Open Project</button>
+        <button id="pcSaveBtn" class="desktop-command" type="button">◈ Save Project</button>
+      </div>
+      <div class="desktop-command-group">
+        <button id="pcAnimationBtn" class="desktop-command" type="button">⏱ Animation</button>
+        <button id="pcShadingBtn" class="desktop-command" type="button">▧ Shading</button>
+        <button id="pcFrameBtn" class="desktop-command" type="button">◎ Frame</button>
+        <button id="pcKeyBtn" class="desktop-command accent" type="button">◆ Keyframe</button>
+        <button id="pcCreateMaterialBtn" class="desktop-command" type="button">＋ Material</button>
+      </div>
+      <div class="desktop-chipbar">
+        <div class="desktop-chip"><label>Model</label><strong id="pcModelChip">Demo</strong></div>
+        <div class="desktop-chip"><label>Selected</label><strong id="pcSelectedChip">None</strong></div>
+        <div class="desktop-chip"><label>Clip</label><strong id="pcClipChip">demo_wave</strong></div>
+      </div>
+    </div>
+    <main class="workspace">
+      <aside class="sidebar left">
+        <div class="panel-heading"><div><span class="eyebrow">SCENE COLLECTION</span><h2>Esqueleto <span id="boneCount">0</span></h2></div><button id="expandBonesBtn" class="icon-btn" title="Exibir todos">⌄</button></div>
+        <div class="outliner-modes"><button class="outliner-mode active" data-outliner="bones" type="button">♧ Ossos</button><button class="outliner-mode" data-outliner="meshes" type="button">▧ Malhas</button></div>
+        <div class="searchbar"><span>⌕</span><input id="boneSearch" placeholder="Buscar osso..." autocomplete="off" aria-label="Buscar osso"></div>
+        <div id="boneTree" class="bone-tree"></div>
+        <div class="left-footer">
+          <div class="section-heading">PROJETO ATUAL</div>
+          <div class="file-info"><span class="file-icon">▣</span><div class="file-text"><strong id="modelName">Modelo de demonstração</strong><small id="modelInfo">Use um FBX para exportar</small></div></div>
+          <button id="openProjectBtn" class="button subtle full">↥ Abrir projeto .json</button>
+        </div>
+      </aside>
+
+      <section class="viewport-panel">
+        <div class="viewport-toolbar">
+          <div class="tool-group"><button id="rotateBtn" class="tool active" title="Rotacionar (R)">⟳ <span>Rotação</span></button><button id="moveBtn" class="tool" title="Mover (G)">✥ <span>Mover</span></button></div>
+          <div class="separator"></div>
+          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
+          <button id="viewportMaterialBtn" class="tool" title="Editar texturas e materiais">▧ <span>Materiais</span></button>
+          <span class="viewport-mode" id="viewportModeLabel">PERSPECTIVE · POSE MODE</span>
+        </div>
+        <div id="viewport" class="viewport" aria-label="Área de visualização 3D">
+          <div class="viewport-corner top-left"><span class="axis-dot"></span> <span id="viewportLabel">Ayame · Demo Rig</span></div>
+          <div class="viewport-corner bottom-left"><span class="keyboard-badge">ARRASTAR</span> Orbitar <span class="keyboard-badge">SCROLL</span> Zoom <span class="keyboard-badge">CLICK</span> Selecionar</div>
+          <div id="loadingOverlay" class="loading-overlay hidden"><span class="spinner"></span><strong id="loadingTitle">Processando modelo...</strong><small id="loadingDescription">Aguarde</small></div>
+          <div id="dropZone" class="drop-zone hidden"><strong>Solte seu FBX aqui ✿</strong><span>O arquivo é aberto no próprio navegador</span></div>
+          <div class="mobile-pose-card mobile-only" id="mobilePoseCard" aria-label="Ferramentas rápidas de pose">
+            <div class="mobile-pose-heading"><span class="m-label">OSSO ATIVO</span><strong id="mobileBoneName">Selecione um osso</strong><button type="button" id="mobileZoomOutBtn" aria-label="Diminuir tamanho aparente / afastar câmera" title="Afastar câmera">−</button><button type="button" id="mobileZoomInBtn" aria-label="Aumentar tamanho aparente / aproximar câmera" title="Aproximar câmera">＋</button><button type="button" id="mobileCenterBtn" aria-label="Enquadrar personagem" title="Enquadrar personagem">◎</button></div>
+            <div class="mobile-pose-row">
+              <div class="mobile-axis" role="group" aria-label="Eixo de rotação">
+                <button type="button" class="selected" data-mobile-axis="x">X</button>
+                <button type="button" data-mobile-axis="y">Y</button>
+                <button type="button" data-mobile-axis="z">Z</button>
+              </div>
+              <button type="button" id="mobileMinus" aria-label="Diminuir 5 graus">−5°</button>
+              <input type="range" id="mobileAngle" min="-180" max="180" value="0" step="1" aria-label="Rotação do osso em graus">
+              <button type="button" id="mobilePlus" aria-label="Aumentar 5 graus">+5°</button>
+              <span id="mobileAngleLabel" class="mobile-angle-label">0°</span>
+            </div>
+            <div class="mobile-pose-actions"><button id="mobileKeyBtn" type="button" class="mobile-key">◆ Keyframe</button><button id="mobileResetBtn" type="button" title="Restaurar osso">↺ Reset</button><span>Arraste a personagem com 1 dedo · zoom com 2</span></div>
+          </div>
+        </div>
+        <div class="viewport-footer"><div class="status-left"><span class="live-pip"></span><span id="statusText">Pronto para animar. Selecione um osso.</span></div><span id="statsText">—</span></div>
+      </section>
+
+      <aside class="sidebar right">
+        <div class="panel-heading"><div><span class="eyebrow">PROPERTIES EDITOR</span><h2 id="inspectorHeading">Transformações</h2></div><span class="inspector-icon">◇</span></div>
+        <div class="inspector-tabs" role="tablist" aria-label="Propriedades">
+          <button type="button" data-inspector-tab="pose" class="active" role="tab">♧ Pose</button>
+          <button type="button" data-inspector-tab="materials" role="tab">▧ Materiais</button>
+          <button type="button" data-inspector-tab="export" role="tab">↗ Exportar</button>
+        </div>
+        <div class="inspector-scroll">
+          <div class="selected-bone"><span class="selected-icon">♧</span><div><small>OSSO SELECIONADO</small><strong id="selectedName">Nenhum osso</strong></div></div>
+          <div class="inspector-section">
+            <div class="section-heading">ROTAÇÃO <span>GRAUS</span></div>
+            <div class="vector-fields" id="rotationFields">
+              <label><span class="axis x">X</span><input id="rx" type="number" step="1" value="0" disabled></label>
+              <label><span class="axis y">Y</span><input id="ry" type="number" step="1" value="0" disabled></label>
+              <label><span class="axis z">Z</span><input id="rz" type="number" step="1" value="0" disabled></label>
+            </div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">POSIÇÃO <span>UNIDADES</span></div>
+            <div class="vector-fields">
+              <label><span class="axis x">X</span><input id="px" type="number" step="0.01" value="0" disabled></label>
+              <label><span class="axis y">Y</span><input id="py" type="number" step="0.01" value="0" disabled></label>
+              <label><span class="axis z">Z</span><input id="pz" type="number" step="0.01" value="0" disabled></label>
+            </div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">FERRAMENTAS</div>
+            <div class="stack-buttons"><button id="keyframeSideBtn" class="button subtle full">◆ Inserir keyframe <kbd>K</kbd></button><button id="resetBoneBtn" class="button subtle full">↺ Restaurar pose do osso</button></div>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">ANIMAÇÃO</div>
+            <div class="form-row"><label for="clipSelect">Clipe em edição</label><select id="clipSelect"></select></div>
+            <div class="form-row"><label for="durationInput">Duração (segundos)</label><input id="durationInput" class="field" type="number" min="0.1" max="120" step="0.5" value="3"></div>
+            <div class="form-row"><label for="fpsInput">Quadros por segundo</label><select id="fpsInput"><option value="24">24 FPS</option><option selected value="30">30 FPS</option><option value="60">60 FPS</option></select></div>
+            <button id="newClipBtn" class="button subtle full">＋ Criar nova animação</button>
+          </div>
+          <div class="inspector-section original-clips hidden" id="originalClipsPanel">
+            <div class="section-heading">CLIPES DO FBX ORIGINAL</div>
+            <select id="originalClipSelect"></select>
+            <button id="loadOriginalBtn" class="button subtle full">↳ Importar clip para a timeline</button>
+          </div>
+          <div class="inspector-section">
+            <div class="section-heading">EXPORTAR PARA O JOGO</div>
+            <p class="hint">FBX com animação embutida para importar como <b>Legacy</b> na Unity.</p>
+            <button id="exportFbxBtn" class="button export full">↗ Exportar animação .FBX</button>
+            <button id="exportGlbBtn" class="button subtle full">↗ Exportar prévia .GLB</button>
+            <button id="connectBackendBtn" class="button subtle full">⚙ Localizar Blender no PC</button>
+            <p class="hint">Versão portátil: o editor funciona offline. Para exportar FBX, instale o Blender no PC e clique em Localizar Blender.</p>
+          </div>
+          <section id="materialInspector" class="inspector-page hidden" aria-label="Materiais e texturas">
+            <div class="mat-selected">
+              <div class="mat-head"><span class="mat-icon">▧</span><div><small>OBJETO SELECIONADO</small><strong id="selectedMeshName">Escolha uma malha</strong></div></div>
+              <small id="meshUVStatus" class="mat-uv">Selecione uma malha para configurar materiais.</small>
+              <label class="mat-field mat-mesh-chooser" for="materialMeshSelect">Malha ativa
+                <select id="materialMeshSelect" aria-label="Escolher malha para editar"><option value="">Carregando malhas…</option></select>
+              </label>
+            </div>
+            <div class="inspector-section">
+              <div class="section-heading">MATERIAL SLOTS <span id="materialCount">0</span></div>
+              <div id="materialSlots" class="material-slots"><div class="mat-empty">Nenhum material selecionado</div></div>
+              <div class="mat-quick-actions">
+                <button type="button" class="button primary" id="newMaterialBtn">＋ Criar material</button>
+                <button type="button" class="button subtle" id="duplicateMaterialBtn">⧉ Duplicar</button>
+              </div>
+              <p class="hint">Criar atribui um novo material à malha e ao slot selecionado. Se houver um material importado, ele é substituído neste slot; o FBX original não é alterado.</p>
+              <button type="button" class="button subtle full" id="materialFindBtn">▧ Próxima malha do personagem</button>
+            </div>
+            <div id="materialProperties" class="hidden">
+              <div class="inspector-section">
+                <div class="section-heading">SUPERFÍCIE · PRINCIPLED</div>
+                <div class="material-preview"><div id="materialSwatch" class="mat-swatch"></div><div><strong id="materialActiveName">Material</strong><small>Prévia em tempo real</small></div></div>
+                <label class="mat-field">Nome do material<input id="materialName" class="field" type="text" maxlength="90" autocomplete="off"></label>
+                <label class="mat-field mat-inline">Cor base <input id="materialColor" type="color" value="#ffffff"></label>
+                <label class="mat-field">Rugosidade <span id="roughnessValue" class="mat-val">0.50</span><input id="materialRoughness" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+                <label class="mat-field">Metallic <span id="metalnessValue" class="mat-val">0.00</span><input id="materialMetalness" type="range" min="0" max="1" step="0.01" value="0"></label>
+                <label class="mat-field">Opacidade <span id="opacityValue" class="mat-val">1.00</span><input id="materialOpacity" type="range" min="0" max="1" step="0.01" value="1"></label>
+                <label class="mat-checkbox"><input id="materialDoubleSide" type="checkbox"> Renderizar duas faces</label>
+                <label class="mat-checkbox"><input id="materialWireframe" type="checkbox"> Exibir aramado (preview)</label>
+              </div>
+              <div class="inspector-section material-texture-section">
+                <div class="section-heading">TEXTURE PAINT · IMAGENS</div>
+                <p class="hint">Escolha o canal e carregue uma textura PNG, JPG ou WebP do celular. A imagem será aplicada somente à malha selecionada.</p>
+                <label class="mat-field">Canal da textura
+                  <select id="textureChannel">
+                    <option value="map">Base Color (Albedo)</option>
+                    <option value="normalMap">Normal Map</option>
+                    <option value="roughnessMap">Roughness Map (canal G)</option>
+                    <option value="metalnessMap">Metallic Map (canal B)</option>
+                    <option value="emissiveMap">Emissão</option>
+                    <option value="alphaMap">Alpha / Transparência</option>
+                  </select>
+                </label>
+                <div class="texture-preview" id="texturePreview"><span id="texturePlaceholder">▧</span><img id="textureThumbnail" alt="Prévia da textura" hidden></div>
+                <p class="texture-name" id="textureName">Nenhuma textura neste canal</p>
+                <label class="mat-field texture-file-label" for="textureInput">Imagem do dispositivo (PNG, JPG, WebP)
+                  <input type="file" id="textureInput" class="texture-native-file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-label="Importar imagem para a textura">
+                </label>
+                <div class="texture-actions"><button id="pickTextureBtn" class="button primary" type="button">↥ Escolher textura</button><button id="clearTextureBtn" class="button subtle" type="button">✕ Remover</button></div>
+                <div class="mat-two-fields"><label class="mat-field">Repetição U<input id="textureRepeatU" type="number" min="0.01" max="32" step="0.1" value="1"></label><label class="mat-field">Repetição V<input id="textureRepeatV" type="number" min="0.01" max="32" step="0.1" value="1"></label></div>
+                <label class="mat-checkbox"><input id="textureFlipY" type="checkbox" checked> Inverter imagem no eixo vertical (Flip Y)</label>
+                <p class="hint" id="textureUVHint">Texturas de imagem precisam que a malha tenha coordenadas UV.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <section class="timeline-panel">
+      <div class="timeline-topbar">
+        <div class="mobile-clip-picker mobile-only"><select id="mobileClipSelect" aria-label="Animação atual"></select><button id="mobileNewClipBtn" type="button" title="Nova animação">＋</button></div>
+        <div class="timeline-title"><span class="eyebrow">ANIMATION EDITOR</span><strong id="timelineClipName">demo_wave</strong><span id="keyCount" class="key-count">0 keys</span></div>
+        <div class="transport"><button id="firstFrameBtn" title="Início">|◀</button><button id="prevFrameBtn" title="Quadro anterior">◀</button><button id="playBtn" class="play-button" title="Reproduzir (Espaço)">▶</button><button id="nextFrameBtn" title="Próximo quadro">▶</button><button id="lastFrameBtn" title="Fim">▶|</button></div>
+        <div class="time-actions"><span id="timeLabel" class="time-display">00:00.00</span><button id="loopBtn" class="small-toggle active" title="Repetir animação">↻ Loop</button><button id="addKeyBtn" class="button pink">◆ Keyframe</button></div>
+      </div>
+      <div class="mobile-scrubber mobile-only"><span id="mobileTimeLabel">0.00s</span><input id="mobileScrub" aria-label="Percorrer timeline" type="range" min="0" max="3" step="0.01" value="0"><span id="mobileDurationLabel">3.00s</span></div>
+      <div id="timelineBody" class="timeline-body"><div id="timelineTrackNames" class="track-names"></div><div id="timelineCanvas" class="timeline-canvas"><div id="timelineRuler" class="timeline-ruler"></div><div id="timelineRows" class="timeline-rows"></div><div id="playhead" class="playhead"><span></span></div></div></div>
+      <div class="timeline-bottom"><span>✦ Rotacione ossos → avance a timeline → insira keyframes.</span><span>SPACE reproduzir · K keyframe · R rotação · G mover</span></div>
+    </section>
+    <footer class="app-footer">
+      <div class="footer-cluster">
+        <span class="pc-app-title">SILENT GARDEN MOTION STUDIO</span>
+        <span class="footer-sep"></span>
+        <span class="footer-tag"><span class="live-pip"></span><strong id="pcFooterStatus">Ready</strong></span>
+      </div>
+      <div class="footer-cluster">
+        <span class="footer-tag"><label>Workspace</label><strong id="pcFooterWorkspace">Animation</strong></span>
+        <span class="footer-sep"></span>
+        <span class="footer-tag"><label>Selected</label><strong id="pcFooterSelected">None</strong></span>
+        <span class="footer-sep"></span>
+        <span class="footer-tag"><label>Clip</label><strong id="pcFooterClip">demo_wave</strong></span>
+      </div>
+    </footer>
+  </div>
+
+  <nav class="mobile-dock mobile-only" id="mobileDock" aria-label="Navegação do estúdio">
+    <button class="active" data-mobile-panel="editor"><span>✦</span> Animar</button>
+    <button data-mobile-panel="bones"><span>♧</span> Ossos</button>
+    <button data-mobile-panel="pose"><span>◈</span> Pose</button>
+    <button data-mobile-panel="materials"><span>▧</span> Texturas</button>
+    <button data-mobile-panel="export"><span>↗</span> Exportar</button>
+  </nav>
+  <div id="mobileBackdrop" class="mobile-backdrop mobile-only hidden"></div>
+  <input type="file" id="fbxInput" accept=".fbx" hidden>
+  <input type="file" id="projectInput" accept=".json,.sgmotion" hidden>
+  <div id="toast" class="toast hidden" role="status"></div>
+  <dialog id="helpDialog" class="help-dialog">
+    <div class="dialog-header"><div><span class="eyebrow">QUICK START</span><h2>Bem-vindo ao Motion Studio ✿</h2></div><button id="closeHelpBtn" class="icon-btn">✕</button></div>
+    <ol>
+      <li><b>Importar FBX:</b> arraste seu modelo ou clique em “Importar FBX”. Ele fica no seu computador.</li>
+      <li><b>Selecionar um osso:</b> clique nos pontos rosa do modelo ou no painel esquerdo.</li>
+      <li><b>Criar poses:</b> gire o osso, clique em “Keyframe”, avance o tempo e crie outra pose.</li>
+      <li><b>Reproduzir:</b> pressione Espaço ou ▶ para visualizar a interpolação.</li>
+      <li><b>Shading e texturas:</b> abra Shading (Texturas no celular), escolha a malha no seletor, toque em “Criar material” e depois selecione uma imagem do dispositivo. É possível editar cor, opacidade e mapas.</li>
+      <li><b>Exportar:</b> use “Exportar animação .FBX”. O conversor precisa de um servidor com Blender.</li>
+    </ol>
+    <div class="dialog-note">O personagem de demonstração serve para aprender. Para exportar seu próprio personagem para a Unity, importe primeiro o FBX original da Ayame. O projeto JSON inclui as imagens importadas, mas não o arquivo FBX original.</div>
+    <button id="gotItBtn" class="button primary full">Começar a animar ✿</button>
+  </dialog>
+  <dialog id="backendDialog" class="help-dialog backend-dialog">
+    <div class="dialog-header"><div><span class="eyebrow">CONVERSOR FBX</span><h2>Servidor Blender ✿</h2></div><button id="backendCloseBtn" class="icon-btn" type="button">✕</button></div>
+    <p class="hint">Para exportar arquivos FBX pelo celular, conecte um servidor privado que execute o Blender. O endereço e o token são fornecidos pelo administrador da equipe.</p>
+    <label for="backendUrl">Endereço HTTPS do servidor (vazio = mesmo site)</label>
+    <input id="backendUrl" class="field" placeholder="https://seu-servidor.example.com" autocomplete="url" inputmode="url">
+    <label for="backendToken">Chave de acesso da equipe (não salvar no site)</label>
+    <input id="backendToken" class="field" type="password" placeholder="Chave privada" autocomplete="off">
+    <p class="hint">A chave fica apenas nesta sessão do navegador. Não compartilhe essa chave em repositórios públicos.</p>
+    <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
+  </dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
