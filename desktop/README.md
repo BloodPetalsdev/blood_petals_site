@@ -1,14 +1,14 @@
-# 🌸 Silent Garden Motion Studio — Windows portátil (Alpha 0.7.1)
+# 🌸 Silent Garden Motion Studio — Windows portátil (Alpha 0.8.0)
 
-Primeiro aplicativo Windows do editor de animações **Blood Petals**, da equipe Silent Garden.
+Aplicativo Windows com Female Rig IK e assistente de saia para o editor de animações **Blood Petals**, da equipe Silent Garden.
 
 ## O que este pacote entrega
 
-- Projeto Electron completo da interface desktop Alpha 0.7, importação FBX, edição de ossos, keyframes, materiais e texturas.
+- Projeto Electron completo da interface desktop Alpha 0.8, importação FBX, edição de ossos, keyframes, materiais e texturas.
 - Bibliotecas Three.js copiadas para dentro do aplicativo durante a compilação: **depois de compilado, funciona offline**.
 - Janelas nativas de **Salvar como...** para projetos e exportações.
 - Exportação FBX via **Blender instalado localmente**; o usuário pode escolher o `blender.exe`.
-- Build automático no GitHub Actions para gerar um único arquivo `SilentGardenMotionStudio-Portable-0.7.1.exe`.
+- Build automático no GitHub Actions para gerar um único arquivo `SilentGardenMotionStudio-Portable-0.8.0.exe`.
 
 ## Como gerar o EXE no GitHub (sem usar seu PC)
 
@@ -60,3 +60,9 @@ Para testar durante o desenvolvimento: `npm start`.
 - `.github/workflows/motion-studio-portable.yml`: build em Windows no GitHub.
 
 A licença do código-base original do editor pertence ao projeto da Silent Garden; não publique modelos, texturas ou outros arquivos privados da equipe sem permissão.
+
+## Blood Petals Female Rig (Alpha 0.8)
+- IK para braços (incluindo ossos intermediários ArmRoll/ForeArmRoll) e pernas.
+- Assistente de saia: 12 ossos nas cadeias Front_skart, Left_skart, Back_skart e Right_skart.
+- Perfis foram feitos a partir da análise estrutural de SweaterUniformRIGGED.fbx, mas o FBX privado NÃO acompanha o aplicativo.
+- É uma ajuda de animação (não simulação de tecido). Testar na Unity Legacy antes de usar em produção.
