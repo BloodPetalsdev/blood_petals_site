@@ -11,11 +11,10 @@ const ROOT = path.resolve(__dirname, 'renderer');
 const MAX_BYTES = 128 * 1024 * 1024;
 const smokeTest = process.argv.includes('--sg-smoke-test');
 const softwareRendering = smokeTest || process.argv.includes('--sg-software');
-// Electron 45 / Chromium: enable SwiftShader only as a user-requested fallback.
-if(softwareRendering){
-  app.commandLine.appendSwitch('enable-unsafe-swiftshader');
-  app.commandLine.appendSwitch('use-angle','swiftshader');
-}
+// Permit automatic software WebGL fallback on older Windows Intel GPUs.
+// Only force software mode when explicitly requested with --sg-software.
+app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+if(softwareRendering)app.commandLine.appendSwitch('use-angle','swiftshader');
 // Menu music should start when opening the application; Chromium normally blocks autoplay.
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 let activeExport = false;
