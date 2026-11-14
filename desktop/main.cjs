@@ -9,6 +9,15 @@ const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, 'renderer');
 const MAX_BYTES = 128 * 1024 * 1024;
+const smokeTest = process.argv.includes('--sg-smoke-test');
+const softwareRendering = smokeTest || process.argv.includes('--sg-software');
+// Electron 45 / Chromium: enable SwiftShader only as a user-requested fallback.
+if(softwareRendering){
+  app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+  app.commandLine.appendSwitch('use-angle','swiftshader');
+}
+// Menu music should start when opening the application; Chromium normally blocks autoplay.
+app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 let activeExport = false;
 
 protocol.registerSchemesAsPrivileged([{
@@ -128,33 +137,83 @@ function createWindow(){
     show:false,autoHideMenuBar:true,
     webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}
   });
-  win.once('ready-to-show',()=>win.show());
+  win.once('ready-to-show',()=>{if(!smokeTest)win.show();});
+  win.webContents.on('did-fail-load',(_event,code,description,url)=>{
+    console.error('Motion Studio load failure:',code,description,url);
+    if(smokeTest)app.exit(1);
+  });
+  win.webContents.on('console-message',(_event,details)=>{
+    if(smokeTest&&details?.level==='error')console.error('[renderer]',details.message);
+  });
+  if(smokeTest){
+    win.webContents.once('did-finish-load',()=>{
+      setTimeout(async()=>{
+        try{
+          const ready=await win.webContents.executeJavaScript(`({boot:!!window.sgEditorBooted,hasCanvas:!!document.querySelector('#viewport canvas'),menu:!!document.querySelector('#sgMainMenu'),error:document.querySelector('#sgStartupProblemMessage')?.textContent||''})`);
+          console.log('SG_SMOKE_BOOT',JSON.stringify(ready));
+          if(!ready.boot||!ready.hasCanvas||!ready.menu)throw Error('Editor JS did not initialize: '+ready.error);
+          await win.webContents.executeJavaScript(`document.querySelector('#sgMenuNew').click()`);
+          await new Promise(resolve=>setTimeout(resolve,2500));
+          const next=await win.webContents.executeJavaScript(`({menuHidden:document.querySelector('#sgMainMenu').classList.contains('sg-hidden'),canvas:!!document.querySelector('#viewport canvas'),loading:!document.querySelector('#loadingOverlay')?.classList.contains('hidden')})`);
+          console.log('SG_SMOKE_EDITOR',JSON.stringify(next));
+          if(!next.menuHidden||!next.canvas)throw Error('3D Editor did not open');
+          app.exit(0);
+        }catch(error){console.error('SG_SMOKE_FAILED',error);app.exit(1);}
+      },5000);
+    });
+    setTimeout(()=>{console.error('SG_SMOKE_TIMEOUT');app.exit(1);},45000);
+  }
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',event=>event.preventDefault());
   win.webContents.on('will-redirect',event=>event.preventDefault());
   win.loadURL('sgmotion://motion/index.html');
 }
-app.whenReady().then(()=>{
-  protocol.handle('sgmotion',(req)=>{
-    const uri=new URL(req.url);
-    if(uri.host!=='motion')return new Response('Not found',{status:404});
-    const pathname=decodeURIComponent(uri.pathname);
-    const resolved=path.resolve(ROOT, '.'+pathname);
-    const relative=path.relative(ROOT,resolved);
-    if(relative.startsWith('..')||path.isAbsolute(relative))return new Response('Forbidden',{status:403});
-    // Optional offline companion assets are kept beside the portable EXE.
-    // This avoids publishing Blood Petals models/textures/music in a public repo.
-    // Only the following fixed file names are allowed, and they are never executed.
-    const sidecarNames=new Set(['SweaterUniformRIGGED.fbx','FemaleHead.png','WhiteBodyBls.jpg','BloodMenu.mp3']);
-    const assetMatch=pathname.match(/^\/assets\/([^/]+)$/);
-    if(assetMatch && sidecarNames.has(assetMatch[1]) && !fs.existsSync(resolved)){
-      const portableDir=process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
-      const companionPath=path.join(portableDir,'assets',assetMatch[1]);
-      if(fs.existsSync(companionPath)) return net.fetch(pathToFileURL(companionPath).toString());
-      return new Response('Recurso não encontrado. Extraia o EXE junto da pasta assets do pacote completo.',{status:404});
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
+  '.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png',
+  '.jpg':'image/jpeg','.jpeg':'image/jpeg','.ico':'image/x-icon',
+  '.mp3':'audio/mpeg','.fbx':'application/octet-stream','.glb':'model/gltf-binary',
+  '.wasm':'application/wasm','.svg':'image/svg+xml'};
+const SIDECAR=new Set(['SweaterUniformRIGGED.fbx','FemaleHead.png','WhiteBodyBls.jpg','BloodMenu.mp3']);
+const assetPath=()=>process.env.PORTABLE_EXECUTABLE_DIR||path.dirname(process.env.PORTABLE_EXECUTABLE_FILE||process.execPath);
+async function handleMotionRequest(req){
+  let pathname;
+  try{const uri=new URL(req.url);if(uri.host!=='motion')return new Response('Not found',{status:404});pathname=decodeURIComponent(uri.pathname);}
+  catch{return new Response('Invalid URL',{status:400});}
+  const resolved=path.resolve(ROOT,'.'+pathname);
+  const relative=path.relative(ROOT,resolved);
+  if(relative.startsWith('..')||path.isAbsolute(relative))return new Response('Forbidden',{status:403});
+  let file=resolved;
+  const companion=pathname.match(/^\/assets\/([^/]+)$/);
+  if(companion && SIDECAR.has(companion[1]) && !fs.existsSync(resolved)){
+    file=path.join(assetPath(),'assets',companion[1]);
+  }
+  try{
+    const data=await fsp.readFile(file); // Electron fs supports files inside app.asar and normal sidecars.
+    const mime=MIME[path.extname(file).toLowerCase()]||'application/octet-stream';
+    const range=req.headers.get('Range');
+    if(range){
+      const match=/^bytes=(\d*)-(\d*)$/.exec(range.trim());
+      if(match){
+        let from=match[1]?Number(match[1]):0;
+        let to=match[2]?Number(match[2]):data.length-1;
+        if(!match[1]&&match[2]){from=Math.max(0,data.length-to);to=data.length-1;}
+        if(from>=data.length || to<from)return new Response(null,{status:416,headers:{'Content-Range':`bytes */${data.length}`}});
+        to=Math.min(data.length-1,to);
+        return new Response(data.subarray(from,to+1),{status:206,headers:{'Content-Type':mime,'Content-Length':String(to-from+1),'Content-Range':`bytes ${from}-${to}/${data.length}`,'Accept-Ranges':'bytes'}});
+      }
     }
-    return net.fetch(pathToFileURL(resolved).toString());
-  });
+    return new Response(data,{status:200,headers:{'Content-Type':mime,'Content-Length':String(data.length),'Accept-Ranges':'bytes'}});
+  }catch(error){
+    if(error?.code==='ENOENT'){
+      if(companion&&SIDECAR.has(companion[1]))console.warn('Missing companion asset:',file);
+      return new Response('Arquivo não encontrado: '+pathname,{status:404});
+    }
+    console.error('Motion Studio file protocol error',pathname,error);
+    return new Response('Falha ao ler arquivo local',{status:500});
+  }
+}
+app.whenReady().then(()=>{
+  protocol.handle('sgmotion',handleMotionRequest);
   registerIpc();
   createWindow();
   app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});

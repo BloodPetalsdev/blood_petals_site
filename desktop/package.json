@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.6",
-  "description": "Silent Garden Motion Studio Alpha 0.9.6 — Mirror IK, orthographic views, head/hips IK and ground safety",
+  "version": "0.9.7",
+  "description": "Silent Garden Motion Studio Alpha 0.9.7 - startup, menu audio and 3D editor fixes",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,8 @@
     "prepare:assets": "node prepare-assets.cjs",
     "start": "npm run prepare:assets && electron .",
     "dist:win": "npm run prepare:assets && electron-builder --win portable --x64 --publish never",
-    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/app.js"
+    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/app.js && node --check renderer/startup.js",
+    "smoke:win": "npm run prepare:assets && electron . --sg-smoke-test"
   },
   "devDependencies": {
     "electron": "45.3.2",
@@ -29,8 +30,7 @@
       "preload.cjs",
       "renderer/**/*",
       "blender/export_to_fbx.py",
-      "package.json",
-      "assets/icon.ico"
+      "package.json"
     ],
     "asar": true,
     "win": {

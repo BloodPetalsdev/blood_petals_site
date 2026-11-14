@@ -29,6 +29,8 @@ jobs:
         run: npm run check
       - name: Validate editor JavaScript
         run: npm run check
+      - name: Smoke test MainMenu and 3D Editor
+        run: npm run smoke:win
       - name: Compile Windows portable executable
         run: npm run dist:win
         env:
@@ -36,7 +38,7 @@ jobs:
       - name: Upload Windows portable executable
         uses: actions/upload-artifact@v4
         with:
-          name: SilentGardenMotionStudio-Windows-Alpha-0.9.6
+          name: SilentGardenMotionStudio-Windows-Alpha-0.9.7
           path: desktop/dist/SilentGardenMotionStudio-Portable-*.exe
           if-no-files-found: error
           retention-days: 30

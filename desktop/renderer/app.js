@@ -1,5 +1,5 @@
 
-/* Silent Garden Motion Studio — versão alpha 0.8 · Blood Petals Female Rig
+/* Silent Garden Motion Studio — versão alpha 0.9.7 · Blood Petals Female Rig
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -2611,18 +2611,28 @@ function sgWireWorkspace09(){
   sgSetClean();
 }
 
-wireShading();
-wire();
-wireMobile();
-rigWire();
-skirtWire();
-sgWirePoseTools();
-sgEasyBonePickerWire();
-wireDesktopWorkbench();
-sgWireWorkspace09();
-sgWireMenuAudio();
-sgWireFbxExportGuide();
-installModel(createDemoModel(),null,true);
-sgEnsureBaseFemale().catch(err=>{console.warn('Modelo base indisponível:',err);toast('Não foi possível carregar o modelo padrão: '+err.message,true);});
-checkBackend();
-requestAnimationFrame(animate);
+// Keep the menu audio in startup.js, so it still works when WebGL cannot initialize.
+try {
+  wireShading();
+  wire();
+  wireMobile();
+  rigWire();
+  skirtWire();
+  sgWirePoseTools();
+  sgEasyBonePickerWire();
+  wireDesktopWorkbench();
+  sgWireWorkspace09();
+  sgWireFbxExportGuide();
+  installModel(createDemoModel(),null,true);
+  window.sgEditorBooted = true;
+  window.sgStartup?.markReady?.();
+  sgEnsureBaseFemale().catch(err=>{
+    console.warn('Modelo base indisponível:',err);
+    toast('O modelo base não carregou. Você ainda pode usar o editor e importar um FBX. '+err.message,true);
+  });
+  checkBackend();
+  requestAnimationFrame(animate);
+} catch(err){
+  window.sgStartup?.reportError?.(err);
+  throw err;
+}
