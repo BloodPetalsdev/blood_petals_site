@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.7.1",
-  "description": "Editor de animações 3D e materiais do Blood Petals — versão portátil para Windows",
+  "version": "0.8.0",
+  "description": "Editor 3D Blood Petals — Windows portable com Female Rig Assist IK e saia Alpha 0.8",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
