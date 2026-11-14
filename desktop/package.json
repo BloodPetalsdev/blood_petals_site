@@ -2,7 +2,7 @@
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
   "version": "0.9.9",
-  "description": "Alpha 0.9.9: full female FBX bone selection, forward knee IK, toon preview, history Undo/Redo and stable camera",
+  "description": "Silent Garden Motion Studio 0.9.9: anatomical IK, 150 bone interactions, Toon preview, undo/redo, camera persistence",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",

@@ -1,4 +1,3 @@
-
 /* Silent Garden Motion Studio — versão alpha 0.9.7 · Blood Petals Female Rig
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
@@ -11,7 +10,7 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 // BLOOD PETALS · BASE CHARACTER (Female Rig) · 0.9.4
 // Exact FBX material associations: FemaleHead = face atlas; FemaleArms = body/arms;
 // FemaleUniform stays unchanged. No bone / mesh / skinning hierarchy edits.
-const SG_BASE_ASSETS = {"model": "./assets/SweaterUniformRIGGED.fbx", "face": "./assets/FemaleHead.png", "body": "./assets/WhiteBodyBls.jpg", "music": "./assets/BloodMenu.mp3"};
+const SG_BASE_ASSETS = {"model":"./assets/SweaterUniformRIGGED.fbx","face":"./assets/FemaleHead.png","body":"./assets/WhiteBodyBls.jpg","music":"./assets/BloodMenu.mp3"};
 const SG_BASE_FILENAME = 'SweaterUniformRIGGED.fbx';
 let sgBaseFileBufferPromise = null;
 let sgBaseReadyPromise = null;
@@ -3178,3 +3177,4 @@ try {
   window.sgStartup?.reportError?.(err);
   throw err;
 }
+

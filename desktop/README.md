@@ -53,3 +53,9 @@ A simulação de IK é uma assistência de dois segmentos com influências; não
 Execute `npm install` e `npm run dist:win` com Node.js 22+ em Windows. O GitHub Actions pode montar o aplicativo em uma máquina Windows hospedada.
 
 Silent Garden Team · Blood Petals · 2026
+## Alpha 0.9.9 — Rig Control & Toon
+- 150 ossos do rig feminino podem ser selecionados em categorias Corpo, Todos, Rosto, Dedos, Saia e Auxiliares.
+- IK da perna com frente anatômica orientada pelos dedos e girando com quadril, limite de flexão e influência por membro.
+- Toon de 3 tons é apenas prévia no viewport: os materiais FBX não são trocados na exportação.
+- Ctrl+Z / Ctrl+Y / Ctrl+S: histórico de ações e salvamento; câmera preservada entre workspaces.
+- Modelo, áudio e texturas privados são distribuídos separadamente em assets e não fazem parte deste repositório.
