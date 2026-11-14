@@ -210,6 +210,40 @@
  .texture-native-file{font-size:12px}
 }
 
+/* Silent Garden Rig Assist — browser IK controller overlay (no changes to source FBX) */
+.rig-assist-panel{border:1px solid #6c5268;background:linear-gradient(150deg,#322935,#211e29);padding:12px;border-radius:10px;margin:14px 0 18px}
+.rig-assist-panel .section-heading{color:#f8d1e9;font-weight:750;letter-spacing:.07em;margin-bottom:8px}
+.rig-main-toggle{border-color:#a77f9e;color:#efc8df;background:#50364c;margin:9px 0}
+.rig-main-toggle.active{background:#9b6487;color:#fff;border-color:#dfa6c8}
+.rig-field,.rig-manual label{display:flex;flex-direction:column;gap:6px;color:#d3bdd0;margin:10px 0 8px;font-size:11px}
+.rig-field select,.rig-manual select{width:100%;height:36px;border:1px solid #655168;border-radius:7px;background:#261f2d;color:#f6e6f3;padding:4px 8px}
+.rig-info{background:#231d29;border:1px solid #4f3e53;border-radius:8px;padding:10px;min-height:43px;color:#cdbdd0;font-size:11px;line-height:1.5;margin:8px 0}
+.rig-control-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
+.rig-control-actions button{height:auto;min-height:36px;padding:6px;font-size:11px;white-space:normal}
+.rig-control-actions .active{background:#6c4b66;border-color:#cb9cb8}
+.rig-move-pad{display:grid;grid-template-columns:1fr 60px 60px;gap:7px;align-items:center;margin:12px 0}
+.rig-axis-title{font-size:11px;letter-spacing:.03em;color:#e4d5e2}
+.rig-move-pad button{border:1px solid #654e63;background:#3b2c3b;color:#f5d9e9;border-radius:7px;min-height:37px;font-size:17px;font-weight:700;touch-action:manipulation}
+.rig-move-pad button:hover{background:#634760}
+.rig-checkbox{display:flex;gap:7px;color:#d2c0d0;font-size:11px;line-height:1.5;margin:11px 0}
+.rig-checkbox input{accent-color:#c78cab}
+.rig-manual{margin-top:12px;padding:10px;border:1px solid #4e4351;border-radius:9px;background:#1c1a23}
+.rig-manual summary{cursor:pointer;color:#ebc6dc;font-size:11px;font-weight:650}
+.rig-manual p{margin:10px 0}
+@media(max-width:790px){.rig-assist-panel{margin:8px 0 18px}.rig-move-pad button{min-height:48px}.rig-control-actions button{min-height:44px}.rig-field select,.rig-manual select{min-height:44px}.mobile-dock button{font-size:9px;padding:0 1px}.rig-assist-panel .button.full{min-height:43px}}
+
+/* Blood Petals Female Profile — skirt rig and roll-bone IK compatibility */
+.skirt-assist{margin:13px 0;padding:12px;border:1px solid #75576c;background:linear-gradient(145deg,#382736,#29232e);border-radius:10px;display:flex;flex-direction:column;gap:9px}
+.skirt-assist h3{font-size:12px;letter-spacing:.05em;color:#ffe5f2;margin:0;display:flex;align-items:center;gap:7px}
+.skirt-assist p{font-size:11px;color:#cbb5c3;line-height:1.55;margin:0}
+.skirt-assist .skirt-range{display:grid;gap:5px}
+.skirt-assist .skirt-range>span{display:flex;justify-content:space-between;font-size:11px;color:#dccad6}
+.skirt-assist input[type=range]{width:100%;accent-color:#e3a3c7;touch-action:pan-x}
+.skirt-assist .skirt-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.skirt-assist .skirt-actions button{min-height:35px;white-space:normal;height:auto;padding:8px 5px}
+.skirt-assist .skirt-indicator{font-size:10px;color:#d7bbcf;background:#291d2c;border:1px solid #5e4359;padding:7px 9px;border-radius:7px}
+@media(max-width:790px){.skirt-assist{margin:12px 0}.skirt-assist .skirt-actions button{min-height:45px;font-size:11px}}
+
 /* Alpha 0.7 · Desktop-first professional interface */
 .desktop-commandbar{display:none}
 .desktop-command-group{display:flex;align-items:center;gap:8px}
@@ -269,6 +303,7 @@
   .desktop-commandbar{display:none!important}
 }
 
+
 </style>
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 </head>
@@ -278,7 +313,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.7 · PC</span>
+        <span class="version">ALPHA 0.8 · PC</span>
       </div>
       <div class="header-actions">
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -333,7 +368,7 @@
         <div class="viewport-toolbar">
           <div class="tool-group"><button id="rotateBtn" class="tool active" title="Rotacionar (R)">⟳ <span>Rotação</span></button><button id="moveBtn" class="tool" title="Mover (G)">✥ <span>Mover</span></button></div>
           <div class="separator"></div>
-          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
+          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="rigAssistToolbarBtn" class="tool" type="button" title="Ativar controles IK inspirados no Rigify">✥ <span>Rig Assist IK</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
           <button id="viewportMaterialBtn" class="tool" title="Editar texturas e materiais">▧ <span>Materiais</span></button>
           <span class="viewport-mode" id="viewportModeLabel">PERSPECTIVE · POSE MODE</span>
         </div>
@@ -390,6 +425,47 @@
             <div class="section-heading">FERRAMENTAS</div>
             <div class="stack-buttons"><button id="keyframeSideBtn" class="button subtle full">◆ Inserir keyframe <kbd>K</kbd></button><button id="resetBoneBtn" class="button subtle full">↺ Restaurar pose do osso</button></div>
           </div>
+
+          <section class="inspector-section rig-assist-panel" id="rigAssistPanel" aria-label="Rig Assist IK">
+            <div class="section-heading">✥ RIG ASSIST <span>IK / FK</span></div>
+            <p class="hint">Controle mãos e pés por alvos, como em um rig profissional. Os keyframes continuam no esqueleto FBX original.</p>
+            <button id="rigAssistToggle" class="button subtle full rig-main-toggle" type="button" aria-pressed="false">✥ Ativar controles IK</button>
+            <label class="rig-field" for="rigChainSelect">Braço ou perna
+              <select id="rigChainSelect" class="field" aria-label="Selecionar braço ou perna"><option value="">Importe uma personagem</option></select>
+            </label>
+            <div id="rigAssistInfo" class="rig-info">O editor procura automaticamente braços e pernas com 3 ossos.</div>
+            <div class="rig-control-actions">
+              <button id="rigSelectGoalBtn" class="button subtle" type="button" title="Mover mão ou pé">◇ Mão / Pé</button>
+              <button id="rigSelectPoleBtn" class="button subtle" type="button" title="Controlar direção do cotovelo ou joelho">◈ Cotovelo / Joelho</button>
+            </div>
+            <div class="rig-move-pad" aria-label="Mover o controle IK nos eixos">
+              <span class="rig-axis-title">Eixo X</span><button type="button" data-rig-nudge="x:-1" aria-label="Esquerda">−</button><button type="button" data-rig-nudge="x:1" aria-label="Direita">＋</button>
+              <span class="rig-axis-title">Eixo Y</span><button type="button" data-rig-nudge="y:-1" aria-label="Baixo">−</button><button type="button" data-rig-nudge="y:1" aria-label="Cima">＋</button>
+              <span class="rig-axis-title">Eixo Z</span><button type="button" data-rig-nudge="z:-1" aria-label="Trás">−</button><button type="button" data-rig-nudge="z:1" aria-label="Frente">＋</button>
+            </div>
+            <label class="rig-checkbox"><input type="checkbox" id="rigGroundCheck" checked> Evitar que o alvo dos pés atravesse o chão</label>
+            <button id="rigKeyframeBtn" class="button primary full" type="button">◆ Gravar pose IK nos ossos</button>
+            <button id="rigSnapBtn" class="button subtle full" type="button">◎ Reposicionar controles na pose atual</button>
+            <section class="skirt-assist" id="skirtAssistPanel" aria-label="Assistente de saia do Blood Petals">
+  <h3>✿ Blood Petals · Saia inteligente</h3>
+  <div class="skirt-indicator" id="skirtProfileStatus">Importe o rig feminino SweaterUniformRIGGED.fbx.</div>
+  <label class="rig-checkbox"><input id="skirtAssistEnabled" type="checkbox"> Saia acompanhar as pernas (experimental)</label>
+  <label class="skirt-range" for="skirtAssistStrength"><span><span>Influência das pernas</span><output id="skirtStrengthLabel">55%</output></span><input id="skirtAssistStrength" type="range" min="0" max="100" step="5" value="55"></label>
+  <label class="skirt-range" for="skirtAssistSpread"><span><span>Abertura lateral</span><output id="skirtSpreadLabel">35%</output></span><input id="skirtAssistSpread" type="range" min="0" max="100" step="5" value="35"></label>
+  <div class="skirt-actions"><button class="button subtle" id="skirtUpdateBtn" type="button">↻ Ajustar saia</button><button class="button primary" id="skirtKeyBtn" type="button">◆ Gravar saia</button></div>
+  <button class="button ghost full" id="skirtRestoreBtn" type="button">↶ Restaurar saia à pose original</button>
+  <p>Adapta os 12 ossos <b>*_skart1/2/3</b> aos movimentos de <b>LeftUpLeg</b> e <b>RightUpLeg</b>. Não adiciona ossos ao FBX. O ajuste ajuda a reduzir interseções, mas não simula tecido nem garante ausência de colisões.</p>
+</section>
+
+            <details class="rig-manual">
+              <summary>Configuração manual de ossos</summary>
+              <p class="hint">Use para rigs que não foram reconhecidos. Selecione três ossos conectados: superior → meio → extremidade.</p>
+              <label>Osso superior<select id="rigManualUpper" class="field"></select></label>
+              <label>Osso intermediário<select id="rigManualMiddle" class="field"></select></label>
+              <label>Osso final<select id="rigManualEnd" class="field"></select></label>
+              <button id="rigManualCreateBtn" type="button" class="button subtle full">＋ Criar controle para esta cadeia</button>
+            </details>
+          </section>
           <div class="inspector-section">
             <div class="section-heading">ANIMAÇÃO</div>
             <div class="form-row"><label for="clipSelect">Clipe em edição</label><select id="clipSelect"></select></div>
@@ -407,8 +483,8 @@
             <p class="hint">FBX com animação embutida para importar como <b>Legacy</b> na Unity.</p>
             <button id="exportFbxBtn" class="button export full">↗ Exportar animação .FBX</button>
             <button id="exportGlbBtn" class="button subtle full">↗ Exportar prévia .GLB</button>
-            <button id="connectBackendBtn" class="button subtle full">⚙ Localizar Blender no PC</button>
-            <p class="hint">Versão portátil: o editor funciona offline. Para exportar FBX, instale o Blender no PC e clique em Localizar Blender.</p>
+            <button id="connectBackendBtn" class="button subtle full">⚙ Configurar conversor FBX online</button>
+            <p class="hint">O site funciona sem servidor próprio. A exportação FBX requer um servidor com Blender. Não publique arquivos privados da equipe em repositórios públicos.</p>
           </div>
           <section id="materialInspector" class="inspector-page hidden" aria-label="Materiais e texturas">
             <div class="mat-selected">
@@ -499,7 +575,7 @@
   <nav class="mobile-dock mobile-only" id="mobileDock" aria-label="Navegação do estúdio">
     <button class="active" data-mobile-panel="editor"><span>✦</span> Animar</button>
     <button data-mobile-panel="bones"><span>♧</span> Ossos</button>
-    <button data-mobile-panel="pose"><span>◈</span> Pose</button>
+    <button data-mobile-panel="pose"><span>◈</span> Pose</button><button data-mobile-panel="rig"><span>✥</span> Rig IK</button>
     <button data-mobile-panel="materials"><span>▧</span> Texturas</button>
     <button data-mobile-panel="export"><span>↗</span> Exportar</button>
   </nav>
@@ -514,7 +590,9 @@
       <li><b>Selecionar um osso:</b> clique nos pontos rosa do modelo ou no painel esquerdo.</li>
       <li><b>Criar poses:</b> gire o osso, clique em “Keyframe”, avance o tempo e crie outra pose.</li>
       <li><b>Reproduzir:</b> pressione Espaço ou ▶ para visualizar a interpolação.</li>
+      <li><b>Rig feminino e saia:</b> importe o SweaterUniformRIGGED.fbx e ative IK. Em Saia inteligente, ative a influência das coxas e grave a pose; não altera o esqueleto original.</li>
       <li><b>Shading e texturas:</b> abra Shading (Texturas no celular), escolha a malha no seletor, toque em “Criar material” e depois selecione uma imagem do dispositivo. É possível editar cor, opacidade e mapas.</li>
+      <li><b>Rig Assist IK:</b> abra Pose → Rig Assist para mover mãos/pés por controle, ajuste a direção do cotovelo/joelho e grave os keyframes nos ossos originais. É inspirado no Rigify, não converte o FBX num Rigify verdadeiro.</li>
       <li><b>Exportar:</b> use “Exportar animação .FBX”. O conversor precisa de um servidor com Blender.</li>
     </ol>
     <div class="dialog-note">O personagem de demonstração serve para aprender. Para exportar seu próprio personagem para a Unity, importe primeiro o FBX original da Ayame. O projeto JSON inclui as imagens importadas, mas não o arquivo FBX original.</div>
