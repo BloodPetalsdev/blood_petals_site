@@ -1,0 +1,68 @@
+{
+  "profileId": "blood-petals-female-sweater-v1",
+  "source": "SweaterUniformRIGGED.fbx",
+  "analyzedFbxVersion": 7400,
+  "analyzedBoneCount": 150,
+  "mesh": "SweaterUniform",
+  "ik": {
+    "leftArm": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand"
+    ],
+    "rightArm": [
+      "RightArm",
+      "RightForeArm",
+      "RightHand"
+    ],
+    "leftLeg": [
+      "LeftUpLeg",
+      "LeftLeg",
+      "LeftFoot"
+    ],
+    "rightLeg": [
+      "RightUpLeg",
+      "RightLeg",
+      "RightFoot"
+    ],
+    "armIntermediateBones": [
+      "LeftArmRoll",
+      "LeftForeArmRoll",
+      "RightArmRoll",
+      "RightForeArmRoll"
+    ]
+  },
+  "skirt": {
+    "drivenBy": [
+      "LeftUpLeg",
+      "RightUpLeg"
+    ],
+    "parent": "Hips",
+    "bones": {
+      "front": [
+        "Front_skart1",
+        "Front_skart2",
+        "Front_skart3"
+      ],
+      "left": [
+        "Left_skart1",
+        "Left_skart2",
+        "Left_skart3"
+      ],
+      "back": [
+        "Back_skart1",
+        "Back_skart2",
+        "Back_skart3"
+      ],
+      "right": [
+        "Right_skart1",
+        "Right_skart2",
+        "Right_skart3"
+      ]
+    },
+    "defaultStrength": 0.55,
+    "defaultSpread": 0.35,
+    "notes": "Experimental angle-based follow, manual adjustment still required in extreme poses"
+  },
+  "safety": "No original FBX asset included, no hierarchy changes, bind poses unchanged"
+}
