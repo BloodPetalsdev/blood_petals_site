@@ -230,6 +230,18 @@
 .rig-manual summary{cursor:pointer;color:#ebc6dc;font-size:11px;font-weight:650}
 .rig-manual p{margin:10px 0}
 @media(max-width:790px){.rig-assist-panel{margin:8px 0 18px}.rig-move-pad button{min-height:48px}.rig-control-actions button{min-height:44px}.rig-field select,.rig-manual select{min-height:44px}.mobile-dock button{font-size:9px;padding:0 1px}.rig-assist-panel .button.full{min-height:43px}}
+
+/* Blood Petals Female Profile — skirt rig and roll-bone IK compatibility */
+.skirt-assist{margin:13px 0;padding:12px;border:1px solid #75576c;background:linear-gradient(145deg,#382736,#29232e);border-radius:10px;display:flex;flex-direction:column;gap:9px}
+.skirt-assist h3{font-size:12px;letter-spacing:.05em;color:#ffe5f2;margin:0;display:flex;align-items:center;gap:7px}
+.skirt-assist p{font-size:11px;color:#cbb5c3;line-height:1.55;margin:0}
+.skirt-assist .skirt-range{display:grid;gap:5px}
+.skirt-assist .skirt-range>span{display:flex;justify-content:space-between;font-size:11px;color:#dccad6}
+.skirt-assist input[type=range]{width:100%;accent-color:#e3a3c7;touch-action:pan-x}
+.skirt-assist .skirt-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.skirt-assist .skirt-actions button{min-height:35px;white-space:normal;height:auto;padding:8px 5px}
+.skirt-assist .skirt-indicator{font-size:10px;color:#d7bbcf;background:#291d2c;border:1px solid #5e4359;padding:7px 9px;border-radius:7px}
+@media(max-width:790px){.skirt-assist{margin:12px 0}.skirt-assist .skirt-actions button{min-height:45px;font-size:11px}}
 </style>
   <script type="importmap">
     {"imports":{
@@ -244,7 +256,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.7 · IK</span>
+        <span class="version">ALPHA 0.8 · IK</span>
       </div>
       <div class="header-actions">
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -358,6 +370,17 @@
             <label class="rig-checkbox"><input type="checkbox" id="rigGroundCheck" checked> Evitar que o alvo dos pés atravesse o chão</label>
             <button id="rigKeyframeBtn" class="button primary full" type="button">◆ Gravar pose IK nos ossos</button>
             <button id="rigSnapBtn" class="button subtle full" type="button">◎ Reposicionar controles na pose atual</button>
+            <section class="skirt-assist" id="skirtAssistPanel" aria-label="Assistente de saia do Blood Petals">
+  <h3>✿ Blood Petals · Saia inteligente</h3>
+  <div class="skirt-indicator" id="skirtProfileStatus">Importe o rig feminino SweaterUniformRIGGED.fbx.</div>
+  <label class="rig-checkbox"><input id="skirtAssistEnabled" type="checkbox"> Saia acompanhar as pernas (experimental)</label>
+  <label class="skirt-range" for="skirtAssistStrength"><span><span>Influência das pernas</span><output id="skirtStrengthLabel">55%</output></span><input id="skirtAssistStrength" type="range" min="0" max="100" step="5" value="55"></label>
+  <label class="skirt-range" for="skirtAssistSpread"><span><span>Abertura lateral</span><output id="skirtSpreadLabel">35%</output></span><input id="skirtAssistSpread" type="range" min="0" max="100" step="5" value="35"></label>
+  <div class="skirt-actions"><button class="button subtle" id="skirtUpdateBtn" type="button">↻ Ajustar saia</button><button class="button primary" id="skirtKeyBtn" type="button">◆ Gravar saia</button></div>
+  <button class="button ghost full" id="skirtRestoreBtn" type="button">↶ Restaurar saia à pose original</button>
+  <p>Adapta os 12 ossos <b>*_skart1/2/3</b> aos movimentos de <b>LeftUpLeg</b> e <b>RightUpLeg</b>. Não adiciona ossos ao FBX. O ajuste ajuda a reduzir interseções, mas não simula tecido nem garante ausência de colisões.</p>
+</section>
+
             <details class="rig-manual">
               <summary>Configuração manual de ossos</summary>
               <p class="hint">Use para rigs que não foram reconhecidos. Selecione três ossos conectados: superior → meio → extremidade.</p>
@@ -478,6 +501,7 @@
       <li><b>Selecionar um osso:</b> clique nos pontos rosa do modelo ou no painel esquerdo.</li>
       <li><b>Criar poses:</b> gire o osso, clique em “Keyframe”, avance o tempo e crie outra pose.</li>
       <li><b>Reproduzir:</b> pressione Espaço ou ▶ para visualizar a interpolação.</li>
+      <li><b>Rig feminino e saia:</b> importe o SweaterUniformRIGGED.fbx e ative IK. Em Saia inteligente, ative a influência das coxas e grave a pose; não altera o esqueleto original.</li>
       <li><b>Shading e texturas:</b> abra Shading (Texturas no celular), escolha a malha no seletor, toque em “Criar material” e depois selecione uma imagem do dispositivo. É possível editar cor, opacidade e mapas.</li>
       <li><b>Rig Assist IK:</b> abra Pose → Rig Assist para mover mãos/pés por controle, ajuste a direção do cotovelo/joelho e grave os keyframes nos ossos originais. É inspirado no Rigify, não converte o FBX num Rigify verdadeiro.</li>
       <li><b>Exportar:</b> use “Exportar animação .FBX”. O conversor precisa de um servidor com Blender.</li>
@@ -496,7 +520,7 @@
     <button id="backendConnectBtn" class="button primary full" type="button">Testar conexão</button>
   </dialog>
   <script type="module">
-/* Silent Garden Motion Studio — versão alpha 0.7 · Rig Assist IK
+/* Silent Garden Motion Studio — versão alpha 0.8 · Blood Petals Female Rig
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -578,6 +602,7 @@ transform.addEventListener('objectChange', () => {
   if (!state.selected) return;
   syncFields();
   if(rigAssist.control && transform.object===rigAssist.control){rigSolve(rigAssist.selected);status('Rig Assist: alvo reposicionado. Pressione K para gravar.');return;}
+  if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(state.selected)))skirtApply();
   status(`Pose alterada: ${state.selected.name}. Pressione K para registrar o keyframe.`);
 });
 // === Rig Assist IK: virtual targets, original FBX bone transforms ===
@@ -586,9 +611,21 @@ const rigAssist={enabled:false,chains:[],selected:null,control:null,solving:fals
 const rigVector=()=>new THREE.Vector3();
 function rigPartName(bone){return String(bone?.name||'').split(':').pop().toLowerCase().replace(/[^a-z0-9]/g,'');}
 function rigSide(name){if(/left|^l(?:upper|lower|fore|hand|arm|leg|foot|thigh|shin|wrist)/.test(name))return 'L';if(/right|^r(?:upper|lower|fore|hand|arm|leg|foot|thigh|shin|wrist)/.test(name))return 'R';return '?';}
+function rigBetween(parent,child){
+  if(!parent||!child||parent===child)return false;
+  let node=child.parent,depth=0;
+  while(node&&node!==parent&&depth<4){
+    if(!node.isBone||!/roll|twist/i.test(node.name))return false;
+    node=node.parent;depth++;
+  }
+  return node===parent;
+}
 function rigValidChain(upper,middle,end){
   if(!upper?.isBone||!middle?.isBone||!end?.isBone)return false;
-  if(middle.parent!==upper||end.parent!==middle)return false;
+  // O rig feminino Blood Petals possui os segmentos LeftArmRoll/LeftForeArmRoll
+  // entre os ossos do braço. Aceitar até dois intermediários de twist/roll,
+  // sem alterar sua hierarquia, mantém a importação FBX compatível com Unity.
+  if(!rigBetween(upper,middle)||!rigBetween(middle,end))return false;
   upper.updateWorldMatrix(true,true);
   const a=upper.getWorldPosition(rigVector());
   const b=middle.getWorldPosition(rigVector());
@@ -620,13 +657,31 @@ function rigCreateChain(upper,middle,end,label){
   goal.userData.rigChain=chain;pole.userData.rigChain=chain;
   rigAssist.chains.push(chain);return chain;
 }
+// Perfil elaborado a partir do FBX real SweaterUniformRIGGED.fbx:
+// pernas com ligação direta e braços com ossos de rotação intermediários.
+const BP_FEMALE_IK={
+  leftArm:['LeftArm','LeftForeArm','LeftHand','Mão esquerda'],
+  rightArm:['RightArm','RightForeArm','RightHand','Mão direita'],
+  leftLeg:['LeftUpLeg','LeftLeg','LeftFoot','Pé esquerdo'],
+  rightLeg:['RightUpLeg','RightLeg','RightFoot','Pé direito']
+};
+function rigBone(name){return state.bones.find(b=>rigPartName(b)===name.toLowerCase())||null;}
 function rigDetectChains(){
-  const hands=state.bones.filter(b=>/hand|wrist/.test(rigPartName(b))&&!/thumb|index|finger|pinky/.test(rigPartName(b)));
-  const feet=state.bones.filter(b=>/foot|ankle/.test(rigPartName(b))&&!/toe/.test(rigPartName(b)));
   let found=0;
+  // Caminhos exatos do modelo feminino, sem mudar nomes nem ossos Roll.
+  for(const names of Object.values(BP_FEMALE_IK)){
+    const [upper,middle,end]=names.map((n,i)=>i<3?rigBone(n):n);
+    if(rigCreateChain(upper,middle,end,names[3]))found++;
+  }
+  // Fallback para esqueletos de outros personagens.
+  const hands=state.bones.filter(b=>/hand|wrist/.test(rigPartName(b))&&!/thumb|index|finger|pinky|middle|ring/.test(rigPartName(b)));
+  const feet=state.bones.filter(b=>/foot|ankle/.test(rigPartName(b))&&!/toe/.test(rigPartName(b)));
   for(const [ends,kind] of [[hands,'arm'],[feet,'leg']]){
     for(const end of ends){
-      const mid=end.parent,upper=mid?.parent;if(!rigValidChain(upper,mid,end))continue;
+      let mid=end.parent,upper=mid?.parent;
+      while(mid&&/roll|twist/i.test(mid.name))mid=mid.parent;
+      if(mid){upper=mid.parent;while(upper&&/roll|twist/i.test(upper.name))upper=upper.parent;}
+      if(!rigValidChain(upper,mid,end))continue;
       const m=rigPartName(mid),u=rigPartName(upper);
       if(kind==='arm'&&(!/forearm|lowerarm|elbow/.test(m)||!/arm/.test(u)))continue;
       if(kind==='leg'&&(!/leg|shin|calf|knee/.test(m)||!/leg|thigh/.test(u)))continue;
@@ -650,6 +705,7 @@ function rigClear(){
     scene.remove(chain.goal,chain.pole);chain.goal.geometry.dispose();chain.goal.material.dispose();chain.pole.geometry.dispose();chain.pole.material.dispose();
   }
   rigAssist.chains=[];rigAssist.selected=null;rigAssist.control=null;rigAssist.enabled=false;rigAssist.solving=false;
+  skirtAssist.enabled=false;skirtAssist.groups={};skirtAssist.legs=[];skirtAssist.detected=false;
   if($('rigAssistToggle'))rigRefreshUI();
 }
 function rigRefreshUI(){
@@ -707,6 +763,102 @@ function rigAlignJoint(bone,child,desired){
   bone.quaternion.copy(parentWorld.invert().multiply(dq.multiply(oldWorld))).normalize();
   bone.updateWorldMatrix(true,true);
 }
+// ---- Blood Petals Female Skirt Assist ---------------------------------
+// A malha única SweaterUniform tem clusters de skin nos 12 skart bones.
+// Não introduz esqueleto auxiliar: anima rotações originais de 4 cadeias.
+const skirtAssist={enabled:false,strength:.55,spread:.35,groups:{},legs:[],detected:false};
+const BP_SKART_GROUPS=['Front','Back','Left','Right'];
+function skirtSetupModel(){
+  skirtAssist.enabled=false;skirtAssist.groups={};skirtAssist.legs=[];skirtAssist.detected=false;
+  const hips=rigBone('Hips'), left=rigBone('LeftUpLeg'),right=rigBone('RightUpLeg');
+  for(const dir of BP_SKART_GROUPS){
+    const bones=[1,2,3].map(i=>rigBone(dir+'_skart'+i));
+    if(bones.every(Boolean)&&bones[0].parent===hips&&bones[1].parent===bones[0]&&bones[2].parent===bones[1])skirtAssist.groups[dir]=bones;
+  }
+  skirtAssist.legs=[left,right];
+  skirtAssist.detected=Boolean(left&&right&&Object.keys(skirtAssist.groups).length===4);
+  $('skirtAssistEnabled').checked=false;
+  $('skirtAssistEnabled').disabled=!skirtAssist.detected;
+  for(const id of ['skirtUpdateBtn','skirtKeyBtn','skirtRestoreBtn'])$(id).disabled=!skirtAssist.detected;
+  skirtRefresh();
+}
+function skirtRefresh(){
+  const names=Object.keys(skirtAssist.groups);
+  const matched=skirtAssist.detected && rigAssist.chains.filter(c=>c.kind==='leg').length>=2;
+  $('skirtProfileStatus').textContent=matched
+    ? '✓ Rig feminino detectado: 4 IK + 12 ossos de saia · LeftUpLeg / RightUpLeg'
+    : names.length ? names.length+' de 4 cadeias da saia detectadas; confira os nomes dos ossos.'
+    : 'Saia não encontrada. Este assistente requer *_skart1, *_skart2, *_skart3 e as duas coxas.';
+  $('skirtStrengthLabel').textContent=Math.round(skirtAssist.strength*100)+'%';
+  $('skirtSpreadLabel').textContent=Math.round(skirtAssist.spread*100)+'%';
+}
+function skirtLegAngles(bone){
+  const rest=state.rest.get(bone?.userData.sgId);
+  if(!rest)return {x:0,z:0};
+  const q0=new THREE.Quaternion().fromArray(rest.quaternion);
+  const relative=q0.clone().invert().multiply(bone.quaternion).normalize();
+  const e=new THREE.Euler().setFromQuaternion(relative,'XYZ');
+  return {x:clamp(e.x,-.9,.9),z:clamp(e.z,-.7,.7)};
+}
+function skirtApply(){
+  if(!skirtAssist.enabled||!skirtAssist.detected||state.playing)return;
+  const [l,r]=skirtAssist.legs.map(skirtLegAngles);
+  const s=skirtAssist.strength,spread=skirtAssist.spread;
+  const flex=(l.x+r.x)*.5;
+  const stride=Math.abs(l.x-r.x);
+  const configs={
+    Front:[(.55*flex+.18*stride)*s,0],
+    Back:[(.38*flex-.12*stride)*s,0],
+    Left:[l.x*.35*s,(l.z*.42 + Math.abs(l.z)*.16*spread)*s],
+    Right:[r.x*.35*s,(r.z*.42 - Math.abs(r.z)*.16*spread)*s]
+  };
+  for(const dir of BP_SKART_GROUPS){
+    const bones=skirtAssist.groups[dir];if(!bones)continue;
+    const [baseX,baseZ]=configs[dir];
+    const rootX=clamp(baseX,-.42,.42),rootZ=clamp(baseZ,-.35,.35);
+    for(let i=0;i<3;i++){
+      const bone=bones[i],rest=state.rest.get(bone.userData.sgId);if(!rest)continue;
+      const factor=[1,.62,.32][i];
+      const x=clamp(rootX*factor,-.45,.45);
+      const z=clamp(rootZ*factor,-.35,.35);
+      const localOffset=new THREE.Quaternion().setFromEuler(new THREE.Euler(x,0,z,'XYZ'));
+      bone.quaternion.fromArray(rest.quaternion).multiply(localOffset).normalize();
+    }
+  }
+  state.model?.updateMatrixWorld(true);
+}
+function skirtKeyframe(showToast=true){
+  if(!skirtAssist.detected){if(showToast)toast('Importe o rig feminino antes de gravar a saia.',true);return 0;}
+  const clip=currentClip(),time=Math.round(state.time*clip.fps)/clip.fps;
+  let count=0;
+  for(const bones of Object.values(skirtAssist.groups)) for(const bone of bones){
+    const id=bone.userData.sgId,list=clip.tracks[id]||(clip.tracks[id]=[]);
+    const key={time,pose:capture(bone)},index=list.findIndex(x=>Math.abs(x.time-time)<.0005);
+    if(index>=0)list[index]=key;else list.push(key);
+    list.sort((a,b)=>a.time-b.time);count++;
+  }
+  renderTimeline();
+  if(showToast)toast('◆ '+count+' ossos da saia gravados no FBX original.');
+  return count;
+}
+function skirtRestore(){
+  if(!skirtAssist.detected)return;
+  for(const bones of Object.values(skirtAssist.groups))for(const bone of bones){
+    const original=state.rest.get(bone.userData.sgId);
+    if(original)bone.quaternion.fromArray(original.quaternion);
+  }
+  state.model?.updateMatrixWorld(true);
+  toast('Saia retornou à pose original. Use Gravar saia para salvar o novo estado.');
+}
+function skirtWire(){
+  $('skirtAssistEnabled').onchange=e=>{skirtAssist.enabled=e.target.checked;skirtRefresh();if(skirtAssist.enabled)skirtApply();};
+  $('skirtAssistStrength').oninput=e=>{skirtAssist.strength=Number(e.target.value)/100;skirtRefresh();skirtApply();};
+  $('skirtAssistSpread').oninput=e=>{skirtAssist.spread=Number(e.target.value)/100;skirtRefresh();skirtApply();};
+  $('skirtUpdateBtn').onclick=()=>{skirtApply();toast(skirtAssist.enabled?'Saia ajustada às coxas.':'Ative Saia acompanhar as pernas.',!skirtAssist.enabled);};
+  $('skirtKeyBtn').onclick=()=>skirtKeyframe(true);
+  $('skirtRestoreBtn').onclick=skirtRestore;
+}
+// -----------------------------------------------------------------------
 function rigSolve(chain){
   if(!chain||rigAssist.solving)return;
   rigAssist.solving=true;
@@ -734,6 +886,7 @@ function rigSolve(chain){
     rigAlignJoint(chain.upper,chain.middle,desiredB);
     rigAlignJoint(chain.middle,chain.end,clampedTarget);
     state.model?.updateMatrixWorld(true);
+    if(chain.kind==='leg')skirtApply();
     syncFields();
   }finally{rigAssist.solving=false;}
 }
@@ -748,7 +901,8 @@ function rigKeyframe(){
     if(ix>=0)list[ix]=pose;else list.push(pose);
     list.sort((a,b)=>a.time-b.time);
   }
-  renderTimeline();toast(`◆ IK gravado em 3 ossos · ${chain.label}`);status(`Rig Assist: keyframe gravado em ${time.toFixed(2)}s (FBX original).`);
+  const skirtCount=chain.kind==='leg' && skirtAssist.enabled?skirtKeyframe(false):0;
+  renderTimeline();toast(`◆ IK gravado em 3 ossos${skirtCount?' + '+skirtCount+' ossos da saia':''} · ${chain.label}`);status(`Rig Assist: keyframe gravado em ${time.toFixed(2)}s (FBX original).`);
 }
 function rigNudge(axis,sign){
   if(!rigAssist.enabled||!rigAssist.control){toast('Ative o Rig Assist e selecione uma mão ou pé.',true);return;}
@@ -759,7 +913,7 @@ function rigSetupModel(){
   rigClear();
   const options=['rigManualUpper','rigManualMiddle','rigManualEnd'];
   for(const id of options){const sel=$(id);sel.replaceChildren();sel.add(new Option('Selecione um osso',''));for(const bone of state.bones){sel.add(new Option(bone.userData.sgId,bone.userData.sgId));}}
-  rigDetectChains();rigRefreshUI();
+  rigDetectChains();rigRefreshUI();skirtSetupModel();
 }
 function rigWire(){
   $('rigAssistToggle').onclick=()=>rigSetEnabled(!rigAssist.enabled);
@@ -1338,7 +1492,9 @@ function setMobileAngle(value){
   const bone=state.selected;if(!bone){toast('Selecione um osso na tela ou em Ossos.',true);return;}
   const a=clamp(Number(value)||0,-180,180);
   const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e[mobileAxis]=rad(a);
-  bone.quaternion.setFromEuler(e);bone.updateMatrixWorld(true);syncFields();
+  bone.quaternion.setFromEuler(e);bone.updateMatrixWorld(true);
+  if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(bone)))skirtApply();
+  syncFields();
   $('mobileAngle').value=String(Math.round(a));$('mobileAngleLabel').textContent=`${Math.round(a)}°`;
   status(`Pose: ${bone.name}, eixo ${mobileAxis.toUpperCase()} = ${Math.round(a)}°. Toque em Keyframe para gravar.`);
 }
@@ -1784,7 +1940,9 @@ function wire(){
       if(key[0]==='r'){
         const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e['xyz'['rx ry rz'.split(' ').indexOf(key)]]=rad(value);bone.quaternion.setFromEuler(e);
       }else bone.position['xyz'['px py pz'.split(' ').indexOf(key)]]=value;
-      bone.updateMatrixWorld(true);syncFields();status(`Alteração em ${bone.name}. Pressione K para registrar.`);
+      bone.updateMatrixWorld(true);
+      if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(bone)))skirtApply();
+      syncFields();status(`Alteração em ${bone.name}. Pressione K para registrar.`);
     });
   }
   $('keyframeSideBtn').onclick=$('addKeyBtn').onclick=()=>keyframe();
@@ -1848,6 +2006,7 @@ wireShading();
 wire();
 wireMobile();
 rigWire();
+skirtWire();
 installModel(createDemoModel(),null,true);
 checkBackend();
 requestAnimationFrame(animate);
