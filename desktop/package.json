@@ -11,7 +11,7 @@
     "prepare:assets": "node prepare-assets.cjs",
     "start": "npm run prepare:assets && electron .",
     "dist:win": "npm run prepare:assets && electron-builder --win portable --x64 --publish never",
-    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/app.js && node --check renderer/startup.js",
+    "check": "node --check main.cjs && node --check preload.cjs && node scripts/check-modules.cjs",
     "smoke:win": "npm run prepare:assets && electron . --sg-smoke-test"
   },
   "devDependencies": {

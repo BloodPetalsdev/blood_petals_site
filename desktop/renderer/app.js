@@ -626,7 +626,8 @@ function sgWirePriorityControllerDrag(){
 function sgRefreshViewToolbar(){
   $('sgMirrorPose')?.classList.toggle('active',sgPoseTools.mirror);
   $('sgMirrorPose')?.setAttribute('aria-pressed',String(sgPoseTools.mirror));
-  $('sgMirrorPoseSide')?.textContent=sgPoseTools.mirror?'ON':'OFF';
+  const mirrorIndicator=$('sgMirrorPoseSide');
+  if(mirrorIndicator)mirrorIndicator.textContent=sgPoseTools.mirror?'ON':'OFF';
 }
 function sgWirePoseTools(){
   $('sgMirrorPose').onclick=()=>{
