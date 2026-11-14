@@ -318,13 +318,21 @@
 /* Alpha 0.9.1: keep the WebGL canvas proportional to the desktop viewport. */
 .viewport > canvas{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:100%;max-height:100%;display:block;}
 .sg-app-official-icon,.sg-menu-official-icon{display:block;object-fit:contain;object-position:center;background:transparent;border:0;box-shadow:none;flex-shrink:0;}
+/* Alpha 0.9.3: bone picker with pixel-based hit targets and hover feedback */
+.sg-bone-picker-hover{position:absolute;z-index:20;pointer-events:none;max-width:230px;padding:7px 10px;border-radius:7px;background:rgba(15,20,30,.93);border:1px solid #8e7399;box-shadow:0 6px 23px #000a;color:#f4e1ed;font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none}
+.sg-bone-picker-hover[hidden]{display:none!important}
+#sgBonePickerMode{white-space:nowrap}
+#sgBonePickerMode.active{background:#3a5260;border-color:#81b6c8;color:#c8edff}
+@media(max-width:790px){#sgBonePickerMode span{display:none}#sgBonePickerMode{padding:8px 10px;min-width:36px}}
+
+
 </style>
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 </head>
 <body>
 
 <div id="sgMainMenu" role="main" aria-label="Menu inicial do Motion Studio">
-  <header class="sg-menu-header"><div class="sg-brand"><img class="sg-brand-flower sg-menu-official-icon" src="./assets/icon.png" alt="Ícone oficial do Motion Studio"><div><div class="sg-brand-name">SILENT GARDEN MOTION STUDIO</div><div class="sg-brand-sub">BLOOD PETALS · 3D ANIMATION</div></div></div><span class="sg-menu-version">ALPHA 0.9.2 · WINDOWS</span></header>
+  <header class="sg-menu-header"><div class="sg-brand"><img class="sg-brand-flower sg-menu-official-icon" src="./assets/icon.png" alt="Ícone oficial do Motion Studio"><div><div class="sg-brand-name">SILENT GARDEN MOTION STUDIO</div><div class="sg-brand-sub">BLOOD PETALS · 3D ANIMATION</div></div></div><span class="sg-menu-version">ALPHA 0.9.3 · WINDOWS</span></header>
   <div class="sg-menu-content">
     <section class="sg-menu-hero"><p class="sg-menu-kicker">WORKSPACE &amp; MATERIALS UPDATE</p><h1 class="sg-menu-title">Animate.<br><span>Create.</span><br>Bring to life.</h1><p class="sg-menu-text">Um espaço completo para animar personagens, controlar o rig, trabalhar com materiais e preparar movimentos para o Blood Petals.</p>
       <div class="sg-menu-actions"><button type="button" class="sg-large-button sg-primary" id="sgMenuNew">＋ New Project</button><button type="button" class="sg-large-button sg-outline" id="sgMenuOpen">▧ Open Project</button></div>
@@ -346,7 +354,7 @@
       <div class="brand">
         <img class="brand-icon sg-app-official-icon" src="./assets/icon.png" alt="Silent Garden Motion Studio">
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.9.2 · PC</span>
+        <span class="version">ALPHA 0.9.3 · PC</span>
       </div>
       <div class="header-actions"><button type="button" class="sg-work-back" id="sgBackToMenu" title="Voltar ao MainMenu">☰ Menu</button>
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
@@ -401,11 +409,12 @@
         <div class="viewport-toolbar">
           <div class="tool-group"><button id="rotateBtn" class="tool active" title="Rotacionar (R)">⟳ <span>Rotação</span></button><button id="moveBtn" class="tool" title="Mover (G)">✥ <span>Mover</span></button></div>
           <div class="separator"></div>
-          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="rigAssistToolbarBtn" class="tool" type="button" title="Ativar controles IK inspirados no Rigify">✥ <span>Rig Assist IK</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
+          <div class="tool-group"><button id="rigBtn" class="tool active" title="Mostrar/ocultar articulações">♧ <span>Rig</span></button><button id="sgBonePickerMode" class="tool" type="button" title="Selecionar ossos principais / todos (B)">◎ <span>Ossos principais</span></button><button id="rigAssistToolbarBtn" class="tool" type="button" title="Ativar controles IK inspirados no Rigify">✥ <span>Rig Assist IK</span></button><button id="gridBtn" class="tool active" title="Mostrar/ocultar grade">▦ <span>Grade</span></button><button id="resetCameraBtn" class="tool" title="Centralizar câmera">◎ <span>Enquadrar</span></button></div>
           <button id="viewportMaterialBtn" class="tool" title="Editar texturas e materiais">▧ <span>Materiais</span></button>
           <span class="viewport-mode" id="viewportModeLabel">PERSPECTIVE · POSE MODE</span>
         </div>
         <div id="viewport" class="viewport" aria-label="Área de visualização 3D">
+    <div id="sgBonePickerHover" class="sg-bone-picker-hover" hidden></div>
     <nav class="sg-viewport-nav" aria-label="Zoom e foco"><button id="sgZoomIn" type="button" title="Aproximar (+)">＋</button><button id="sgZoomOut" type="button" title="Afastar (−)">−</button><button id="sgZoomFocus" type="button" title="Focar seleção (F)">◎</button><button id="sgZoomAll" type="button" title="Enquadrar tudo (Home)">ALL</button></nav>
           <div class="viewport-corner top-left"><span class="axis-dot"></span> <span id="viewportLabel">Ayame · Demo Rig</span></div>
           <div class="viewport-corner bottom-left"><span class="keyboard-badge">ARRASTAR</span> Orbitar <span class="keyboard-badge">ALT + DIREITO</span> Zoom <span class="keyboard-badge">CLICK</span> Selecionar</div>
