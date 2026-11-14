@@ -132,7 +132,7 @@ function registerIpc(){
 }
 function createWindow(){
   const win=new BrowserWindow({
-    title:'Silent Garden Motion Studio · Blood Petals',
+    title:'Silent Garden Motion Studio 1.0 · Blood Petals',
     width:1440,height:900,minWidth:1060,minHeight:680,backgroundColor:'#14161c',
     show:false,autoHideMenuBar:true,
     webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}
@@ -178,6 +178,9 @@ function createWindow(){
           })()`);
           console.log('SG_SMOKE_REGRESSION',JSON.stringify(regression));
           if(!regression.ok)throw Error('Camera, duration, or modal G regression: '+JSON.stringify(regression));
+          const ikTest=await win.webContents.executeJavaScript(`window.sgStudioDiagnostics?.testIK?.()||{ok:false,error:'No IK diagnostics'}`);
+          console.log('SG_SMOKE_IK',JSON.stringify(ikTest));
+          if(!ikTest.ok)throw Error('Rig controls do not move bones: '+JSON.stringify(ikTest));
           app.exit(0);
         }catch(error){console.error('SG_SMOKE_FAILED',error);app.exit(1);}
       },5000);
@@ -195,7 +198,7 @@ const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=u
   '.mp3':'audio/mpeg','.fbx':'application/octet-stream','.glb':'model/gltf-binary',
   '.wasm':'application/wasm','.svg':'image/svg+xml'};
 const SIDECAR=new Set(['SweaterUniformRIGGED.fbx','FemaleHead.png','WhiteBodyBls.jpg','BloodMenu.mp3']);
-const assetPath=()=>process.env.PORTABLE_EXECUTABLE_DIR||path.dirname(process.env.PORTABLE_EXECUTABLE_FILE||process.execPath);
+const assetPath=()=>{const c=[process.env.PORTABLE_EXECUTABLE_DIR,process.env.PORTABLE_EXECUTABLE_FILE&&path.dirname(process.env.PORTABLE_EXECUTABLE_FILE),path.dirname(process.execPath),process.cwd()].filter(Boolean);return c.find(p=>fs.existsSync(path.join(p,'assets','SweaterUniformRIGGED.fbx')))||c[0]||process.cwd();};
 async function handleMotionRequest(req){
   let pathname;
   try{const uri=new URL(req.url);if(uri.host!=='motion')return new Response('Not found',{status:404});pathname=decodeURIComponent(uri.pathname);}

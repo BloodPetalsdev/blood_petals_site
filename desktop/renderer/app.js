@@ -900,6 +900,7 @@ function rigClear(){
 }
 function rigRefreshUI(){
   const select=$('rigChainSelect');if(!select)return;
+  const live=$('sgIKLiveStatus');if(live&&!rigAssist.solving)live.textContent=rigAssist.chains.length?rigAssist.chains.length+' cadeias IK · '+state.bones.length+' ossos originais':'Nenhuma cadeia IK identificada';
   sgIKRefreshWeights();
   const current=rigAssist.selected?.id||'';
   select.replaceChildren();
@@ -1051,70 +1052,106 @@ function skirtWire(){
   $('skirtRestoreBtn').onclick=skirtRestore;
 }
 // -----------------------------------------------------------------------
+// Version 1.0: physically edit the original FBX bones. Virtual controls are never exported.
 function rigSolve(chain){
-  if(!chain||rigAssist.solving)return;
+  if(!chain||rigAssist.solving||!state.model)return;
   rigAssist.solving=true;
   try{
-    const a=rigWorldPos(chain.upper),b=rigWorldPos(chain.middle),c=rigWorldPos(chain.end);
-    const l1=a.distanceTo(b),l2=b.distanceTo(c);
-    if(l1<1e-6||l2<1e-6)return;
-    if(rigAssist.groundClamp&&chain.kind==='leg')chain.goal.position.y=Math.max(chain.goal.position.y,sgFootGroundY(chain));
-    const target=chain.goal.position.clone();
-    const delta=target.clone().sub(a);let rawDist=delta.length();
-    if(rawDist<1e-8)delta.copy(c.sub(a));
-    if(delta.lengthSq()<1e-12)delta.set(0,-1,0);
-    const direction=delta.normalize();
-    // Leg bend is constrained to the *forward* hemisphere of the model.
-    // The maximum flexion protects knees against hyperextension/inversion.
-    const maxFlex=THREE.MathUtils.degToRad(150);
-    const minReach=chain.kind==='leg'
-      ?Math.sqrt(Math.max(.0000001,l1*l1+l2*l2+2*l1*l2*Math.cos(maxFlex)))
-      :Math.abs(l1-l2)+.00001;
-    const reach=clamp(rawDist,Math.max(Math.abs(l1-l2)+.00001,minReach),l1+l2-.00001);
-    const along=(l1*l1-l2*l2+reach*reach)/(2*reach);
-    const height=Math.sqrt(Math.max(0,l1*l1-along*along));
-    const poleDir=chain.pole.position.clone().sub(a);
-    poleDir.addScaledVector(direction,-poleDir.dot(direction));
-    if(poleDir.lengthSq()<1e-9){poleDir.copy(b).sub(a);poleDir.addScaledVector(direction,-poleDir.dot(direction));}
+    const upper=chain.upper,middle=chain.middle,end=chain.end;
+    if(!upper?.isBone||!middle?.isBone||!end?.isBone)return;
+    state.model.updateWorldMatrix(true,true);
+    const hip=rigWorldPos(upper),knee=rigWorldPos(middle),ankle=rigWorldPos(end);
+    const L1=hip.distanceTo(knee),L2=knee.distanceTo(ankle);
+    if(L1<1e-7||L2<1e-7)return;
+    const weights=chain.weights||{upper:1,middle:1,end:1};
+    const goal=chain.goal.position.clone();
+    if(rigAssist.groundClamp&&chain.kind==='leg'){
+      goal.y=Math.max(goal.y,sgFootGroundY(chain));chain.goal.position.y=goal.y;
+    }
+    let ray=goal.clone().sub(hip);
+    if(ray.lengthSq()<1e-12)ray.copy(ankle).sub(hip);
+    if(ray.lengthSq()<1e-12)ray.set(0,-1,0);
+    const distance=ray.length();ray.normalize();
+    const maxKneeFlex=THREE.MathUtils.degToRad(150);
+    const minLegReach=Math.sqrt(Math.max(0,L1*L1+L2*L2+2*L1*L2*Math.cos(maxKneeFlex)));
+    const minReach=chain.kind==='leg'?Math.max(Math.abs(L1-L2)+1e-5,minLegReach):Math.abs(L1-L2)+1e-5;
+    const maxReach=L1+L2-1e-5;
+    const reach=clamp(distance,minReach,Math.max(minReach+1e-5,maxReach));
+    const along=(L1*L1-L2*L2+reach*reach)/(2*reach);
+    const height=Math.sqrt(Math.max(0,L1*L1-along*along));
+    let poleDir=chain.pole.position.clone().sub(hip);
+    poleDir.addScaledVector(ray,-poleDir.dot(ray));
     if(chain.kind==='leg'){
-      const front=sgCurrentLegFront(chain);
-      front.addScaledVector(direction,-front.dot(direction));
-      if(front.lengthSq()>1e-9){
-        front.normalize();
-        // A pole behind the anatomical front must never invert the knee.
-        if(poleDir.lengthSq()<1e-9||poleDir.clone().normalize().dot(front)<.25) poleDir.copy(front);
-        else poleDir.addScaledVector(front,.28).normalize();
-        // Prevent the user pole handle from being dragged behind the knee.
-        const kneePoleDistance=Math.max(l1*.7,.12);
-        chain.pole.position.copy(a).addScaledVector(poleDir.clone().normalize(),kneePoleDistance);
+      const anatomicalFront=sgCurrentLegFront(chain);
+      anatomicalFront.addScaledVector(ray,-anatomicalFront.dot(ray));
+      if(anatomicalFront.lengthSq()>1e-10){
+        anatomicalFront.normalize();
+        if(poleDir.lengthSq()<1e-10||poleDir.clone().normalize().dot(anatomicalFront)<.12){
+          poleDir.copy(anatomicalFront);chain.pole.position.copy(hip).addScaledVector(poleDir,L1*.85);
+        }else poleDir.normalize().addScaledVector(anatomicalFront,.17).normalize();
       }
     }
-    if(poleDir.lengthSq()<1e-9){poleDir.set(0,0,1).addScaledVector(direction,-direction.z);}
-    if(poleDir.lengthSq()<1e-9){poleDir.set(1,0,0).addScaledVector(direction,-direction.x);}
+    if(poleDir.lengthSq()<1e-10){
+      poleDir.copy(knee).sub(hip).addScaledVector(ray,-knee.clone().sub(hip).dot(ray));
+    }
+    if(poleDir.lengthSq()<1e-10){
+      poleDir.set(0,0,1).addScaledVector(ray,-ray.z);
+      if(poleDir.lengthSq()<1e-10)poleDir.set(1,0,0).addScaledVector(ray,-ray.x);
+    }
     poleDir.normalize();
-    const desiredB=a.clone().addScaledVector(direction,along).addScaledVector(poleDir,height);
-    const clampedTarget=a.clone().addScaledVector(direction,reach);
-    // Weights control the actual original upper/middle bones, never fake bones.
-    const priorUpper=chain.upper.quaternion.clone(),priorMiddle=chain.middle.quaternion.clone();
-    const priorEnd=chain.end.quaternion.clone();
-    const goalEndWorld=chain.goal.quaternion.clone();
-    rigAlignJoint(chain.upper,chain.middle,desiredB);
-    const weightUpper=clamp(chain.weights?.upper??1,0,1);
-    chain.upper.quaternion.copy(priorUpper).slerp(chain.upper.quaternion.clone(),weightUpper);
-    chain.upper.updateWorldMatrix(true,true);
-    rigAlignJoint(chain.middle,chain.end,clampedTarget);
-    const weightMiddle=clamp(chain.weights?.middle??1,0,1);
-    chain.middle.quaternion.copy(priorMiddle).slerp(chain.middle.quaternion.clone(),weightMiddle);
-    chain.middle.updateWorldMatrix(true,true);
-    // Keep feet horizontal and allow the animator to mix IK/FK foot rotation.
-    const parentWorld=chain.end.parent?.getWorldQuaternion(new THREE.Quaternion())||new THREE.Quaternion();
-    const targetLocal=parentWorld.invert().multiply(goalEndWorld);
-    chain.end.quaternion.copy(priorEnd).slerp(targetLocal,clamp(chain.weights?.end??1,0,1));
-    chain.end.updateWorldMatrix(true,true);
-    state.model?.updateMatrixWorld(true);
-    if(chain.kind==='leg')skirtApply();
+    const desiredKnee=hip.clone().addScaledVector(ray,along).addScaledVector(poleDir,height);
+    const desiredEnd=hip.clone().addScaledVector(ray,reach);
+    const originalUpper=upper.quaternion.clone(),originalMiddle=middle.quaternion.clone(),originalEnd=end.quaternion.clone();
+    rigAlignJoint(upper,middle,desiredKnee);
+    const solvedUpper=upper.quaternion.clone();
+    upper.quaternion.copy(originalUpper).slerp(solvedUpper,clamp(weights.upper??1,0,1));
+    upper.updateWorldMatrix(true,true);
+    rigAlignJoint(middle,end,desiredEnd);
+    const solvedMiddle=middle.quaternion.clone();
+    middle.quaternion.copy(originalMiddle).slerp(solvedMiddle,clamp(weights.middle??1,0,1));
+    middle.updateWorldMatrix(true,true);
+    const parentQ=end.parent?.getWorldQuaternion(new THREE.Quaternion())||new THREE.Quaternion();
+    const orient=parentQ.invert().multiply(chain.goal.quaternion.clone());
+    end.quaternion.copy(originalEnd).slerp(orient,clamp(weights.end??1,0,1));
+    end.updateWorldMatrix(true,true);state.model.updateWorldMatrix(true,true);
+    const residual=end.getWorldPosition(new THREE.Vector3()).distanceTo(desiredEnd);
+    chain.lastError=residual;chain.lastUpdated=performance.now();
+    if(chain.kind==='leg'&&skirtAssist.enabled)skirtApply();
     syncFields();
+    if($('sgIKLiveStatus')&&rigAssist.selected===chain){
+      const ratio=residual/Math.max(L1+L2,1e-6);
+      $('sgIKLiveStatus').textContent=(ratio<.04?'✓ Ossos acompanhando o alvo':'⚠ IK com deslocamento limitado')+' · desvio '+(ratio*100).toFixed(1)+'%';
+    }
   }finally{rigAssist.solving=false;}
+}
+// Non-destructive diagnostic of virtual target ↔ ORIGINAL FBX bone linkage.
+function sgDiagnoseIK(){
+  if(!state.model||!rigAssist.chains.length)return {ok:false,error:'Nenhuma cadeia IK no modelo carregado.',chains:0};
+  const wasPlaying=state.playing;state.playing=false;
+  const prior=state.bones.map(b=>[b,b.position.clone(),b.quaternion.clone(),b.scale.clone()]);
+  const targets=rigAssist.chains.map(c=>({chain:c,p:c.goal.position.clone(),q:c.goal.quaternion.clone(),pole:c.pole.position.clone()}));
+  const results=[];
+  try{
+    for(const chain of rigAssist.chains){
+      for(const [bone,p,q,s] of prior){bone.position.copy(p);bone.quaternion.copy(q);bone.scale.copy(s);}
+      state.model.updateWorldMatrix(true,true);
+      chain.goal.position.copy(targets.find(x=>x.chain===chain).p);
+      const beforeU=chain.upper.quaternion.clone(),beforeM=chain.middle.quaternion.clone();
+      const endBefore=rigWorldPos(chain.end);
+      const l=Math.max(.01,rigWorldPos(chain.middle).distanceTo(rigWorldPos(chain.upper)));
+      chain.goal.position.add(new THREE.Vector3(l*.11,0,l*.15));
+      rigSolve(chain);
+      const moved=endBefore.distanceTo(rigWorldPos(chain.end));
+      const boneRotation=Math.max(beforeU.angleTo(chain.upper.quaternion),beforeM.angleTo(chain.middle.quaternion));
+      results.push({label:chain.label,moved:Number(moved.toFixed(5)),boneRotation:Number(boneRotation.toFixed(5)),ok:moved>l*.012&&boneRotation>1e-5});
+    }
+  }catch(error){results.push({ok:false,error:String(error)});}
+  finally{
+    for(const [bone,p,q,s] of prior){bone.position.copy(p);bone.quaternion.copy(q);bone.scale.copy(s);}
+    for(const t of targets){t.chain.goal.position.copy(t.p);t.chain.goal.quaternion.copy(t.q);t.chain.pole.position.copy(t.pole);}
+    state.model.updateWorldMatrix(true,true);state.playing=wasPlaying;syncFields();
+  }
+  return {ok:results.length===rigAssist.chains.length&&results.every(x=>x.ok),chains:results.length,results};
 }
 function rigKeyframe(){
   if(sgEnhancedRigKeyframe())return;
@@ -1146,6 +1183,7 @@ function rigSetupModel(){
 }
 function rigWire(){
   sgIKWireWeights();
+  $('sgIKTestBtn')?.addEventListener('click',()=>{const r=sgDiagnoseIK();const m=r.ok?'✓ '+r.chains+' cadeias testadas: os ossos respondem aos controles.':'⚠ Falha IK: '+(r.results||[]).filter(x=>!x.ok).map(x=>x.label||x.error).join(', ');$('sgIKLiveStatus').textContent=m;toast(m,!r.ok);console.info('Motion Studio IK diagnostic',r);});
   $('rigAssistToggle').onclick=()=>rigSetEnabled(!rigAssist.enabled);
   $('rigAssistToolbarBtn').onclick=()=>{setWorkspace('animation');setInspectorTab('pose');rigSetEnabled(!rigAssist.enabled);};
   $('rigChainSelect').onchange=e=>{const c=rigAssist.chains.find(x=>x.id===e.target.value);rigSelect(c,'goal');};
@@ -1493,6 +1531,7 @@ function installModel(model, filename=null, isDemo=false) {
   updateClipSelectors();renderBoneTree();renderTimeline();refreshMaterials();
   $('originalClipsPanel').classList.toggle('hidden',state.sourceClips.length===0);
   updateSourceClips();selectBone(state.bones.find(b=>/rightarm/i.test(b.name))||state.bones[0]);
+  if(!isDemo && rigAssist.chains.length)rigSetEnabled(true);
   refreshMaterials();
   seek(0);if(typeof sgHistoryReset==='function')sgHistoryReset();
   status(isDemo?'Modelo de demonstração pronto. Selecione um osso e pressione K.':`${filename} carregado! Crie animações e exporte para a Unity.`);
@@ -2751,7 +2790,7 @@ function sgMarkDirty(){
 function sgSetClean(){sgAppState.dirty=false;sgRefreshDirty();}
 function sgRefreshDirty(){
   const label=$('sgDirtyLabel');if(label)label.textContent=sgAppState.dirty?'● Alterações não salvas':'✓ Projeto salvo';
-  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9.9';
+  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Version 1.0.0';
 }
 function sgEnterEditor(){
   sgAppState.screen='editor';$('sgMainMenu').classList.add('sg-hidden');sgPauseMenuMusic();
@@ -3162,6 +3201,8 @@ try {
   window.sgStudioDiagnostics=Object.freeze({
     camera:()=>({position:camera.position.toArray(),target:orbit.target.toArray(),quaternion:camera.quaternion.toArray(),orthographic:camera.isOrthographicCamera}),
     modal:()=>sgModalTransform.active?.kind||null,
+    rig:()=>({model:state.modelFilename||'demo',bones:state.bones.length,chains:rigAssist.chains.map(c=>({name:c.label,kind:c.kind,upper:c.upper.name,middle:c.middle.name,end:c.end.name,error:c.lastError||0}))}),
+    testIK:()=>sgDiagnoseIK(),
     timing:()=>({seconds:currentClip()?.duration||0,fps:currentClip()?.fps||0,frames:Math.round((currentClip()?.duration||0)*(currentClip()?.fps||0))})
   });
   installModel(createDemoModel(),null,true);

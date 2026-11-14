@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.9",
-  "description": "Silent Garden Motion Studio 0.9.9: anatomical IK, 150 bone interactions, Toon preview, undo/redo, camera persistence",
+  "version": "1.0.0",
+  "description": "Motion Studio 1.0 — professional Windows workspace, verified IK linkage, toon preview and undo/redo",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
