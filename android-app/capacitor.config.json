@@ -1,0 +1,7 @@
+{
+  "appId": "com.silentgarden.motionstudio",
+  "appName": "Motion Studio",
+  "webDir": "www",
+  "android": {"allowMixedContent": false},
+  "plugins": {"CapacitorHttp": {"enabled": false}}
+}
