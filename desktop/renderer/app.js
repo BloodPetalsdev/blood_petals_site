@@ -65,10 +65,17 @@ const viewport = $('viewport');
 const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'default'});
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, matchMedia('(max-width:790px)').matches ? 1.25 : 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.setSize(Math.max(1, viewport.clientWidth), Math.max(1, viewport.clientHeight));
+// Width/height must reflect the real desktop viewport, never a stale portrait canvas.
+const initialViewportWidth = Math.max(1, Math.round(viewport.clientWidth));
+const initialViewportHeight = Math.max(1, Math.round(viewport.clientHeight));
+renderer.setSize(initialViewportWidth, initialViewportHeight, false);
+renderer.domElement.style.width = '100%';
+renderer.domElement.style.height = '100%';
+renderer.domElement.style.position = 'absolute';
+renderer.domElement.style.inset = '0';
 renderer.shadowMap.enabled = false;
 viewport.prepend(renderer.domElement);
-const camera = new THREE.PerspectiveCamera(43,1,.01,5000);
+const camera = new THREE.PerspectiveCamera(43, initialViewportWidth / initialViewportHeight, .01, 5000);
 camera.position.set(3, 2.2, 4.5);
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
@@ -774,12 +781,24 @@ function changeMode(mode){
 }
 let prevViewportAspect=null;
 function updateSize(){
-  const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);
-  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-  if(pendingBounds && (prevViewportAspect===null || Math.abs(prevViewportAspect-camera.aspect)>.18))frameModel();
-  prevViewportAspect=camera.aspect;
+  // Skip zero-size viewports while switching screens.
+  const cssW=viewport.clientWidth, cssH=viewport.clientHeight;
+  if(cssW<2||cssH<2)return;
+  const w=Math.max(2,Math.round(cssW)),h=Math.max(2,Math.round(cssH));
+  // Keep WebGL draw buffer, CSS canvas rectangle and camera projection synchronized.
+  renderer.setSize(w,h,false);
+  renderer.domElement.style.width='100%';
+  renderer.domElement.style.height='100%';
+  const nextAspect=w/h;
+  const aspectChanged=Math.abs(camera.aspect-nextAspect)>1e-4;
+  if(aspectChanged){camera.aspect=nextAspect;camera.updateProjectionMatrix();}
+  if(pendingBounds&&(prevViewportAspect===null||Math.abs(prevViewportAspect-nextAspect)>.18))frameModel();
+  prevViewportAspect=nextAspect;
 }
 new ResizeObserver(updateSize).observe(viewport);
+window.addEventListener('resize',updateSize);
+// Ensure aspect is correct before installing and framing the first model.
+updateSize();
 function animate(now){
   requestAnimationFrame(animate);
   const elapsed=Math.min(.1,(now-state.lastFrameAt)/1000);

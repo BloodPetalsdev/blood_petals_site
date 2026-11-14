@@ -315,13 +315,15 @@
 
 
 @media(min-width:791px){.sg-compact-ui .timeline-panel{height:192px}.sg-compact-ui .panel-heading{padding:5px 10px}.sg-compact-ui .desktop-commandbar{padding:4px 10px}.sg-compact-ui .workspace-tabs{min-height:32px}}
+/* Alpha 0.9.1: keep the WebGL canvas proportional to the desktop viewport. */
+.viewport > canvas{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:100%;max-height:100%;display:block;}
 </style>
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 </head>
 <body>
 
 <div id="sgMainMenu" role="main" aria-label="Menu inicial do Motion Studio">
-  <header class="sg-menu-header"><div class="sg-brand"><div class="sg-brand-flower">✿</div><div><div class="sg-brand-name">SILENT GARDEN MOTION STUDIO</div><div class="sg-brand-sub">BLOOD PETALS · 3D ANIMATION</div></div></div><span class="sg-menu-version">ALPHA 0.9 · WINDOWS</span></header>
+  <header class="sg-menu-header"><div class="sg-brand"><div class="sg-brand-flower">✿</div><div><div class="sg-brand-name">SILENT GARDEN MOTION STUDIO</div><div class="sg-brand-sub">BLOOD PETALS · 3D ANIMATION</div></div></div><span class="sg-menu-version">ALPHA 0.9.1 · WINDOWS</span></header>
   <div class="sg-menu-content">
     <section class="sg-menu-hero"><p class="sg-menu-kicker">WORKSPACE &amp; MATERIALS UPDATE</p><h1 class="sg-menu-title">Animate.<br><span>Create.</span><br>Bring to life.</h1><p class="sg-menu-text">Um espaço completo para animar personagens, controlar o rig, trabalhar com materiais e preparar movimentos para o Blood Petals.</p>
       <div class="sg-menu-actions"><button type="button" class="sg-large-button sg-primary" id="sgMenuNew">＋ New Project</button><button type="button" class="sg-large-button sg-outline" id="sgMenuOpen">▧ Open Project</button></div>
@@ -343,7 +345,7 @@
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.9 · PC</span>
+        <span class="version">ALPHA 0.9.1 · PC</span>
       </div>
       <div class="header-actions"><button type="button" class="sg-work-back" id="sgBackToMenu" title="Voltar ao MainMenu">☰ Menu</button>
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
