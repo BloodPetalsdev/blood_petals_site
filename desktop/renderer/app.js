@@ -8,6 +8,208 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 
+// BLOOD PETALS · BASE CHARACTER (Female Rig) · 0.9.4
+// Exact FBX material associations: FemaleHead = face atlas; FemaleArms = body/arms;
+// FemaleUniform stays unchanged. No bone / mesh / skinning hierarchy edits.
+const SG_BASE_ASSETS = {"model": "./assets/SweaterUniformRIGGED.fbx", "face": "./assets/FemaleHead.png", "body": "./assets/WhiteBodyBls.jpg", "music": "./assets/BloodMenu.mp3"};
+const SG_BASE_FILENAME = 'SweaterUniformRIGGED.fbx';
+let sgBaseFileBufferPromise = null;
+let sgBaseReadyPromise = null;
+let sgEditorStartedOnce = false;
+
+function sgGetBaseBuffer(){
+  if(!sgBaseFileBufferPromise){
+    sgBaseFileBufferPromise=fetch(SG_BASE_ASSETS.model).then(async r=>{
+      if(!r.ok)throw new Error('Não foi possível abrir o FBX padrão (HTTP '+r.status+').');
+      const bytes=await r.arrayBuffer();
+      if(!bytes.byteLength)throw new Error('O FBX padrão está vazio.');
+      return bytes;
+    }).catch(err=>{sgBaseFileBufferPromise=null;throw err;});
+  }
+  return sgBaseFileBufferPromise;
+}
+function sgMaterialKey(material){
+  return String(material?.name||'').split('\0')[0].trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+async function sgApplyBaseCharacterTextures(model){
+  // FemaleArms e FemaleUniform usam exatamente o mesmo atlas corporal.
+  // Os materiais continuam independentes: alterar um slot não altera o outro.
+  const assignments={femalehead:{url:SG_BASE_ASSETS.face,filename:'172011.png'},
+    femalearms:{url:SG_BASE_ASSETS.body,filename:'WhiteBodyBls.png'},
+    femaleuniform:{url:SG_BASE_ASSETS.body,filename:'WhiteBodyBls.png'}};
+  const sourceTextures={};
+  const sourceDataUrls={};
+  const toUpdate=[];
+  model.traverse(object=>{
+    if(!object.isMesh || !object.material)return;
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    materials.forEach((material,index)=>{
+      const key=sgMaterialKey(material);
+      if(assignments[key])toUpdate.push({object,materials,index,material,key});
+    });
+  });
+  for(const assignment of toUpdate){
+    if(!sourceTextures[assignment.key]){
+      const config=assignments[assignment.key];
+      const texture=await makeTexture(config.url,'map',assignment.material.map||null);
+      texture.colorSpace=THREE.SRGBColorSpace;
+      texture.needsUpdate=true;
+      sourceTextures[assignment.key]=texture;
+      if(config.url.startsWith('data:image/'))sourceDataUrls[assignment.key]=config.url;
+      else {
+        const resource=await fetch(config.url);
+        if(!resource.ok)throw new Error('Não foi possível ler '+config.filename);
+        const blob=await resource.blob();
+        sourceDataUrls[assignment.key]=await new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=()=>resolve(String(reader.result));
+          reader.onerror=()=>reject(new Error('Erro ao incorporar a textura padrão'));
+          reader.readAsDataURL(blob);
+        });
+      }
+    }
+    // Clone the material, never change original FBX geometry, UVs, skin weights or bones.
+    const mat=assignment.material.clone();
+    mat.map=sourceTextures[assignment.key];
+    if(mat.color)mat.color.set('#ffffff');  // respect atlas colors; no unwanted diffuse tint
+    mat.needsUpdate=true;
+    if(Array.isArray(assignment.object.material)){
+      const next=assignment.object.material.slice();next[assignment.index]=mat;
+      assignment.object.material=next;
+    }else assignment.object.material=mat;
+    assignment.object.userData.sgBaseTextureSlots ||= {};
+    assignment.object.userData.sgBaseTextureSlots[assignment.index]=assignments[assignment.key].filename;
+    // Inspector thumbnail and portable project exports can reuse the exact default atlas.
+    assignment.object.userData.sgTextureInfo ||= {};
+    assignment.object.userData.sgTextureInfo[assignment.index] ||= {};
+    assignment.object.userData.sgTextureInfo[assignment.index].map={
+      filename:assignments[assignment.key].filename, dataUrl:sourceDataUrls[assignment.key]
+    };
+  }
+  for(const required of ['femalehead','femalearms','femaleuniform']){
+    if(!toUpdate.some(x=>x.key===required))console.warn('Perfil feminino: material não encontrado:',required);
+  }
+  return toUpdate.length;
+}
+async function sgLoadBaseFemaleCharacter(){
+  const bytes=await sgGetBaseBuffer();
+  const model=new FBXLoader().parse(bytes.slice(0),'');
+  model.name='SweaterUniformRIGGED';
+  installModel(model,SG_BASE_FILENAME,false);
+  state.importedFile=new File([bytes],SG_BASE_FILENAME,{type:'application/octet-stream'});
+  const matched=await sgApplyBaseCharacterTextures(model);
+  refreshMaterials();
+  sgRefreshFaceUI();
+  status('Blood Petals Female Rig carregado · '+state.bones.length+' ossos · '+matched+' slots com textura');
+  sgSetClean();
+  return model;
+}
+function sgEnsureBaseFemale(){
+  if(!sgBaseReadyPromise){
+    sgBaseReadyPromise=sgLoadBaseFemaleCharacter().catch(err=>{
+      console.error('Falha no modelo base:',err);
+      sgBaseReadyPromise=null;
+      throw err;
+    });
+  }
+  return sgBaseReadyPromise;
+}
+async function sgCreateFreshFemaleProject(){
+  if(sgAppState.screen==='editor'&&sgAppState.dirty&&
+    !confirm('Descartar alterações não salvas e criar um novo projeto?'))return;
+  sgEnterEditor();
+  loading(true,'Carregando personagem padrão…','SweaterUniformRIGGED · Face, Braços e Uniforme');
+  try{
+    if(!sgEditorStartedOnce)await sgEnsureBaseFemale();
+    else {sgBaseReadyPromise=sgLoadBaseFemaleCharacter();await sgBaseReadyPromise;}
+    sgEditorStartedOnce=true;
+    sgSetClean();
+    toast('Base feminina do Blood Petals pronta. Rig Assist e saia disponíveis!');
+  }catch(err){
+    console.error(err);
+    installModel(createDemoModel(),null,true);
+    sgSetClean();
+    toast('Modelo padrão indisponível: '+err.message+' · Use Importar FBX.',true);
+  }finally{loading(false);}
+}
+
+// MAIN MENU MUSIC — loop while the main menu is visible. Autoplay policies are respected.
+const sgMenuAudioSettings={
+ enabled:localStorage.getItem('sgMenuMusicEnabled')!=='off',
+ volume:Number(localStorage.getItem('sgMenuMusicVolume')||0.48)
+};
+function sgAudioNode(){return $('sgMenuMusic');}
+function sgRefreshAudioUI(note=''){
+  const music=sgAudioNode(),button=$('sgMenuMusicToggle');
+  if(!music||!button)return;
+  const playing=!music.paused&&!music.ended;
+  button.textContent=!sgMenuAudioSettings.enabled?'♪ Música desligada':playing?'♫ Música ligada':note||'♪ Ativar música';
+  button.setAttribute('aria-pressed',String(sgMenuAudioSettings.enabled));
+  button.title=playing?'Pausar música do MainMenu':'Ativar música em loop no MainMenu';
+  const range=$('sgMenuMusicVolume');if(range)range.value=String(Math.round(sgMenuAudioSettings.volume*100));
+}
+async function sgPlayMenuMusic(){
+  const audio=sgAudioNode();if(!audio)return;
+  if(!sgMenuAudioSettings.enabled||sgAppState.screen!=='menu'){
+    audio.pause();sgRefreshAudioUI();return;
+  }
+  audio.loop=true;audio.volume=Math.min(1,Math.max(0,sgMenuAudioSettings.volume));
+  try{await audio.play();sgRefreshAudioUI();}
+  catch(err){ // normal until first real user gesture in Chrome/Edge
+    sgRefreshAudioUI('♪ Clique para ouvir');
+  }
+}
+function sgPauseMenuMusic(){const audio=sgAudioNode();if(audio){audio.pause();sgRefreshAudioUI();}}
+function sgToggleMenuMusic(){
+  // First click must start music when autoplay was blocked, not turn it off.
+  if(sgMenuAudioSettings.enabled && sgAudioNode()?.paused){sgPlayMenuMusic();return;}
+  sgMenuAudioSettings.enabled=!sgMenuAudioSettings.enabled;
+  localStorage.setItem('sgMenuMusicEnabled',sgMenuAudioSettings.enabled?'on':'off');
+  if(sgMenuAudioSettings.enabled)sgPlayMenuMusic();else sgPauseMenuMusic();
+}
+
+function sgWireFbxExportGuide(){
+  const dialog=$('sgFbxExportGuide');
+  const trigger=$('sgFbxExportGuideBtn');
+  const hint=$('sgFbxExportHint');
+  if(hint)hint.textContent=window.motionDesktop
+    ? 'Windows: Blender instalado → Exportar animação .FBX. Clique em “Como exportar FBX?” para ver o passo a passo.'
+    : 'HTML: exporte GLB e converta no Blender, ou configure um servidor Blender para exportar FBX diretamente.';
+  if(trigger&&dialog)trigger.onclick=()=>dialog.showModal();
+  if(dialog){
+    for(const id of ['sgFbxExportGuideClose','sgFbxExportGuideDone']){
+      const button=$(id);if(button)button.onclick=()=>dialog.close();
+    }
+  }
+}
+
+function sgWireMenuAudio(){
+  const node=sgAudioNode();
+  if(!node)return;
+  node.loop=true;
+  $('sgMenuMusicToggle').onclick=sgToggleMenuMusic;
+  const range=$('sgMenuMusicVolume');if(range){
+    range.value=String(Math.round(sgMenuAudioSettings.volume*100));
+    range.oninput=e=>{
+      sgMenuAudioSettings.volume=Math.min(1,Math.max(0,Number(e.target.value)/100));
+      localStorage.setItem('sgMenuMusicVolume',String(sgMenuAudioSettings.volume));
+      node.volume=sgMenuAudioSettings.volume;
+    };
+  }
+  document.addEventListener('pointerdown',event=>{
+    if(event.target?.closest?.('#sgMenuMusicToggle'))return;
+    if(sgAppState.screen==='menu'&&sgMenuAudioSettings.enabled&&node.paused)sgPlayMenuMusic();
+  },{passive:true});
+  document.addEventListener('keydown',()=>{
+    if(sgAppState.screen==='menu'&&sgMenuAudioSettings.enabled&&node.paused)sgPlayMenuMusic();
+  });
+  node.addEventListener('play',()=>sgRefreshAudioUI());
+  node.addEventListener('pause',()=>sgRefreshAudioUI());
+  sgRefreshAudioUI();
+  sgPlayMenuMusic();
+}
+
+
 const $ = (id) => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const formatTime = (t) => `00:${String(Math.floor(t)).padStart(2, '0')}.${String(Math.round((t % 1) * 100)).padStart(2, '0')}`;
@@ -65,7 +267,8 @@ const viewport = $('viewport');
 const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'default'});
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, matchMedia('(max-width:790px)').matches ? 1.25 : 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-// Width/height must reflect the real desktop viewport, never a stale portrait canvas.
+// Width/height must reflect the actual desktop viewport, not a stale portrait canvas.
+// setSize(..., false) updates the WebGL drawing buffer without locking canvas CSS pixels.
 const initialViewportWidth = Math.max(1, Math.round(viewport.clientWidth));
 const initialViewportHeight = Math.max(1, Math.round(viewport.clientHeight));
 renderer.setSize(initialViewportWidth, initialViewportHeight, false);
@@ -75,7 +278,10 @@ renderer.domElement.style.position = 'absolute';
 renderer.domElement.style.inset = '0';
 renderer.shadowMap.enabled = false;
 viewport.prepend(renderer.domElement);
-const camera = new THREE.PerspectiveCamera(43, initialViewportWidth / initialViewportHeight, .01, 5000);
+let camera = new THREE.PerspectiveCamera(43, initialViewportWidth / initialViewportHeight, .01, 5000);
+const sgPerspectiveCamera = camera;
+const sgOrthographicCamera = new THREE.OrthographicCamera(-2,2,2,-2,.00001,100000);
+const sgViewState = {mode:'perspective',view:'perspective',orthoHalfHeight:1.6};
 camera.position.set(3, 2.2, 4.5);
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
@@ -93,9 +299,13 @@ scene.add(transform.getHelper());
 transform.addEventListener('dragging-changed', (evt) => {orbit.enabled = !evt.value;});
 transform.addEventListener('objectChange', () => {
   sgMarkDirty();
-  if (!state.selected) return;
+  if(rigAssist.control && transform.object===rigAssist.control){
+    sgProcessRigControl(rigAssist.control);
+    status('Controlador IK atualizado. Pressione K para gravar a pose.');return;
+  }
+  if(!state.selected)return;
+  sgMirrorBonePose(state.selected);
   syncFields();
-  if(rigAssist.control && transform.object===rigAssist.control){rigSolve(rigAssist.selected);status('Rig Assist: alvo reposicionado. Pressione K para gravar.');return;}
   if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(state.selected)))skirtApply();
   status(`Pose alterada: ${state.selected.name}. Pressione K para registrar o keyframe.`);
 });
@@ -153,6 +363,294 @@ function rigCreateChain(upper,middle,end,label){
 }
 // Perfil elaborado a partir do FBX real SweaterUniformRIGGED.fbx:
 // pernas com ligação direta e braços com ossos de rotação intermediários.
+
+// Motion Studio Alpha 0.9.6 — pose mirroring, head gaze, hips/root control.
+// Virtual controls live in scene, NEVER in the original FBX hierarchy.
+const sgPoseTools={mirror:false,guard:false,restWorld:new Map(),head:null,hips:null,
+  headBone:null,hipsBone:null,headRestWorld:null,headForward:null,
+  dragging:null,groundOffset:new Map()};
+const sgMirrorName=name=>{
+  const raw=rigPartName({name});
+  if(/^left/.test(raw))return 'right'+raw.slice(4);
+  if(/^right/.test(raw))return 'left'+raw.slice(5);
+  if(/^l(?=arm|leg|hand|foot|thigh|fore|upper|lower|shoulder)/.test(raw))return 'r'+raw.slice(1);
+  if(/^r(?=arm|leg|hand|foot|thigh|fore|upper|lower|shoulder)/.test(raw))return 'l'+raw.slice(1);
+  return null;
+};
+function sgOtherSideBone(bone){
+  const name=sgMirrorName(bone?.name||'');
+  return name?state.bones.find(other=>rigPartName(other)===name)||null:null;
+}
+function sgMirrorQuaternion(q){return new THREE.Quaternion(q.x,-q.y,-q.z,q.w).normalize();}
+function sgMirrorBonePose(bone){
+  if(!sgPoseTools.mirror||sgPoseTools.guard||!bone)return;
+  const other=sgOtherSideBone(bone);if(!other||other===bone)return;
+  const srcRest=sgPoseTools.restWorld.get(bone),dstRest=sgPoseTools.restWorld.get(other);
+  if(!srcRest||!dstRest)return;
+  sgPoseTools.guard=true;
+  try{
+    state.model?.updateMatrixWorld(true);
+    const srcWorld=bone.getWorldQuaternion(new THREE.Quaternion());
+    const delta=srcWorld.clone().multiply(srcRest.clone().invert());
+    const wanted=sgMirrorQuaternion(delta).multiply(dstRest);
+    const parentQ=other.parent.getWorldQuaternion(new THREE.Quaternion());
+    other.quaternion.copy(parentQ.invert().multiply(wanted)).normalize();
+    const srcPos=state.rest.get(bone.userData.sgId)?.position;
+    const destPos=state.rest.get(other.userData.sgId)?.position;
+    if(srcPos&&destPos){
+      other.position.set(destPos[0]-(bone.position.x-srcPos[0]),
+        destPos[1]+(bone.position.y-srcPos[1]),destPos[2]+(bone.position.z-srcPos[2]));
+    }
+    other.scale.copy(bone.scale);
+    other.updateWorldMatrix(true,true);
+    if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(bone)))skirtApply();
+  }finally{sgPoseTools.guard=false;}
+}
+function sgMirrorChain(chain,part){
+  if(!sgPoseTools.mirror||sgPoseTools.guard||!chain)return;
+  const other=rigAssist.chains.find(c=>c!==chain&&rigPartName(c.end)===sgMirrorName(chain.end.name));
+  if(!other)return;
+  const source=part==='pole'?chain.pole:chain.goal;
+  const dest=part==='pole'?other.pole:other.goal;
+  const center=sgPoseTools.hipsBone?.getWorldPosition(new THREE.Vector3()).x||0;
+  sgPoseTools.guard=true;
+  try{
+    dest.position.set(2*center-source.position.x,source.position.y,source.position.z);
+    if(other.kind==='leg'&&part==='goal'&&rigAssist.groundClamp)dest.position.y=Math.max(dest.position.y,sgFootGroundY(other));
+    rigSolve(other);
+  }finally{sgPoseTools.guard=false;}
+}
+function sgFootGroundY(chain){
+  const offset=sgPoseTools.groundOffset.get(chain?.end)||0;
+  return grid.position.y+offset+Math.max((pendingBounds?.height||1.9)*.005,.002);
+}
+function sgControllerMarker(name,color,position){
+  const mesh=new THREE.Mesh(new THREE.OctahedronGeometry(1),new THREE.MeshBasicMaterial({color,depthTest:false,transparent:true,opacity:.97}));
+  mesh.name=name;mesh.position.copy(position);mesh.renderOrder=1005;mesh.visible=false;
+  scene.add(mesh);return mesh;
+}
+function sgClearPoseControls(){
+  if(sgPoseTools.dragging)sgPoseTools.dragging=null;
+  for(const ctrl of [sgPoseTools.head,sgPoseTools.hips]){
+    if(!ctrl)continue;
+    if(transform.object===ctrl)transform.detach();
+    scene.remove(ctrl);ctrl.geometry.dispose();ctrl.material.dispose();
+  }
+  sgPoseTools.head=sgPoseTools.hips=null;
+  sgPoseTools.headBone=sgPoseTools.hipsBone=null;
+  sgPoseTools.restWorld.clear();sgPoseTools.groundOffset.clear();
+}
+function sgSetupPoseControls(){
+  sgClearPoseControls();
+  state.model?.updateMatrixWorld(true);
+  for(const bone of state.bones){sgPoseTools.restWorld.set(bone,bone.getWorldQuaternion(new THREE.Quaternion()));}
+  sgPoseTools.headBone=rigBone('head')||state.bones.find(b=>/head$/.test(rigPartName(b)))||null;
+  sgPoseTools.hipsBone=rigBone('hips')||rigBone('pelvis')||rigBone('root')||null;
+  if(sgPoseTools.headBone){
+    const bone=sgPoseTools.headBone;
+    sgPoseTools.headRestWorld=bone.getWorldQuaternion(new THREE.Quaternion());
+    sgPoseTools.headForward=new THREE.Vector3(0,0,1).applyQuaternion(sgPoseTools.headRestWorld);
+    const p=bone.getWorldPosition(new THREE.Vector3());
+    sgPoseTools.head=sgControllerMarker('SG · Head Look-At','#b6ddff',p.addScaledVector(sgPoseTools.headForward,Math.max(state.sceneScale*.28,.2)));
+    sgPoseTools.head.userData.sgExtra='head';
+  }
+  if(sgPoseTools.hipsBone){
+    sgPoseTools.hips=sgControllerMarker('SG · Hips Root','#ffe08b',sgPoseTools.hipsBone.getWorldPosition(new THREE.Vector3()));
+    sgPoseTools.hips.userData.sgExtra='hips';
+  }
+  for(const chain of rigAssist.chains){
+    if(chain.kind!=='leg')continue;
+    const base=chain.end.getWorldPosition(new THREE.Vector3());let minY=base.y;
+    chain.end.traverse(child=>{if(child.isBone&&/toe|ball/.test(rigPartName(child)))minY=Math.min(minY,child.getWorldPosition(new THREE.Vector3()).y);});
+    sgPoseTools.groundOffset.set(chain.end,Math.max(0,base.y-minY));
+  }
+  sgRefreshPoseControls();
+}
+function sgRefreshPoseControls(){
+  const visible=rigAssist.enabled&&state.workspaceMode!=='shading'&&state.rigVisible;
+  for(const c of [sgPoseTools.head,sgPoseTools.hips])if(c)c.visible=visible;
+  for(const id of ['sgHeadControlBtn','sgHipsControlBtn'])if($(id))$(id).disabled=!state.model;
+}
+function sgSelectExtraControl(kind){
+  const control=sgPoseTools[kind];if(!control)return toast('Este esqueleto não possui o controle solicitado.',true);
+  if(!rigAssist.enabled)rigSetEnabled(true);
+  if(!rigAssist.enabled)return;
+  rigAssist.selected=null;rigAssist.control=control;
+  state.selected=kind==='head'?sgPoseTools.headBone:sgPoseTools.hipsBone;
+  state.playing=false;$('playBtn').textContent='▶';
+  transform.attach(control);transform.setMode('translate');transform.setSpace('world');
+  $('selectedName').textContent=kind==='head'?'IK · Olhar / Cabeça':'IK · Quadril / Hips';
+  sgRefreshPoseControls();rigRefreshUI();
+  for(const id of ['sgHeadControlBtn','sgHipsControlBtn'])$(id)?.classList.toggle('active',$(id)===$(kind==='head'?'sgHeadControlBtn':'sgHipsControlBtn'));
+  status(kind==='head'?'Mova o alvo para mudar a direção do olhar.':'Arraste o quadril para mover o corpo; os pés permanecem controlados pelo IK.');
+}
+function sgSolveHeadLook(){
+  const bone=sgPoseTools.headBone,target=sgPoseTools.head;
+  if(!bone||!target)return;
+  const p=bone.getWorldPosition(new THREE.Vector3());
+  const direction=target.position.clone().sub(p);if(direction.lengthSq()<1e-10)return;
+  direction.normalize();
+  const delta=new THREE.Quaternion().setFromUnitVectors(sgPoseTools.headForward,direction);
+  // Limit neck/eye tracking: no full 180-degree twisting.
+  const angle=2*Math.acos(clamp(delta.w,-1,1));
+  if(angle>THREE.MathUtils.degToRad(65))delta.rotateTowards(new THREE.Quaternion(),angle-THREE.MathUtils.degToRad(65));
+  const world=delta.multiply(sgPoseTools.headRestWorld);
+  const parent=bone.parent.getWorldQuaternion(new THREE.Quaternion());
+  bone.quaternion.copy(parent.invert().multiply(world)).normalize();
+  bone.updateWorldMatrix(true,true);
+}
+function sgMoveHipsToTarget(){
+  const bone=sgPoseTools.hipsBone,target=sgPoseTools.hips;
+  if(!bone||!target)return;
+  const previous=bone.getWorldPosition(new THREE.Vector3());
+  const next=target.getWorldPosition(new THREE.Vector3());
+  // Hips is a REAL FBX bone. Move its original transform, not an added bone.
+  bone.position.copy(bone.parent.worldToLocal(next.clone()));
+  bone.updateWorldMatrix(true,true);
+  const delta=next.clone().sub(previous);
+  if(sgPoseTools.head && rigAssist.control!==sgPoseTools.head)sgPoseTools.head.position.add(delta);
+  if(rigAssist.enabled){
+    for(const chain of rigAssist.chains){
+      if(chain.kind==='leg'){if(rigAssist.groundClamp)chain.goal.position.y=Math.max(chain.goal.position.y,sgFootGroundY(chain));rigSolve(chain);}
+      else{chain.goal.position.add(delta);chain.pole.position.add(delta);}
+    }
+  }
+  if(skirtAssist.enabled)skirtApply();
+}
+function sgProcessRigControl(control){
+  if(!control)return false;
+  const kind=control.userData.sgExtra;
+  if(kind==='head'){sgSolveHeadLook();syncFields();return true;}
+  if(kind==='hips'){sgMoveHipsToTarget();syncFields();return true;}
+  const chain=control.userData.rigChain;
+  if(chain){
+    if(chain.kind==='leg'&&rigAssist.groundClamp)chain.goal.position.y=Math.max(chain.goal.position.y,sgFootGroundY(chain));
+    rigSolve(chain);
+    sgMirrorChain(chain,control.userData.sgIk||'goal');
+    return true;
+  }
+  return false;
+}
+function sgSaveBonesAsKeyframes(bones){
+  const clip=currentClip(),time=Math.round(state.time*clip.fps)/clip.fps;
+  for(const bone of new Set(bones.filter(Boolean))){
+    const id=bone.userData.sgId;if(!id)continue;
+    const track=clip.tracks[id]||(clip.tracks[id]=[]);
+    const frame={time,pose:capture(bone)};
+    const ix=track.findIndex(k=>Math.abs(k.time-time)<.0005);
+    if(ix>=0)track[ix]=frame;else track.push(frame);
+    track.sort((a,b)=>a.time-b.time);
+  }
+  return time;
+}
+function sgEnhancedRigKeyframe(){
+  const control=rigAssist.control;
+  if(!control)return false;
+  const kind=control.userData.sgExtra;
+  if(!kind)return false;
+  const bones=kind==='head'?[sgPoseTools.headBone]:[
+    sgPoseTools.hipsBone,...rigAssist.chains.filter(c=>c.kind==='leg').flatMap(c=>[c.upper,c.middle,c.end]),
+    ...(skirtAssist.enabled?Object.values(skirtAssist.groups).flat():[])
+  ];
+  const t=sgSaveBonesAsKeyframes(bones);
+  renderTimeline();sgMarkDirty();toast('◆ '+(kind==='head'?'Olhar':'Hips + pernas')+' gravado em '+t.toFixed(2)+'s');
+  return true;
+}
+// Prioritize virtual controls on the viewport over bone dots and OrbitControls.
+const sgControlRay=new THREE.Raycaster();
+const sgControlDragPlane=new THREE.Plane();
+function sgControlScreenPick(clientX,clientY){
+  if(!rigAssist.enabled||state.workspaceMode==='shading'||!state.rigVisible||state.playing)return null;
+  const rect=renderer.domElement.getBoundingClientRect();if(rect.width<2)return null;
+  const candidates=[];
+  for(const c of rigAssist.chains){
+    if(c.goal.visible)candidates.push(c.goal);
+    if(c.pole.visible)candidates.push(c.pole);
+  }
+  for(const c of [sgPoseTools.head,sgPoseTools.hips])if(c?.visible)candidates.push(c);
+  let best=null;const distanceLimit=matchMedia('(pointer:coarse)').matches?42:28;
+  camera.updateWorldMatrix(true,false);
+  for(const control of candidates){
+    const projected=control.position.clone().project(camera);
+    if(projected.z < -1||projected.z > 1)continue;
+    const px=(projected.x*.5+.5)*rect.width+rect.left;
+    const py=(-projected.y*.5+.5)*rect.height+rect.top;
+    const d=Math.hypot(px-clientX,py-clientY);
+    if(d<distanceLimit && (!best||d<best.distance))best={control,distance:d};
+  }
+  return best;
+}
+function sgHandleRigPointerDown(evt){
+  if(evt.target!==renderer.domElement||evt.button!==0||evt.altKey||evt.ctrlKey||sgAppState.screen!=='editor'||sgPoseTools.dragging)return false;
+  const hit=sgControlScreenPick(evt.clientX,evt.clientY);if(!hit)return false;
+  const control=hit.control;
+  if(control.userData.sgExtra)sgSelectExtraControl(control.userData.sgExtra);
+  else rigSelect(control.userData.rigChain,control.userData.sgIk||'goal');
+  // Start direct pointer/touch drag in a plane facing the active viewport.
+  // The gizmo still works for more exact numerical manipulation.
+  const normal=camera.getWorldDirection(new THREE.Vector3());
+  sgControlDragPlane.setFromNormalAndCoplanarPoint(normal,control.position);
+  const rect=renderer.domElement.getBoundingClientRect();
+  const p=new THREE.Vector2(((evt.clientX-rect.left)/rect.width)*2-1,-((evt.clientY-rect.top)/rect.height)*2+1);
+  sgControlRay.setFromCamera(p,camera);
+  const planePoint=sgControlRay.ray.intersectPlane(sgControlDragPlane,new THREE.Vector3())||control.position.clone();
+  sgPoseTools.dragging={id:evt.pointerId,control,startX:evt.clientX,startY:evt.clientY,offset:control.position.clone().sub(planePoint),moved:false};
+  orbit.enabled=false;
+  viewport.setPointerCapture?.(evt.pointerId);
+  evt.preventDefault();evt.stopImmediatePropagation();
+  return true;
+}
+function sgWirePriorityControllerDrag(){
+  viewport.addEventListener('pointermove',evt=>{
+    const drag=sgPoseTools.dragging;if(!drag||drag.id!==evt.pointerId)return;
+    if(Math.hypot(evt.clientX-drag.startX,evt.clientY-drag.startY)<2.5&&!drag.moved)return;
+    drag.moved=true;
+    const rect=renderer.domElement.getBoundingClientRect();
+    if(!rect.width||!rect.height)return;
+    const p=new THREE.Vector2(((evt.clientX-rect.left)/rect.width)*2-1,-((evt.clientY-rect.top)/rect.height)*2+1);
+    sgControlRay.setFromCamera(p,camera);
+    const current=sgControlRay.ray.intersectPlane(sgControlDragPlane,new THREE.Vector3());
+    if(current){drag.control.position.copy(current.add(drag.offset));sgProcessRigControl(drag.control);sgMarkDirty();}
+    evt.preventDefault();evt.stopImmediatePropagation();
+  },true);
+  const stop=evt=>{
+    const drag=sgPoseTools.dragging;if(!drag||evt.pointerId!==drag.id)return;
+    sgPoseTools.dragging=null;orbit.enabled=!transform.dragging;
+    if(viewport.hasPointerCapture?.(evt.pointerId))viewport.releasePointerCapture(evt.pointerId);
+    if(drag.moved)status('Controlador IK reposicionado. Pressione K para gravar a pose.');
+    evt.preventDefault();evt.stopImmediatePropagation();
+  };
+  viewport.addEventListener('pointerup',stop,true);viewport.addEventListener('pointercancel',stop,true);
+  window.addEventListener('blur',()=>{sgPoseTools.dragging=null;orbit.enabled=!transform.dragging;});
+}
+function sgRefreshViewToolbar(){
+  $('sgMirrorPose')?.classList.toggle('active',sgPoseTools.mirror);
+  $('sgMirrorPose')?.setAttribute('aria-pressed',String(sgPoseTools.mirror));
+  $('sgMirrorPoseSide')?.textContent=sgPoseTools.mirror?'ON':'OFF';
+}
+function sgWirePoseTools(){
+  $('sgMirrorPose').onclick=()=>{
+    sgPoseTools.mirror=!sgPoseTools.mirror;sgRefreshViewToolbar();
+    toast('Espelho de pose '+(sgPoseTools.mirror?'ATIVADO':'desativado')+' · braços e pernas L/R');
+  };
+  $('sgHeadControlBtn').onclick=()=>sgSelectExtraControl('head');
+  $('sgHipsControlBtn').onclick=()=>sgSelectExtraControl('hips');
+  document.querySelectorAll('[data-sg-view]').forEach(btn=>btn.onclick=()=>sgSetCameraView(btn.dataset.sgView));
+  sgWirePriorityControllerDrag();sgRefreshViewToolbar();
+  document.addEventListener('keydown',evt=>{
+    if(sgAppState.screen!=='editor'||evt.ctrlKey&& !evt.code.startsWith('Numpad')||evt.metaKey||evt.altKey||evt.repeat||
+      evt.target?.closest?.('input,select,textarea,[contenteditable="true"]')||document.querySelector('dialog[open]'))return;
+    const code=evt.code,key=(evt.key||'').toLowerCase();
+    if(code==='Numpad1'){evt.preventDefault();sgSetCameraView(evt.ctrlKey?'back':'front');return;}
+    if(code==='Numpad3'){evt.preventDefault();sgSetCameraView(evt.ctrlKey?'left':'right');return;}
+    if(code==='Numpad7'){evt.preventDefault();sgSetCameraView(evt.ctrlKey?'down':'up');return;}
+    if(code==='Numpad5'){evt.preventDefault();sgSetCameraView('perspective');return;}
+    if(key==='g'||key==='r'||key==='s'){
+      evt.preventDefault();changeMode(key==='g'?'translate':key==='r'?'rotate':'scale');
+    }
+  },true);
+}
+
 const BP_FEMALE_IK={
   leftArm:['LeftArm','LeftForeArm','LeftHand','Mão esquerda'],
   rightArm:['RightArm','RightForeArm','RightHand','Mão direita'],
@@ -194,6 +692,7 @@ function rigSyncTargets(){
   }
 }
 function rigClear(){
+  sgClearPoseControls();
   if(rigAssist.control && (transform.object===rigAssist.control))transform.detach();
   for(const chain of rigAssist.chains){
     scene.remove(chain.goal,chain.pole);chain.goal.geometry.dispose();chain.goal.material.dispose();chain.pole.geometry.dispose();chain.pole.material.dispose();
@@ -218,6 +717,7 @@ function rigRefreshUI(){
     : 'Não foram encontrados braços/pernas de três ossos. Abra “Configuração manual de ossos”.';
   $('rigSelectGoalBtn').classList.toggle('active',rigAssist.control===rigAssist.selected?.goal);
   $('rigSelectPoleBtn').classList.toggle('active',rigAssist.control===rigAssist.selected?.pole);
+  sgRefreshPoseControls();
   for(const chain of rigAssist.chains){
     chain.goal.visible=rigAssist.enabled&&state.workspaceMode!=='shading'&&state.rigVisible;
     chain.pole.visible=rigAssist.enabled&&chain===rigAssist.selected&&state.workspaceMode!=='shading'&&state.rigVisible;
@@ -243,7 +743,7 @@ function rigSetEnabled(value){
     if(rigAssist.control&&transform.object===rigAssist.control)transform.detach();
     rigAssist.control=null;rigAssist.selected=null;
     if(state.selected){$('selectedName').textContent=state.selected.name||'Unnamed Bone';}
-    if(state.selected&&state.workspaceMode!=='shading'){transform.attach(state.selected);transform.setMode(state.editMode==='rotate'?'rotate':'translate');transform.setSpace('local');}
+    if(state.selected&&state.workspaceMode!=='shading'){transform.attach(state.selected);transform.setMode(state.editMode==='scale'?'scale':state.editMode==='rotate'?'rotate':'translate');transform.setSpace('local');}
   }
   rigRefreshUI();
 }
@@ -360,7 +860,7 @@ function rigSolve(chain){
     const a=rigWorldPos(chain.upper),b=rigWorldPos(chain.middle),c=rigWorldPos(chain.end);
     const l1=a.distanceTo(b),l2=b.distanceTo(c);
     if(l1<1e-6||l2<1e-6)return;
-    if(rigAssist.groundClamp&&chain.kind==='leg')chain.goal.position.y=Math.max(chain.goal.position.y,grid.position.y);
+    if(rigAssist.groundClamp&&chain.kind==='leg')chain.goal.position.y=Math.max(chain.goal.position.y,sgFootGroundY(chain));
     const target=chain.goal.position.clone();
     const delta=target.clone().sub(a);let rawDist=delta.length();
     if(rawDist<1e-8)delta.copy(c.sub(a));
@@ -385,11 +885,13 @@ function rigSolve(chain){
   }finally{rigAssist.solving=false;}
 }
 function rigKeyframe(){
+  if(sgEnhancedRigKeyframe())return;
   sgMarkDirty();
   const chain=rigAssist.selected;
   if(!chain){toast('Selecione uma mão ou pé no Rig Assist.',true);return;}
   const clip=currentClip(),time=Math.round(state.time*clip.fps)/clip.fps;
-  for(const bone of [chain.upper,chain.middle,chain.end]){
+  const other=sgPoseTools.mirror?rigAssist.chains.find(c=>c!==chain&&rigPartName(c.end)===sgMirrorName(chain.end.name)):null;
+  for(const bone of [...new Set([chain.upper,chain.middle,chain.end,...(other?[other.upper,other.middle,other.end]:[])])]){
     const id=bone.userData.sgId,list=clip.tracks[id]||(clip.tracks[id]=[]);
     const pose={time,pose:capture(bone)};
     const ix=list.findIndex(k=>Math.abs(k.time-time)<.0005);
@@ -402,13 +904,13 @@ function rigKeyframe(){
 function rigNudge(axis,sign){
   if(!rigAssist.enabled||!rigAssist.control){toast('Ative o Rig Assist e selecione uma mão ou pé.',true);return;}
   rigAssist.control.position[axis]+=sign*Math.max(state.sceneScale*.045,.015);
-  rigSolve(rigAssist.selected);status(`Rig Assist: ${rigAssist.selected?.label||'Alvo'} movido no eixo ${axis.toUpperCase()}. Grave a pose IK.`);
+  sgProcessRigControl(rigAssist.control);status(`Rig Assist: ${rigAssist.selected?.label||'Alvo'} movido no eixo ${axis.toUpperCase()}. Grave a pose IK.`);
 }
 function rigSetupModel(){
   rigClear();
   const options=['rigManualUpper','rigManualMiddle','rigManualEnd'];
   for(const id of options){const sel=$(id);sel.replaceChildren();sel.add(new Option('Selecione um osso',''));for(const bone of state.bones){sel.add(new Option(bone.userData.sgId,bone.userData.sgId));}}
-  rigDetectChains();rigRefreshUI();skirtSetupModel();
+  rigDetectChains();rigRefreshUI();skirtSetupModel();sgSetupPoseControls();
 }
 function rigWire(){
   $('rigAssistToggle').onclick=()=>rigSetEnabled(!rigAssist.enabled);
@@ -428,6 +930,7 @@ function rigWire(){
     rigRefreshUI();rigSelect(chain,'goal');toast('Controle IK criado.');
   };
 }
+
 
 // === Alpha 0.9.3 · Easy Bone Picker / screen-space selection ===
 // Selecting an FBX bone never modifies hierarchy, skin weights, or animation curves.
@@ -537,6 +1040,7 @@ function sgEasyBonePickerWire(){
   // raycast the tiny 3D sphere; it does not steal clicks on toolbar controls.
   viewport.addEventListener('pointerdown',evt=>{
     if(evt.target!==canvas||evt.button!==0||!sgBonePickerActive()||evt.altKey||evt.ctrlKey)return;
+    if(sgHandleRigPointerDown(evt))return;
     if(transform.dragging || (transform.axis&&!evt.shiftKey))return; // Keep gizmo usable.
     const hits=sgBonePickingCandidates(evt.clientX,evt.clientY);
     if(!hits.length)return;
@@ -768,6 +1272,10 @@ function frameModel(){
   sgCameraFrame(bounds,matchMedia('(max-width:790px)').matches?1.36:1.19);
 }
 function zoomCamera(multiplier) {
+  if(camera.isOrthographicCamera){
+    sgViewState.orthoHalfHeight=clamp(sgViewState.orthoHalfHeight*multiplier,.00005,10000);
+    sgUpdateOrthoFrustum();return;
+  }
   const offset=camera.position.clone().sub(orbit.target);
   const distance=clamp(offset.length()*multiplier,orbit.minDistance,orbit.maxDistance);
   if(offset.lengthSq()<1e-12) return;
@@ -778,6 +1286,7 @@ function selectBone(bone) {
   if(!bone) return;
   state.selected=bone;
   if(rigAssist.control){rigAssist.control=null;rigAssist.selected=null;rigRefreshUI();}
+  for(const id of ['sgHeadControlBtn','sgHipsControlBtn'])$(id)?.classList.remove('active');
   if(state.workspaceMode!=='shading'){transform.attach(bone);transform.setMode(state.editMode==='rotate'?'rotate':'translate');transform.setSpace('local');}
   $('selectedName').textContent=bone.name||'Unnamed Bone';
   $('mobileBoneName').textContent=bone.name||'Osso';
@@ -859,7 +1368,7 @@ function updatePlayhead(){
 }
 function keyframe(bone=state.selected){
   sgMarkDirty();
-  if(rigAssist.enabled && rigAssist.control && rigAssist.selected){rigKeyframe();return;}
+  if(rigAssist.enabled && rigAssist.control){rigKeyframe();return;}
   if(!bone){toast('Selecione um osso primeiro.',true);return;}
   const clip=currentClip(), id=bone.userData.sgId;
   const frames=clip.tracks[id]||(clip.tracks[id]=[]);
@@ -868,6 +1377,7 @@ function keyframe(bone=state.selected){
   const ix=frames.findIndex(k=>Math.abs(k.time-time)<.0005);
   if(ix>=0) frames[ix]=key;else frames.push(key);
   frames.sort((a,b)=>a.time-b.time);
+  if(sgPoseTools.mirror){const counterpart=sgOtherSideBone(bone);if(counterpart)sgSaveBonesAsKeyframes([counterpart]);}
   renderTimeline();status(`◆ Keyframe de ${bone.name} criado em ${time.toFixed(2)}s.`);
   toast(`◆ Keyframe salvo: ${bone.name} · ${time.toFixed(2)}s`);
 }
@@ -921,29 +1431,37 @@ function togglePlay(){
   $('playBtn').textContent=state.playing?'Ⅱ':'▶';
 }
 function changeMode(mode){
-  state.editMode=mode;if(rigAssist.control){transform.setMode('translate');}else{transform.setMode(mode==='rotate'?'rotate':'translate');}
-  $('rotateBtn').classList.toggle('active',mode==='rotate');$('moveBtn').classList.toggle('active',mode==='translate');
-  status(mode==='rotate'?'Gizmo de rotação ativo.':'Gizmo de movimento ativo.');
+  state.editMode=mode;
+  // Virtual IK targets are translation-only; scaling/rotating them has no
+  // meaning in FBX and is deliberately not allowed.
+  if(rigAssist.control)transform.setMode('translate');
+  else transform.setMode(mode==='rotate'?'rotate':mode==='scale'?'scale':'translate');
+  $('rotateBtn').classList.toggle('active',mode==='rotate');
+  $('moveBtn').classList.toggle('active',mode==='translate');
+  $('sgScaleBtn')?.classList.toggle('active',mode==='scale');
+  status(rigAssist.control?'Controlador IK: mover (G).':mode==='rotate'?'Rotação (R) ativa.':mode==='scale'?'Escala (S) ativa.':'Mover (G) ativo.');
 }
 let prevViewportAspect=null;
 function updateSize(){
-  // Skip zero-size viewports while switching screens.
-  const cssW=viewport.clientWidth, cssH=viewport.clientHeight;
-  if(cssW<2||cssH<2)return;
-  const w=Math.max(2,Math.round(cssW)),h=Math.max(2,Math.round(cssH));
-  // Keep WebGL draw buffer, CSS canvas rectangle and camera projection synchronized.
-  renderer.setSize(w,h,false);
-  renderer.domElement.style.width='100%';
-  renderer.domElement.style.height='100%';
-  const nextAspect=w/h;
-  const aspectChanged=Math.abs(camera.aspect-nextAspect)>1e-4;
-  if(aspectChanged){camera.aspect=nextAspect;camera.updateProjectionMatrix();}
-  if(pendingBounds&&(prevViewportAspect===null||Math.abs(prevViewportAspect-nextAspect)>.18))frameModel();
+  // Skip zero-size viewports while switching screens: 1x1 destroys the projection.
+  const cssW = viewport.clientWidth, cssH = viewport.clientHeight;
+  if(cssW < 2 || cssH < 2) return;
+  const w = Math.max(2, Math.round(cssW));
+  const h = Math.max(2, Math.round(cssH));
+  // The drawing buffer, CSS rectangle and perspective aspect must match.
+  renderer.setSize(w, h, false);
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+  const nextAspect = w / h;
+  const aspectChanged = !camera.isOrthographicCamera && Math.abs(camera.aspect-nextAspect)>1e-4;
+  if(camera.isOrthographicCamera)sgUpdateOrthoFrustum();
+  else if(aspectChanged){camera.aspect=nextAspect;camera.updateProjectionMatrix();}
+  if(pendingBounds && (prevViewportAspect===null || Math.abs(prevViewportAspect-nextAspect)>.18))frameModel();
   prevViewportAspect=nextAspect;
 }
 new ResizeObserver(updateSize).observe(viewport);
-window.addEventListener('resize',updateSize);
-// Ensure aspect is correct before installing and framing the first model.
+window.addEventListener('resize', updateSize);
+// Set the correct perspective before the demo FBX / Auto Focus is installed.
 updateSize();
 function animate(now){
   requestAnimationFrame(animate);
@@ -966,9 +1484,19 @@ function animate(now){
     h.material.color.set(hovered?'#97ecff':selected?'#ffe1f0':'#dda7c8');
     h.material.opacity=hovered||selected?1:.79;
     const distance=Math.max(camera.position.distanceTo(scratchVector),.00001);
-    const unitsPerPixel=2*distance*Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5)/Math.max(1,viewport.clientHeight);
+    const unitsPerPixel=camera.isOrthographicCamera
+      ?2*sgViewState.orthoHalfHeight/Math.max(1,viewport.clientHeight)
+      :2*distance*Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5)/Math.max(1,viewport.clientHeight);
     // Radius in SCREEN pixels, consistent on tiny and enormous FBX rigs.
     h.scale.setScalar(Math.max(.000001,unitsPerPixel*(selected?8:hovered?7:sgBonePicker.mode==='all'?4.5:5.5)));
+  }
+  for(const ctrl of [sgPoseTools.head,sgPoseTools.hips]){
+    if(!ctrl||!ctrl.visible)continue;
+    const distance=Math.max(camera.position.distanceTo(ctrl.position),.0001);
+    const perPixel=camera.isOrthographicCamera
+      ? (sgViewState.orthoHalfHeight*2/Math.max(1,viewport.clientHeight))
+      : (2*distance*Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5)/Math.max(1,viewport.clientHeight));
+    ctrl.scale.setScalar(perPixel*(ctrl===rigAssist.control?14:11));
   }
   renderer.render(scene,camera);
 }
@@ -1182,7 +1710,7 @@ function setMobileAngle(value){
   const bone=state.selected;if(!bone){toast('Selecione um osso na tela ou em Ossos.',true);return;}
   const a=clamp(Number(value)||0,-180,180);
   const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e[mobileAxis]=rad(a);
-  bone.quaternion.setFromEuler(e);bone.updateMatrixWorld(true);
+  bone.quaternion.setFromEuler(e);bone.updateMatrixWorld(true);sgMirrorBonePose(bone);
   if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(bone)))skirtApply();
   syncFields();
   $('mobileAngle').value=String(Math.round(a));$('mobileAngleLabel').textContent=`${Math.round(a)}°`;
@@ -1630,7 +2158,7 @@ function wire(){
   $('closeHelpBtn').onclick=$('gotItBtn').onclick=()=>$('helpDialog').close();
   $('boneSearch').oninput=renderBoneTree;
   $('expandBonesBtn').onclick=()=>{$('boneSearch').value='';renderBoneTree();};
-  $('rotateBtn').onclick=()=>changeMode('rotate');$('moveBtn').onclick=()=>changeMode('translate');
+  $('rotateBtn').onclick=()=>changeMode('rotate');$('moveBtn').onclick=()=>changeMode('translate');$('sgScaleBtn').onclick=()=>changeMode('scale');
   $('rigBtn').onclick=()=>{state.rigVisible=!state.rigVisible;$('rigBtn').classList.toggle('active',state.rigVisible);for(const h of state.handles)h.visible=state.rigVisible;if(state.skeletonHelper)state.skeletonHelper.visible=state.rigVisible;rigRefreshUI();};
   $('gridBtn').onclick=()=>{state.gridVisible=!state.gridVisible;grid.visible=state.gridVisible;$('gridBtn').classList.toggle('active',state.gridVisible);};
   $('resetCameraBtn').onclick=frameModel;
@@ -1642,7 +2170,7 @@ function wire(){
       if(key[0]==='r'){
         const e=new THREE.Euler().setFromQuaternion(bone.quaternion,'XYZ');e['xyz'['rx ry rz'.split(' ').indexOf(key)]]=rad(value);bone.quaternion.setFromEuler(e);
       }else bone.position['xyz'['px py pz'.split(' ').indexOf(key)]]=value;
-      bone.updateMatrixWorld(true);
+      bone.updateMatrixWorld(true);sgMirrorBonePose(bone);
       if(skirtAssist.enabled && /^(leftupleg|rightupleg)$/.test(rigPartName(bone)))skirtApply();
       syncFields();status(`Alteração em ${bone.name}. Pressione K para registrar.`);
     });
@@ -1749,23 +2277,19 @@ function sgMarkDirty(){
 function sgSetClean(){sgAppState.dirty=false;sgRefreshDirty();}
 function sgRefreshDirty(){
   const label=$('sgDirtyLabel');if(label)label.textContent=sgAppState.dirty?'● Alterações não salvas':'✓ Projeto salvo';
-  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9.3';
+  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9.4';
 }
 function sgEnterEditor(){
-  sgAppState.screen='editor';$('sgMainMenu').classList.add('sg-hidden');
+  sgAppState.screen='editor';$('sgMainMenu').classList.add('sg-hidden');sgPauseMenuMusic();
   requestAnimationFrame(()=>{updateSize();orbit.update();sgRefreshDirty();});
 }
 function sgShowMenu(){
   if(sgAppState.screen==='editor'&&sgAppState.dirty&&!confirm('Você tem alterações não salvas. Voltar ao menu sem salvar?'))return;
   state.playing=false;
-  sgClearMaterialPreview();sgAppState.screen='menu';$('sgMainMenu').classList.remove('sg-hidden');
+  sgClearMaterialPreview();sgAppState.screen='menu';$('sgMainMenu').classList.remove('sg-hidden');sgPlayMenuMusic();
   sgRefreshRecent();
 }
-function sgNewProject(){
-  if(sgAppState.screen==='editor'&&sgAppState.dirty&&!confirm('Descartar alterações não salvas e criar um novo projeto?'))return;
-  sgClearMaterialPreview();installModel(createDemoModel(),null,true);sgSetClean();sgEnterEditor();
-  toast('Novo projeto criado. Importe o FBX para começar.');
-}
+function sgNewProject(){return sgCreateFreshFemaleProject();}
 function sgOpenProjectFromMenu(){$('projectInput').click();}
 function sgDatabase(){
   return new Promise((resolve,reject)=>{
@@ -1853,10 +2377,61 @@ function sgApplySettings(){
 function sgOpenSettings(){sgApplySettings();$('sgSettingsDialog').showModal();}
 function sgPersistSettings(){try{localStorage.setItem('sg-motion-settings-v09',JSON.stringify(sgSettings));}catch{}sgApplySettings();}
 // Bounding-box fit with a camera-oriented sphere avoids clipping on wide, tiny or enormous FBX assets.
+
+// Six real orthographic views. The active camera is shared by picking,
+// OrbitControls, TransformControls and WebGL renderer.
+function sgUpdateOrthoFrustum(){
+  const ratio=Math.max(.05,viewport.clientWidth/Math.max(1,viewport.clientHeight));
+  const h=sgViewState.orthoHalfHeight;
+  sgOrthographicCamera.left=-h*ratio;sgOrthographicCamera.right=h*ratio;
+  sgOrthographicCamera.top=h;sgOrthographicCamera.bottom=-h;
+  sgOrthographicCamera.updateProjectionMatrix();
+}
+function sgSetCameraView(view){
+  if(sgAppState.screen!=='editor')return;
+  if(view==='perspective'){
+    if(camera!==sgPerspectiveCamera){
+      sgPerspectiveCamera.position.copy(camera.position);
+      sgPerspectiveCamera.quaternion.copy(camera.quaternion);
+      camera=sgPerspectiveCamera;orbit.object=camera;transform.camera=camera;
+      camera.aspect=Math.max(.05,viewport.clientWidth/Math.max(1,viewport.clientHeight));
+      camera.updateProjectionMatrix();
+    }
+  }else{
+    const orientations={
+      front:[0,0,1],back:[0,0,-1],left:[-1,0,0],right:[1,0,0],up:[0,1,0],down:[0,-1,0]
+    };
+    const v=orientations[view];if(!v)return;
+    if(camera!==sgOrthographicCamera){camera=sgOrthographicCamera;orbit.object=camera;transform.camera=camera;}
+    camera.up.set(0,Math.abs(v[1])===1?0:1,Math.abs(v[1])===1?(v[1]===1?-1:1):0);
+    camera.position.copy(orbit.target).addScaledVector(new THREE.Vector3(...v),Math.max(3,(pendingBounds?.radius||1)*6));
+    camera.lookAt(orbit.target);sgUpdateOrthoFrustum();
+  }
+  sgViewState.mode=view==='perspective'?'perspective':'orthographic';sgViewState.view=view;
+  if(state.model && view!=='perspective')frameModel();
+  orbit.update();
+  document.querySelectorAll('[data-sg-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.sgView===view));
+  if($('viewportModeLabel'))$('viewportModeLabel').textContent=(view==='perspective'?'PERSPECTIVE':view.toUpperCase()+' · ORTHOGRAPHIC')+' · POSE MODE';
+  status('Vista '+({front:'frontal',back:'traseira',left:'esquerda',right:'direita',up:'superior',down:'inferior',perspective:'perspectiva'}[view]||view));
+}
+
 function sgCameraFrame(box,padding=1.22){
   if(!box||box.isEmpty())return;
   const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
   const radius=Math.max(size.length()*.5,1e-5);
+  if(camera.isOrthographicCamera){
+    const width=Math.max(.0001,size.x),height=Math.max(.0001,size.y),depth=Math.max(.0001,size.z);
+    const need=Math.max(height,width/Math.max(.1,viewport.clientWidth/Math.max(1,viewport.clientHeight)),depth*.72);
+    sgViewState.orthoHalfHeight=Math.max(need*.5*padding,.0001);
+    sgUpdateOrthoFrustum();
+    const travel=Math.max(radius*6,.4);
+    const dir=camera.position.clone().sub(orbit.target);
+    if(dir.lengthSq()<1e-12)dir.set(0,0,1);
+    orbit.target.copy(center);
+    camera.position.copy(center).addScaledVector(dir.normalize(),travel);
+    camera.near=.00001;camera.far=Math.max(1000,travel*1000,radius*3000);
+    camera.updateProjectionMatrix();orbit.update();return;
+  }
   const fovY=THREE.MathUtils.degToRad(camera.fov),fovX=2*Math.atan(Math.tan(fovY/2)*Math.max(.15,camera.aspect));
   const halfFov=Math.max(.075,Math.min(fovX,fovY)*.5);
   const dist=radius/Math.sin(halfFov)*padding;
@@ -2041,10 +2616,13 @@ wire();
 wireMobile();
 rigWire();
 skirtWire();
+sgWirePoseTools();
 sgEasyBonePickerWire();
 wireDesktopWorkbench();
 sgWireWorkspace09();
+sgWireMenuAudio();
+sgWireFbxExportGuide();
 installModel(createDemoModel(),null,true);
+sgEnsureBaseFemale().catch(err=>{console.warn('Modelo base indisponível:',err);toast('Não foi possível carregar o modelo padrão: '+err.message,true);});
 checkBackend();
 requestAnimationFrame(animate);
-

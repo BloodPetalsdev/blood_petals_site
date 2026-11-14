@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.3",
-  "description": "Silent Garden Motion Studio — Easy Bone Picker, IK and Materials Alpha 0.9.3",
+  "version": "0.9.6",
+  "description": "Silent Garden Motion Studio Alpha 0.9.6 — Mirror IK, orthographic views, head/hips IK and ground safety",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",

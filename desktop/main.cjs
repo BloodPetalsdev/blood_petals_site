@@ -9,8 +9,6 @@ const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, 'renderer');
 const MAX_BYTES = 128 * 1024 * 1024;
-// Windows uses the same identity and icon in the executable and its taskbar window.
-if (process.platform === 'win32') app.setAppUserModelId('com.silentgarden.motionstudio');
 let activeExport = false;
 
 protocol.registerSchemesAsPrivileged([{
@@ -128,7 +126,6 @@ function createWindow(){
     title:'Silent Garden Motion Studio · Blood Petals',
     width:1440,height:900,minWidth:1060,minHeight:680,backgroundColor:'#14161c',
     show:false,autoHideMenuBar:true,
-    icon:path.join(__dirname,'assets','icon.ico'),
     webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}
   });
   win.once('ready-to-show',()=>win.show());
@@ -145,6 +142,17 @@ app.whenReady().then(()=>{
     const resolved=path.resolve(ROOT, '.'+pathname);
     const relative=path.relative(ROOT,resolved);
     if(relative.startsWith('..')||path.isAbsolute(relative))return new Response('Forbidden',{status:403});
+    // Optional offline companion assets are kept beside the portable EXE.
+    // This avoids publishing Blood Petals models/textures/music in a public repo.
+    // Only the following fixed file names are allowed, and they are never executed.
+    const sidecarNames=new Set(['SweaterUniformRIGGED.fbx','FemaleHead.png','WhiteBodyBls.jpg','BloodMenu.mp3']);
+    const assetMatch=pathname.match(/^\/assets\/([^/]+)$/);
+    if(assetMatch && sidecarNames.has(assetMatch[1]) && !fs.existsSync(resolved)){
+      const portableDir=process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
+      const companionPath=path.join(portableDir,'assets',assetMatch[1]);
+      if(fs.existsSync(companionPath)) return net.fetch(pathToFileURL(companionPath).toString());
+      return new Response('Recurso não encontrado. Extraia o EXE junto da pasta assets do pacote completo.',{status:404});
+    }
     return net.fetch(pathToFileURL(resolved).toString());
   });
   registerIpc();
