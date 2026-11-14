@@ -1,23 +1,23 @@
 {
-  "name": "silent-garden-motion-studio-android",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Silent Garden Motion Studio for Android",
-  "scripts": {
-    "build": "node scripts/build-web.mjs",
-    "android:add": "npx cap add android",
-    "android:sync": "npx cap sync android",
-    "android:debug": "cd android && ./gradlew assembleDebug"
+  "name":"silent-garden-motion-studio-android",
+  "version":"1.1.0",
+  "private":true,
+  "description":"Silent Garden Motion Studio 1.1 — single Android app with configurable studio themes and touch viewport",
+  "scripts":{
+    "build":"node scripts/build-web.mjs",
+    "verify:web":"node --check www/motion-editor.js && node --check www/startup.js && node --check www/theme.js",
+    "android:add":"npx cap add android",
+    "android:sync":"npx cap sync android"
   },
-  "dependencies": {
-    "@capacitor/android": "^8.0.0",
-    "@capacitor/core": "^8.0.0",
-    "@capacitor/filesystem": "^8.0.0",
-    "@capacitor/share": "^8.0.0",
-    "three": "0.170.0"
+  "dependencies":{
+    "@capacitor/android":"8.0.0",
+    "@capacitor/core":"8.0.0",
+    "@capacitor/filesystem":"8.0.0",
+    "@capacitor/share":"8.0.0",
+    "three":"0.170.0"
   },
-  "devDependencies": {
-    "@capacitor/cli": "^8.0.0",
-    "esbuild": "^0.25.12"
+  "devDependencies":{
+    "@capacitor/cli":"8.0.0",
+    "esbuild":"0.25.12"
   }
 }
