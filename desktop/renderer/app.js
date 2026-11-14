@@ -1,5 +1,5 @@
 
-/* Silent Garden Motion Studio — versão alpha 0.8 · Windows Portable · Blood Petals Female Rig
+/* Silent Garden Motion Studio — versão alpha 0.8 · Blood Petals Female Rig
    Editor de poses/keyframes em Three.js para exportação FBX via Blender local.
    O FBX é processado no navegador. Exportar FBX exige server.py + Blender. */
 import * as THREE from 'three';
@@ -85,6 +85,7 @@ transform.setMode('rotate'); transform.setSpace('local'); transform.setSize(.8);
 scene.add(transform.getHelper());
 transform.addEventListener('dragging-changed', (evt) => {orbit.enabled = !evt.value;});
 transform.addEventListener('objectChange', () => {
+  sgMarkDirty();
   if (!state.selected) return;
   syncFields();
   if(rigAssist.control && transform.object===rigAssist.control){rigSolve(rigAssist.selected);status('Rig Assist: alvo reposicionado. Pressione K para gravar.');return;}
@@ -377,6 +378,7 @@ function rigSolve(chain){
   }finally{rigAssist.solving=false;}
 }
 function rigKeyframe(){
+  sgMarkDirty();
   const chain=rigAssist.selected;
   if(!chain){toast('Selecione uma mão ou pé no Rig Assist.',true);return;}
   const clip=currentClip(),time=Math.round(state.time*clip.fps)/clip.fps;
@@ -500,6 +502,7 @@ function uniqueNamesCheck() {
   if(repeat) toast(`${repeat} nomes de ossos duplicados: a exportação de animação pode ficar ambígua.`,true);
 }
 function clearModel() {
+  sgClearMaterialPreview();
   state.playing=false;
   transform.detach();
   rigClear();
@@ -510,7 +513,7 @@ function clearModel() {
   state.handles.length=0;
   state.bones=[];state.boneMap.clear();state.rest.clear();state.selected=null;
   // Evita aplicar texturas à malha da demo após importar outro FBX.
-  state.selectedMesh=null;state.selectedMaterialSlot=0;pendingBounds=null;
+  state.selectedMesh=null;state.selectedMaterialSlot=0;state.importedFile=null;pendingBounds=null;
   state.selectedMesh=null;state.selectedMaterialSlot=0;
 }
 // Calcula limites apenas das malhas VISÍVEIS (não do esqueleto completo).
@@ -605,27 +608,11 @@ function createDemoWave() {
     {time:2,pose:structuredClone(baseE)}
   ];
 }
-function frameModel() {
-  if(!pendingBounds) return;
-  const {center,height,size}=pendingBounds;
-  const mobile=matchMedia('(max-width:790px)').matches;
-  // Distância calculada pela câmera e pelos limites da MALHA visível.
-  // Assim um armature FBX com ossos distantes não faz a personagem virar formiga.
-  const tanHalfFov=Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5);
-  const aspect=Math.max(camera.aspect, .2);
-  const fitY=(Math.max(size.y,.01)*.5)/tanHalfFov;
-  const fitX=(Math.max(size.x,.01)*.5)/(tanHalfFov*aspect);
-  const dist=(Math.max(fitX,fitY)+size.z*.5)*(mobile?1.35:1.22);
-  const target=center.clone().add(Vec(0,mobile?-height*.10:0,0));
-  orbit.target.copy(target);
-  camera.position.copy(target).add(Vec(.28,.10,1).normalize().multiplyScalar(Math.max(dist,.1)));
-  // Zoom realmente próximo, ideal para rosto e mãos, mesmo com modelos minúsculos.
-  camera.near=Math.max(height*.00008,.00001);
-  camera.far=Math.max(dist*250,1000);
-  camera.updateProjectionMatrix();
-  orbit.minDistance=Math.max(height*.0005,.00005);
-  orbit.maxDistance=Math.max(dist*100,200);
-  orbit.update();
+function frameModel(){
+  if(!state.model)return;
+  const bounds=getVisibleCharacterBounds(state.model);
+  if(bounds.isEmpty())return;
+  sgCameraFrame(bounds,matchMedia('(max-width:790px)').matches?1.36:1.19);
 }
 function zoomCamera(multiplier) {
   const offset=camera.position.clone().sub(orbit.target);
@@ -718,6 +705,7 @@ function updatePlayhead(){
   $('mobileDurationLabel').textContent=`${d.toFixed(2)}s`;
 }
 function keyframe(bone=state.selected){
+  sgMarkDirty();
   if(rigAssist.enabled && rigAssist.control && rigAssist.selected){rigKeyframe();return;}
   if(!bone){toast('Selecione um osso primeiro.',true);return;}
   const clip=currentClip(), id=bone.userData.sgId;
@@ -731,6 +719,7 @@ function keyframe(bone=state.selected){
   toast(`◆ Keyframe salvo: ${bone.name} · ${time.toFixed(2)}s`);
 }
 function removeKey(boneId,time){
+  sgMarkDirty();
   const list=currentClip().tracks[boneId];if(!list)return;
   const i=list.findIndex(k=>Math.abs(k.time-time)<.0005);
   if(i>=0){list.splice(i,1);if(!list.length)delete currentClip().tracks[boneId];renderTimeline();seek(state.time);toast('Keyframe removido.');}
@@ -830,10 +819,16 @@ function serializeProject(){
     materials:serializeMaterials(),
     rigAssist:{enabled:rigAssist.enabled,groundClamp:rigAssist.groundClamp,chains:rigAssist.chains.map(c=>({label:c.label,upper:c.upper.userData.sgId,middle:c.middle.userData.sgId,end:c.end.userData.sgId}))}};
 }
-function saveProject(){
+async function saveProject(){
+  sgClearMaterialPreview();
   const project=serializeProject();const name=tidy(state.modelFilename?.replace(/\.fbx$/i,'')||'demo');
-  download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),`${name}_silentgarden.sgmotion.json`);
-  toast('Projeto salvo com animações e texturas adicionadas. Guarde também o FBX original!');
+  const json=JSON.stringify(project,null,2);
+  try{
+    const ok=await download(new Blob([json],{type:'application/json'}),`${name}_silentgarden.sgmotion.json`);
+    if(ok===false)return;
+    await sgRememberProject(json);sgSetClean();
+    toast('Projeto salvo com animações e texturas. Guarde também o FBX original!');
+  }catch(e){toast('Não foi possível salvar: '+e.message,true);}
 }
 async function openProject(file){
   try{
@@ -868,7 +863,8 @@ async function openProject(file){
     }
     if(Array.isArray(p.materials))await restoreMaterials(p.materials);
     toast(`Projeto aberto: ${loaded} trilhas restauradas.${unmatched?' '+unmatched+' ossos não correspondem.':''}`);
-  }catch(e){toast(`Não foi possível abrir o projeto: ${e.message}`,true);}
+    sgSetClean();return true;
+  }catch(e){toast(`Não foi possível abrir o projeto: ${e.message}`,true);return false;}
 }
 function createAnimationClip(){
   const c=currentClip();const times=[];
@@ -892,6 +888,7 @@ function createAnimationClip(){
   return new THREE.AnimationClip(c.name,c.duration,tracks);
 }
 async function makeGlb(){
+  sgClearMaterialPreview();
   if(state.modelIsDemo)throw new Error('Importe o FBX da Ayame antes de exportar. O Demo Rig é apenas um exercício.');
   const clip=createAnimationClip();
   // O modelo exportado carrega posições base; as keyframes animam a pose de repouso.
@@ -1122,6 +1119,7 @@ function assignMaterialToMesh(mesh,slot,material,{clearTextures=true}={}){
   material.needsUpdate=true;
 }
 function createNewMaterial({duplicate=false,silent=false}={}){
+  sgClearMaterialPreview();sgMarkDirty();
   const mesh=defaultMeshSelection();
   if(!mesh){if(!silent)toast('Importe um modelo FBX ou abra a demo para criar um material.',true);return null;}
   let slot=state.selectedMaterialSlot;
@@ -1151,6 +1149,7 @@ function markMaterialEdited(){
   mesh.userData.sgEditedSlots[state.selectedMaterialSlot]=true;
 }
 function cloneWritableMaterial(){
+  sgClearMaterialPreview();sgMarkDirty();
   let mat=activeMaterial();if(!mat)return null;
   const mesh=state.selectedMesh;
   mesh.userData.sgOwnedSlots ||= {};
@@ -1238,6 +1237,7 @@ function renderMeshOutliner(){
   if(!host.children.length)host.textContent='Nenhuma malha encontrada.';
 }
 function selectMesh(mesh){
+  sgClearMaterialPreview();
   if(!mesh)return;
   state.selectedMesh=mesh;state.selectedMaterialSlot=0;
   if(state.workspaceMode!=='shading')setWorkspace('shading');
@@ -1275,7 +1275,8 @@ function refreshMaterials(){
     const b=document.createElement('button');b.type='button';b.className='material-slot'+(i===state.selectedMaterialSlot?' active':'');
     const swatch=document.createElement('i');swatch.className='slot-dot';swatch.style.backgroundColor='#'+(mat?.color?.getHexString()||'ffffff');
     const label=document.createElement('span');label.className='slot-label';label.textContent=mat?.name||`Material ${i+1}`;
-    b.append(swatch,label);b.onclick=()=>{state.selectedMaterialSlot=i;refreshMaterials();};slots.append(b);
+    const counts=sgFaceCounts(mesh).counts; const suffix=document.createElement('small'); suffix.className='sg-slot-faces'; suffix.textContent=`${counts[i]||0} faces`;
+    b.append(swatch,label,suffix);b.onclick=()=>{sgClearMaterialPreview();state.selectedMaterialSlot=i;refreshMaterials();};slots.append(b);
   });
   if(!materials.length){const empty=document.createElement('div');empty.className='mat-empty';empty.textContent='A malha não possui material.';slots.append(empty);return;}
   const mat=activeMaterial();
@@ -1287,7 +1288,7 @@ function refreshMaterials(){
   }
   $('materialDoubleSide').checked=mat.side===THREE.DoubleSide;
   $('materialWireframe').checked=!!mat.wireframe;
-  materialPreviewInfo();refreshTexturePreview();
+  materialPreviewInfo();refreshTexturePreview();sgRefreshFaceUI();
 }
 function refreshTexturePreview(){
   const mat=activeMaterial();const channel=$('textureChannel').value;
@@ -1359,6 +1360,7 @@ function updateTextureSettings(){
   const info=activeMaterialData();if(info[channel]){info[channel].repeat=[t.repeat.x,t.repeat.y];info[channel].flipY=t.flipY;}
 }
 function serializeMaterials(){
+  sgClearMaterialPreview();
   const out=[];
   for(const mesh of allModelMeshes()){
     const edited=mesh.userData.sgEditedSlots;
@@ -1442,10 +1444,10 @@ function wire(){
   $('importBtn').onclick=()=>$('fbxInput').click();
   $('quickImportBtn').onclick=()=>$('fbxInput').click();
   $('quickSaveBtn').onclick=saveProject;
-  $('fbxInput').onchange=(evt)=>{const f=evt.target.files?.[0];if(f)importFBX(f);evt.target.value='';};
+  $('fbxInput').onchange=async(evt)=>{const f=evt.target.files?.[0];evt.target.value='';if(f)await sgLoadFBX(f);};
   $('saveBtn').onclick=saveProject;
   $('openProjectBtn').onclick=()=>$('projectInput').click();
-  $('projectInput').onchange=(evt)=>{const f=evt.target.files?.[0];if(f)openProject(f);evt.target.value='';};
+  $('projectInput').onchange=async(evt)=>{const f=evt.target.files?.[0];evt.target.value='';if(f)await sgLoadProjectFile(f);};
   $('helpBtn').onclick=()=>$('helpDialog').showModal();
   $('closeHelpBtn').onclick=$('gotItBtn').onclick=()=>$('helpDialog').close();
   $('boneSearch').oninput=renderBoneTree;
@@ -1494,7 +1496,7 @@ function wire(){
       const rect=renderer.domElement.getBoundingClientRect();pointer.x=(evt.clientX-rect.left)/rect.width*2-1;pointer.y=-(evt.clientY-rect.top)/rect.height*2+1;
       raycaster.setFromCamera(pointer,camera);
       const hits=raycaster.intersectObjects(visibleModelMeshes(),false);
-      if(hits.length){selectMesh(hits[0].object);return;}
+      if(hits.length){sgSelectMaterialSlotFromHit(hits[0].object,hits[0].faceIndex);return;}
     }
     if(!state.rigVisible)return;
     const rect=renderer.domElement.getBoundingClientRect();pointer.x=(evt.clientX-rect.left)/rect.width*2-1;pointer.y=-(evt.clientY-rect.top)/rect.height*2+1;
@@ -1548,7 +1550,7 @@ function wireDesktopWorkbench(){
   $('pcShadingBtn').onclick=()=>{setWorkspace('shading');setInspectorTab('materials');syncDesktopWorkbench();};
   $('pcFrameBtn').onclick=()=>{frameModel();syncDesktopWorkbench();};
   $('pcKeyBtn').onclick=()=>$('addKeyBtn')?.click();
-  $('pcCreateMaterialBtn').onclick=()=>{setWorkspace('shading');setInspectorTab('materials');$('createMaterialBtn')?.click();syncDesktopWorkbench();};
+  $('pcCreateMaterialBtn').onclick=()=>{setWorkspace('shading');setInspectorTab('materials');$('newMaterialBtn')?.click();syncDesktopWorkbench();};
   for(const id of ['statusText','selectedName','timelineClipName','modelName']){
     const el=$(id); if(el) new MutationObserver(syncDesktopWorkbench).observe(el,{characterData:true,childList:true,subtree:true});
   }
@@ -1556,14 +1558,313 @@ function wireDesktopWorkbench(){
   syncDesktopWorkbench();
 }
 
-
+// ===================== ALPHA 0.9: WORKSPACE + MATERIAL FACE VIEW =====================
+// Virtual material highlights never modify geometry, UV, bind matrices or skin weights.
+const sgAppState={screen:'menu',dirty:false,preview:null,pendingProject:null,zoomDragging:false,zoomY:0};
+let sgSettings={compact:false,showGrid:true,zoomSensitivity:1};
+try{sgSettings={...sgSettings,...JSON.parse(localStorage.getItem('sg-motion-settings-v09')||'{}')};}catch{}
+function sgMarkDirty(){
+  if(sgAppState.screen!=='editor')return;
+  sgAppState.dirty=true;
+  sgRefreshDirty();
+}
+function sgSetClean(){sgAppState.dirty=false;sgRefreshDirty();}
+function sgRefreshDirty(){
+  const label=$('sgDirtyLabel');if(label)label.textContent=sgAppState.dirty?'● Alterações não salvas':'✓ Projeto salvo';
+  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9';
+}
+function sgEnterEditor(){
+  sgAppState.screen='editor';$('sgMainMenu').classList.add('sg-hidden');
+  requestAnimationFrame(()=>{updateSize();orbit.update();sgRefreshDirty();});
+}
+function sgShowMenu(){
+  if(sgAppState.screen==='editor'&&sgAppState.dirty&&!confirm('Você tem alterações não salvas. Voltar ao menu sem salvar?'))return;
+  state.playing=false;
+  sgClearMaterialPreview();sgAppState.screen='menu';$('sgMainMenu').classList.remove('sg-hidden');
+  sgRefreshRecent();
+}
+function sgNewProject(){
+  if(sgAppState.screen==='editor'&&sgAppState.dirty&&!confirm('Descartar alterações não salvas e criar um novo projeto?'))return;
+  sgClearMaterialPreview();installModel(createDemoModel(),null,true);sgSetClean();sgEnterEditor();
+  toast('Novo projeto criado. Importe o FBX para começar.');
+}
+function sgOpenProjectFromMenu(){$('projectInput').click();}
+function sgDatabase(){
+  return new Promise((resolve,reject)=>{
+    if(!indexedDB){reject(Error('Armazenamento local indisponível'));return;}
+    const request=indexedDB.open('SilentGardenMotionStudio-v09',1);
+    request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('projects'))db.createObjectStore('projects',{keyPath:'id'});};
+    request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
+  });
+}
+async function sgReadRecents(){
+  try{const db=await sgDatabase();return await new Promise((resolve,reject)=>{
+    const tx=db.transaction('projects','readonly'),req=tx.objectStore('projects').getAll();
+    req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,8));
+    req.onerror=()=>reject(req.error);
+    tx.oncomplete=()=>db.close();
+  });}catch(e){console.warn('Recent projects unavailable',e);return [];}
+}
+async function sgRememberProject(json){
+  try{
+    const p=JSON.parse(json),db=await sgDatabase();const id=String(p.modelFilename||'demo')+':'+String(p.clips?.[p.clipIndex||0]?.name||'animation');
+    const tx=db.transaction('projects','readwrite'),store=tx.objectStore('projects');
+    store.put({id,modelFilename:p.modelFilename||null,clipName:p.clips?.[p.clipIndex||0]?.name||'animation',updatedAt:Date.now(),json});
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();
+  }catch(e){console.warn('Snapshot recente não salvo:',e);}
+}
+async function sgRefreshRecent(){
+  const host=$('sgRecentList');if(!host)return;host.replaceChildren();
+  const rows=await sgReadRecents();if(!rows.length){
+    const empty=document.createElement('div');empty.className='sg-empty-recent';
+    const icon=document.createElement('span');icon.textContent='◇';const strong=document.createElement('strong');strong.textContent='Nenhum projeto recente';
+    const note=document.createElement('small');note.textContent='Seus projetos salvos aparecerão aqui. Para um projeto FBX, guarde também o modelo original.';
+    empty.append(icon,strong,note);host.append(empty);return;
+  }
+  for(const record of rows){
+    const row=document.createElement('button');row.type='button';row.className='sg-recent-item';
+    const icon=document.createElement('span');icon.className='sg-recent-icon';icon.textContent='▧';
+    const info=document.createElement('div');info.className='sg-recent-content';
+    const name=document.createElement('strong');name.textContent=record.modelFilename||'Projeto de demonstração';
+    const detail=document.createElement('small');detail.textContent=`${record.clipName} · ${new Date(record.updatedAt).toLocaleString('pt-BR')}`;
+    const arrow=document.createElement('span');arrow.className='sg-recent-arrow';arrow.textContent='›';
+    info.append(name,detail);row.append(icon,info,arrow);row.onclick=()=>sgRestoreRecent(record);host.append(row);
+  }
+}
+async function sgRestoreRecent(record){
+  if(sgAppState.screen==='editor'&&sgAppState.dirty&&!confirm('Substituir o projeto atual e perder alterações não salvas?'))return;
+  await sgLoadProjectJSON(record.json);
+}
+async function sgLoadProjectFile(file){
+  if(!file)return;
+  try{await sgLoadProjectJSON(await file.text());}catch(e){toast('Arquivo de projeto inválido: '+e.message,true);}
+}
+async function sgLoadProjectJSON(json){
+  let p;
+  try{p=JSON.parse(json);if(p.app!=='SilentGardenMotionStudio'||!Array.isArray(p.clips))throw Error('Projeto inválido');}
+  catch(e){toast('Não foi possível ler o projeto: '+e.message,true);return;}
+  if(p.modelFilename && state.modelFilename!==p.modelFilename){
+    sgAppState.pendingProject={json,filename:p.modelFilename};
+    toast('Para abrir este projeto, selecione primeiro o modelo original: '+p.modelFilename);
+    $('fbxInput').click();return;
+  }
+  const success=await openProject(new File([json],'project.sgmotion.json',{type:'application/json'}));
+  if(success){sgSetClean();sgEnterEditor();}
+}
+async function sgLoadFBX(file){
+  if(!file)return;
+  sgClearMaterialPreview();await importFBX(file);
+  if(state.modelFilename!==file.name)return;
+  sgEnterEditor();
+  const pending=sgAppState.pendingProject;
+  if(pending){sgAppState.pendingProject=null;if(file.name===pending.filename){
+    const success=await openProject(new File([pending.json],'recent.sgmotion.json',{type:'application/json'}));
+    if(success){sgSetClean();toast('Modelo e projeto recente restaurados.');return;}
+  } else toast('O FBX selecionado não corresponde ao projeto: '+pending.filename,true);}
+  sgMarkDirty();sgFocusAll();
+}
+function sgApplySettings(){
+  document.body.classList.toggle('sg-compact-ui',Boolean(sgSettings.compact));
+  grid.visible=Boolean(sgSettings.showGrid);
+  state.gridVisible=Boolean(sgSettings.showGrid);
+  $('gridBtn').classList.toggle('active',Boolean(sgSettings.showGrid));
+  if($('sgSettingCompact'))$('sgSettingCompact').checked=Boolean(sgSettings.compact);
+  if($('sgSettingGrid'))$('sgSettingGrid').checked=Boolean(sgSettings.showGrid);
+  if($('sgSettingZoom'))$('sgSettingZoom').value=String(sgSettings.zoomSensitivity||1);
+}
+function sgOpenSettings(){sgApplySettings();$('sgSettingsDialog').showModal();}
+function sgPersistSettings(){try{localStorage.setItem('sg-motion-settings-v09',JSON.stringify(sgSettings));}catch{}sgApplySettings();}
+// Bounding-box fit with a camera-oriented sphere avoids clipping on wide, tiny or enormous FBX assets.
+function sgCameraFrame(box,padding=1.22){
+  if(!box||box.isEmpty())return;
+  const size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+  const radius=Math.max(size.length()*.5,1e-5);
+  const fovY=THREE.MathUtils.degToRad(camera.fov),fovX=2*Math.atan(Math.tan(fovY/2)*Math.max(.15,camera.aspect));
+  const halfFov=Math.max(.075,Math.min(fovX,fovY)*.5);
+  const dist=radius/Math.sin(halfFov)*padding;
+  const offset=camera.position.clone().sub(orbit.target);
+  if(offset.lengthSq()<1e-12)offset.set(.35,.12,1);
+  offset.normalize();orbit.target.copy(center);camera.position.copy(center).addScaledVector(offset,dist);
+  camera.near=Math.max(0.000001,radius*.00008);
+  camera.far=Math.max(radius*1100,dist*300,camera.near*1000);
+  orbit.minDistance=Math.max(radius*.00015,.000001);
+  orbit.maxDistance=Math.max(dist*200,radius*1000);
+  camera.updateProjectionMatrix();orbit.update();
+}
+function sgFocusAll(){
+  if(!state.model)return;
+  const bounds=getVisibleCharacterBounds(state.model);
+  if(bounds.isEmpty())return;
+  sgCameraFrame(bounds,matchMedia('(max-width:790px)').matches?1.38:1.19);
+  status('Modelo inteiro enquadrado. Home = enquadrar novamente.');
+}
+function sgFocusSelection(){
+  let box=null;
+  if(state.workspaceMode==='shading'&&state.selectedMesh){box=new THREE.Box3().setFromObject(state.selectedMesh);}
+  else if(rigAssist?.control){const p=rigAssist.control.getWorldPosition(Vec());const radius=Math.max((pendingBounds?.height||1.9)*.065,.01);box=new THREE.Box3(p.clone().addScalar(-radius),p.clone().addScalar(radius));}
+  else if(state.selected){
+    const bone=state.selected,p=bone.getWorldPosition(Vec());let radius=Math.max((pendingBounds?.height||1.9)*.085,.015);
+    for(const child of bone.children||[]){if(child.isBone)radius=Math.max(radius,p.distanceTo(child.getWorldPosition(Vec()))*.8);}
+    box=new THREE.Box3(p.clone().addScalar(-radius),p.clone().addScalar(radius));
+  }
+  if(!box||box.isEmpty())return sgFocusAll();
+  sgCameraFrame(box,1.8);status('Seleção enquadrada. Tecla F para focar novamente.');
+}
+function sgZoom(mult){
+  if(!Number.isFinite(mult)||mult<=0)return;
+  const sensitivity=clamp(Number(sgSettings.zoomSensitivity)||1,.25,3);
+  zoomCamera(Math.pow(mult,sensitivity));
+}
+function sgBindZoomDrag(){
+  const canvas=renderer.domElement;
+  canvas.addEventListener('pointerdown',evt=>{
+    if(sgAppState.screen!=='editor'||!evt.altKey||evt.button!==2)return;
+    sgAppState.zoomDragging=true;sgAppState.zoomY=evt.clientY;
+    orbit.enabled=false;canvas.setPointerCapture?.(evt.pointerId);
+    evt.preventDefault();evt.stopImmediatePropagation();
+  },true);
+  canvas.addEventListener('pointermove',evt=>{
+    if(!sgAppState.zoomDragging)return;
+    const dy=evt.clientY-sgAppState.zoomY;sgAppState.zoomY=evt.clientY;
+    sgZoom(Math.exp(dy*.012));evt.preventDefault();evt.stopImmediatePropagation();
+  },true);
+  function end(evt){if(!sgAppState.zoomDragging)return;sgAppState.zoomDragging=false;orbit.enabled=!transform.dragging;evt?.preventDefault?.();}
+  canvas.addEventListener('pointerup',end,true);canvas.addEventListener('pointercancel',end,true);window.addEventListener('blur',end);
+  canvas.addEventListener('contextmenu',evt=>{if(evt.altKey||sgAppState.zoomDragging)evt.preventDefault();},true);
+}
+// FBX geometry.groups are per-draw material assignments. Do not infer missing assignments.
+function sgFaceCounts(mesh){
+  const geom=mesh?.geometry,materials=meshMaterials(mesh),out=materials.map(()=>0);
+  if(!geom||!materials.length)return {counts:out,grouped:false,valid:false};
+  const total=geom.index?.count||geom.attributes.position?.count||0;
+  const groups=geom.groups||[];
+  if(groups.length){
+    let valid=true;
+    for(const group of groups){const index=Math.trunc(group.materialIndex||0);
+      if(index>=0&&index<out.length)out[index]+=Math.max(0,Math.floor(group.count/3));
+      else valid=false;
+    }
+    return {counts:out,grouped:true,valid};
+  }
+  if(out.length===1){out[0]=Math.floor(total/3);return {counts:out,grouped:false,valid:true};}
+  return {counts:out,grouped:false,valid:false};
+}
+function sgSlotForFace(mesh,faceIndex){
+  if(!mesh?.geometry||!Number.isFinite(faceIndex))return 0;
+  const pos=faceIndex*3,groups=mesh.geometry.groups||[];
+  if(!groups.length)return 0;
+  for(const group of groups){if(pos>=group.start&&pos<group.start+group.count)return Math.trunc(group.materialIndex||0);}
+  return 0;
+}
+function sgClearMaterialPreview(){
+  const view=sgAppState.preview;if(!view)return;
+  view.mesh.material=view.original;
+  for(const mat of view.temporary)mat?.dispose?.();
+  sgAppState.preview=null;
+  for(const id of ['sgHighlightFaces','sgIsolateFaces'])$(id)?.classList.remove('active');
+}
+function sgMaterialPreview(mode){
+  sgClearMaterialPreview();const mesh=state.selectedMesh,slot=state.selectedMaterialSlot;
+  if(!mesh){toast('Selecione uma malha com material.',true);return;}
+  const {counts,valid}=sgFaceCounts(mesh),materials=meshMaterials(mesh);
+  if(!valid||!counts[slot]){toast('O FBX não fornece faces atribuídas a esse slot.',true);return;}
+  const original=mesh.material,temporary=[];
+  const display=materials.map((mat,i)=>{
+    if(i===slot)return mat;
+    const clone=mat.clone();temporary.push(clone);
+    if(mode==='isolate')clone.visible=false;
+    else{clone.transparent=true;clone.opacity=.09;clone.depthWrite=false;clone.needsUpdate=true;}
+    return clone;
+  });
+  // With one material, everything belongs to it; no separate faces can be isolated.
+  mesh.material=Array.isArray(original)?display:display[0];
+  sgAppState.preview={mesh,original,temporary,mode};
+  $(mode==='isolate'?'sgIsolateFaces':'sgHighlightFaces')?.classList.add('active');
+  status(`${mode==='isolate'?'Isoladas':'Destacadas'} ${counts[slot]} faces de ${materials[slot]?.name||'Material'}. Original intacto.`);
+}
+function sgRefreshFaceUI(){
+  const mesh=state.selectedMesh,stats=sgFaceCounts(mesh),slot=state.selectedMaterialSlot;
+  const name=meshMaterials(mesh)[slot]?.name||'Material';
+  const label=$('sgFaceSummary');if(label){
+    label.textContent=mesh?`${name} · ${stats.counts[slot]||0} faces · ${stats.grouped?'Grupos FBX detectados':'Material único ou sem grupos'}`:'Selecione uma malha para identificar as faces';
+  }
+  const possible=Boolean(mesh&&stats.valid&&stats.counts[slot]>0&&meshMaterials(mesh).length>1);
+  for(const id of ['sgHighlightFaces','sgIsolateFaces'])if($(id))$(id).disabled=!possible;
+  if($('sgFaceHint'))$('sgFaceHint').textContent=!mesh?'Selecione uma malha no Outliner.':(!stats.valid?'O FBX não traz atribuições de faces utilizáveis para todos os slots. É necessário definir os grupos no Blender.':meshMaterials(mesh).length===1?'Material único: todas as faces pertencem a esse slot.':'Clique numa face na viewport ou selecione um slot para destacá-lo.');
+}
+function sgSelectMaterialSlotFromHit(mesh,faceIndex){
+  sgClearMaterialPreview();selectMesh(mesh);
+  const slot=sgSlotForFace(mesh,faceIndex),materials=meshMaterials(mesh);
+  if(slot>=0&&slot<materials.length){state.selectedMaterialSlot=slot;refreshMaterials();}
+}
+function sgSetupMaterialClicks(){
+  const canvas=renderer.domElement;
+  // Capturing pointer handler finds the face material before the existing object selector.
+  canvas.addEventListener('pointerdown',evt=>{
+    if(sgAppState.screen!=='editor'||evt.button!==0||state.workspaceMode!=='shading'||transform.dragging)return;
+    const box=canvas.getBoundingClientRect();if(!box.width||!box.height)return;
+    pointer.x=(evt.clientX-box.left)/box.width*2-1;pointer.y=-(evt.clientY-box.top)/box.height*2+1;
+    raycaster.setFromCamera(pointer,camera);
+    const hit=raycaster.intersectObjects(visibleModelMeshes(),false)[0];
+    if(hit){sgSelectMaterialSlotFromHit(hit.object,hit.faceIndex);evt.stopImmediatePropagation();}
+  },true);
+}
+function sgWireWorkspace09(){
+  $('sgMenuNew').onclick=sgNewProject;$('sgMenuOpen').onclick=sgOpenProjectFromMenu;
+  $('sgMenuSettings').onclick=sgOpenSettings;$('sgBackToMenu').onclick=sgShowMenu;
+  $('sgSettingsClose').onclick=()=>$('sgSettingsDialog').close();
+  $('sgSettingCompact').onchange=e=>{sgSettings.compact=e.target.checked;sgPersistSettings();};
+  $('sgSettingGrid').onchange=e=>{sgSettings.showGrid=e.target.checked;sgPersistSettings();};
+  $('sgSettingZoom').onchange=e=>{sgSettings.zoomSensitivity=Number(e.target.value);sgPersistSettings();};
+  $('sgNavView').onclick=sgFocusAll;
+  $('sgNavRig').onclick=()=>{sgEnterEditor();setWorkspace('animation');setInspectorTab('pose');$('rigAssistPanel')?.scrollIntoView({block:'nearest'});};
+  $('sgNavAnimation').onclick=()=>setWorkspace('animation');
+  $('sgZoomIn').onclick=()=>sgZoom(.75);$('sgZoomOut').onclick=()=>sgZoom(1.33);
+  $('sgZoomFocus').onclick=sgFocusSelection;$('sgZoomAll').onclick=sgFocusAll;
+  $('sgHighlightFaces').onclick=()=>sgMaterialPreview('highlight');
+  $('sgIsolateFaces').onclick=()=>sgMaterialPreview('isolate');
+  $('sgRestoreFaces').onclick=()=>{sgClearMaterialPreview();status('Visualização de material restaurada.');};
+  sgBindZoomDrag();sgSetupMaterialClicks();sgApplySettings();sgRefreshFaceUI();sgRefreshRecent();
+  document.addEventListener('keydown',evt=>{
+    if(sgAppState.screen!=='editor'||evt.ctrlKey||evt.metaKey||evt.altKey||
+      evt.target instanceof HTMLInputElement||evt.target instanceof HTMLSelectElement||evt.target instanceof HTMLTextAreaElement||
+      [...document.querySelectorAll('dialog')].some(d=>d.open))return;
+    if(['+','=','NumpadAdd'].includes(evt.key)||evt.code==='NumpadAdd'){evt.preventDefault();sgZoom(.78);}
+    else if(['-','NumpadSubtract'].includes(evt.key)||evt.code==='NumpadSubtract'){evt.preventDefault();sgZoom(1.28);}
+    else if(evt.key.toLowerCase()==='f'){evt.preventDefault();sgFocusSelection();}
+    else if(evt.code==='Home'){evt.preventDefault();sgFocusAll();}
+  },true);
+  document.addEventListener('input',evt=>{
+    if(sgAppState.screen!=='editor')return;
+    const e=evt.target;
+    if(e?.closest?.('#materialInspector')||e?.closest?.('#rotationFields')||e?.closest?.('#positionFields')||
+      ['durationInput','fpsInput','mobileAngle'].includes(e?.id))sgMarkDirty();
+  });
+  document.addEventListener('change',evt=>{
+    if(sgAppState.screen!=='editor')return;
+    const e=evt.target;
+    if(['durationInput','fpsInput','rigGroundCheck','skirtFollowCheck','skirtStrength','skirtSpread'].includes(e?.id))sgMarkDirty();
+  });
+  document.addEventListener('click',evt=>{
+    if(sgAppState.screen!=='editor')return;
+    if(evt.target?.closest?.('#newClipBtn,#mobileNewClipBtn,#rigManualCreateBtn,#skirtKeyframeBtn,#rigKeyframeBtn'))sgMarkDirty();
+  });
+  document.addEventListener('keydown',evt=>{
+    if(sgAppState.screen!=='editor'||!(evt.ctrlKey||evt.metaKey)||evt.altKey)return;
+    if(evt.key.toLowerCase()==='s'){evt.preventDefault();saveProject();}
+    if(evt.key.toLowerCase()==='o'){evt.preventDefault();$('projectInput').click();}
+  },true);
+  window.addEventListener('beforeunload',evt=>{if(sgAppState.dirty){evt.preventDefault();evt.returnValue='';}});
+  sgSetClean();
+}
 
 wireShading();
-wireDesktopWorkbench();
 wire();
 wireMobile();
 rigWire();
 skirtWire();
+wireDesktopWorkbench();
+sgWireWorkspace09();
 installModel(createDemoModel(),null,true);
 checkBackend();
 requestAnimationFrame(animate);

@@ -27,6 +27,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Validar codigo JavaScript do editor
         run: npm run check
+      - name: Validate editor JavaScript
+        run: npm run check
       - name: Compile Windows portable executable
         run: npm run dist:win
         env:
@@ -34,7 +36,7 @@ jobs:
       - name: Upload Windows portable executable
         uses: actions/upload-artifact@v4
         with:
-          name: SilentGardenMotionStudio-Portable-Windows-Alpha-0.8
+          name: SilentGardenMotionStudio-Alpha09-Windows-Portable-Alpha-0.8
           path: desktop/dist/SilentGardenMotionStudio-Portable-*.exe
           if-no-files-found: error
           retention-days: 30

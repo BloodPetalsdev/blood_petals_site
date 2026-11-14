@@ -243,7 +243,6 @@
 .skirt-assist .skirt-actions button{min-height:35px;white-space:normal;height:auto;padding:8px 5px}
 .skirt-assist .skirt-indicator{font-size:10px;color:#d7bbcf;background:#291d2c;border:1px solid #5e4359;padding:7px 9px;border-radius:7px}
 @media(max-width:790px){.skirt-assist{margin:12px 0}.skirt-assist .skirt-actions button{min-height:45px;font-size:11px}}
-
 /* Alpha 0.7 · Desktop-first professional interface */
 .desktop-commandbar{display:none}
 .desktop-command-group{display:flex;align-items:center;gap:8px}
@@ -303,19 +302,50 @@
   .desktop-commandbar{display:none!important}
 }
 
+/* Silent Garden Motion Studio — Workspace & Materials Update, Alpha 0.9 */
+#sgMainMenu{position:fixed;z-index:120;inset:0;display:flex;flex-direction:column;overflow-y:auto;color:#f6f1f9;background:radial-gradient(ellipse at 78% 16%,#59415753,transparent 52%),radial-gradient(ellipse at 8% 82%,#5b52723f,transparent 52%),#10121a;font-family:Inter,'Segoe UI',Arial,sans-serif}
+#sgMainMenu.sg-hidden{display:none!important}
+.sg-menu-header{height:73px;flex-shrink:0;border-bottom:1px solid #ffffff18;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,5vw,78px);gap:15px;background:#11121aa8}
+.sg-brand{display:flex;align-items:center;gap:12px}.sg-brand-flower{height:39px;width:39px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#d79dbf,#8a5c80);color:#301e30;font-size:26px;font-weight:700}.sg-brand-name{font-weight:820;letter-spacing:.14em;font-size:12px}.sg-brand-sub{color:#a69bac;font-size:10px;letter-spacing:.1em;margin-top:4px}.sg-menu-version{font-size:10px;letter-spacing:.12em;color:#eec8dc;border:1px solid #76576f;background:#3b2b3b;border-radius:8px;padding:9px 11px}
+.sg-menu-content{width:min(1170px,calc(100% - 60px));margin:auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:clamp(28px,6vw,96px);align-items:center;padding:50px 0 85px}.sg-menu-hero{max-width:610px}.sg-menu-kicker{font-size:11px;letter-spacing:.19em;color:#cf9dbd;font-weight:740;margin:0 0 26px}.sg-menu-title{font-size:clamp(42px,5vw,79px);line-height:1.05;letter-spacing:-.052em;margin:0 0 19px;font-weight:800}.sg-menu-title span{color:#e5a9cc}.sg-menu-text{color:#b0aab9;font-size:15px;line-height:1.75;max-width:500px;margin:0 0 32px}.sg-primary{color:#201820;background:linear-gradient(120deg,#f6badb,#d99fc8);border:1px solid #f6c1df;box-shadow:0 8px 40px #d693c02a}.sg-primary:hover{filter:brightness(1.09)}.sg-large-button{height:49px;min-width:190px;padding:0 22px;border-radius:10px;font-size:13px;font-weight:780;cursor:pointer}.sg-outline{background:#201e29;border:1px solid #514556;color:#efe6ee}.sg-outline:hover{background:#302835}.sg-menu-actions{display:flex;gap:10px;flex-wrap:wrap}.sg-menu-metadata{display:flex;align-items:center;gap:16px;color:#807989;font-size:11px;margin-top:29px;flex-wrap:wrap}.sg-menu-dot{height:6px;width:6px;border-radius:50%;background:#b8dfb4;display:inline-block;margin-right:5px}
+.sg-menu-panel{background:#1c1b25ed;border:1px solid #4b3e51;border-radius:19px;box-shadow:0 22px 90px #09070e70;overflow:hidden}.sg-panel-header{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 17px;border-bottom:1px solid #ffffff12}.sg-panel-header h2{margin:0;font-size:15px;font-weight:760}.sg-panel-header small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#9d91a6;margin-bottom:7px}.sg-recent-list{padding:10px 12px 15px;min-height:220px;max-height:390px;overflow:auto}.sg-recent-item{width:100%;background:transparent;border:1px solid transparent;color:#e5dee8;display:flex;gap:11px;text-align:left;align-items:center;padding:14px 12px;border-radius:12px;cursor:pointer}.sg-recent-item:hover{background:#352a3a;border-color:#584457}.sg-recent-icon{height:37px;width:37px;border-radius:9px;display:grid;place-items:center;color:#ddb2ce;background:#4b354a;font-size:21px}.sg-recent-content{flex:1;min-width:0}.sg-recent-content strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg-recent-content small{display:block;color:#a395a9;font-size:10px;margin-top:4px;line-height:1.5}.sg-recent-arrow{font-size:19px;color:#9c839a}.sg-empty-recent{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:41px 15px;color:#b5a7b8;gap:9px}.sg-empty-recent span{font-size:30px;color:#ce9bb8}.sg-empty-recent strong{color:#e6daea;font-size:13px}.sg-empty-recent small{font-size:11px;max-width:260px;line-height:1.6}.sg-panel-bottom{padding:12px 22px;background:#201c26;border-top:1px solid #ffffff14;color:#aa9bad;font-size:11px}.sg-menu-footer{height:43px;padding:0 clamp(20px,5vw,78px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;color:#7e7885;font-size:11px;border-top:1px solid #ffffff12}.sg-dialog{border:1px solid #69516a;max-width:470px;width:calc(100% - 32px);background:#1d1b26;color:#f4eaf3;border-radius:17px;padding:25px;box-shadow:0 30px 80px #0009}.sg-dialog::backdrop{background:#000a;backdrop-filter:blur(6px)}.sg-dialog h2{font-size:20px;margin:0 0 8px}.sg-dialog p{line-height:1.6;color:#b5aabc;font-size:12px}.sg-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid #ffffff14;font-size:13px}.sg-setting-row input{accent-color:#d59bbd}.sg-dialog-actions{display:flex;justify-content:flex-end;margin-top:22px}.sg-dialog-actions button{height:36px;border-radius:8px;padding:0 18px}
+.sg-work-back{height:30px;border:1px solid #685068;border-radius:7px;background:#392b3b;color:#f7dbe8;padding:0 11px;font-size:11px;font-weight:740;white-space:nowrap}.sg-work-back:hover{background:#523951}.sg-viewport-nav{position:absolute;right:12px;top:12px;z-index:5;display:flex;flex-direction:column;gap:5px;padding:6px;background:#1c1d26cc;border:1px solid #605166;border-radius:11px;backdrop-filter:blur(12px)}.sg-viewport-nav button{border:1px solid transparent;background:#2e2837;color:#f4dbe9;min-width:35px;height:33px;border-radius:7px;font-size:16px;cursor:pointer;line-height:1}.sg-viewport-nav button:hover{background:#614a62;border-color:#906e8d}.sg-viewport-nav button:last-child{font-size:11px;font-weight:800}.sg-material-face-tools{padding:11px 0;border-bottom:1px solid #ffffff1c;margin:8px 0 13px}.sg-material-face-head{font-size:10px;color:#c0afc2;line-height:1.6;margin-bottom:10px}.sg-material-face-head strong{color:#f3d4e5}.sg-face-buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.sg-face-buttons button{min-height:34px;border-radius:7px;background:#352d3b;border:1px solid #66506a;color:#edd8ea;font-size:10px;font-weight:740;cursor:pointer}.sg-face-buttons button:hover{background:#56405a}.sg-face-buttons button.active{background:#7e5572;color:#fff;border-color:#d89fc2}.sg-face-buttons button:disabled{opacity:.35;cursor:not-allowed}.sg-material-note{color:#a999ac;font-size:10px;line-height:1.55;margin-top:8px}.sg-workspace-help{display:none}
+@media(max-width:790px){.sg-menu-content{grid-template-columns:1fr;width:calc(100% - 34px);gap:26px;padding:28px 0}.sg-menu-title{font-size:41px}.sg-menu-header{padding:0 17px}.sg-brand-name{font-size:10px}.sg-menu-version{font-size:8px}.sg-menu-footer{padding:0 18px}.sg-viewport-nav{right:8px;top:8px}.sg-viewport-nav button{min-width:33px}.sg-face-buttons button{font-size:9px}.sg-work-back{padding:0 8px;font-size:10px}}
+@media(min-width:791px){#sgMainMenu .sg-menu-panel{min-height:290px}.sg-viewport-nav{top:17px;right:17px}.sg-material-face-tools{border-top:1px solid #ffffff13}.sg-workspace-help{display:block;color:#8d8192;font-size:10px;margin:5px 3px 0}.workspace{grid-template-columns:270px minmax(0,1fr) 354px}.app{min-width:1060px}}
 
+
+@media(min-width:791px){.sg-compact-ui .timeline-panel{height:192px}.sg-compact-ui .panel-heading{padding:5px 10px}.sg-compact-ui .desktop-commandbar{padding:4px 10px}.sg-compact-ui .workspace-tabs{min-height:32px}}
 </style>
   <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 </head>
 <body>
+
+<div id="sgMainMenu" role="main" aria-label="Menu inicial do Motion Studio">
+  <header class="sg-menu-header"><div class="sg-brand"><div class="sg-brand-flower">✿</div><div><div class="sg-brand-name">SILENT GARDEN MOTION STUDIO</div><div class="sg-brand-sub">BLOOD PETALS · 3D ANIMATION</div></div></div><span class="sg-menu-version">ALPHA 0.9 · WINDOWS</span></header>
+  <div class="sg-menu-content">
+    <section class="sg-menu-hero"><p class="sg-menu-kicker">WORKSPACE &amp; MATERIALS UPDATE</p><h1 class="sg-menu-title">Animate.<br><span>Create.</span><br>Bring to life.</h1><p class="sg-menu-text">Um espaço completo para animar personagens, controlar o rig, trabalhar com materiais e preparar movimentos para o Blood Petals.</p>
+      <div class="sg-menu-actions"><button type="button" class="sg-large-button sg-primary" id="sgMenuNew">＋ New Project</button><button type="button" class="sg-large-button sg-outline" id="sgMenuOpen">▧ Open Project</button></div>
+      <div class="sg-menu-metadata"><span><i class="sg-menu-dot"></i>Editor 3D offline</span><span>◆ Rig Assist IK</span><span>▧ Materials by Face</span></div>
+    </section>
+    <aside class="sg-menu-panel" aria-label="Projetos recentes"><div class="sg-panel-header"><div><small>YOUR WORKSPACE</small><h2>Recent Projects</h2></div><button type="button" class="sg-outline desktop-command" id="sgMenuSettings" aria-label="Configurações">⚙ Settings</button></div><div class="sg-recent-list" id="sgRecentList"></div><div class="sg-panel-bottom">Projetos recentes salvos neste computador · Guarde o FBX original</div></aside>
+  </div>
+  <footer class="sg-menu-footer"><span>✿ Silent Garden Team · Blood Petals</span><span>Made for animation · 2026</span></footer>
+</div>
+<dialog id="sgSettingsDialog" class="sg-dialog"><h2>⚙ Configurações</h2><p>Personalize o comportamento do Motion Studio neste computador.</p>
+  <label class="sg-setting-row"><span>Interface compacta</span><input type="checkbox" id="sgSettingCompact"></label>
+  <label class="sg-setting-row"><span>Exibir grade da viewport</span><input type="checkbox" id="sgSettingGrid" checked></label>
+  <label class="sg-setting-row"><span>Sensibilidade do zoom</span><select id="sgSettingZoom"><option value="0.5">Suave</option><option value="1" selected>Normal</option><option value="1.7">Rápido</option></select></label>
+  <div class="sg-dialog-actions"><button type="button" class="sg-primary" id="sgSettingsClose">Concluído</button></div>
+</dialog>
+
   <div class="app">
     <header class="topbar">
       <div class="brand">
         <div class="brand-icon">✿</div>
         <div><div class="brand-title">SILENT GARDEN <span>MOTION</span></div><div class="brand-subtitle">Animation studio · BLOOD PETALS</div></div>
-        <span class="version">ALPHA 0.8 · PC</span>
+        <span class="version">ALPHA 0.9 · PC</span>
       </div>
-      <div class="header-actions">
+      <div class="header-actions"><button type="button" class="sg-work-back" id="sgBackToMenu" title="Voltar ao MainMenu">☰ Menu</button>
         <span id="backendPill" class="backend-pill"><i></i> Verificando conversor…</span>
         <button id="helpBtn" class="button ghost" title="Como usar">? <span class="desktop-text">Ajuda</span></button>
         <button id="mobileOpenProjectBtn" class="button ghost mobile-only" title="Abrir projeto">📂</button>
@@ -325,7 +355,7 @@
     </header>
 
     <nav class="workspace-tabs" aria-label="Áreas de trabalho">
-      <div class="file-menu"><span class="menu-flower">✿</span><button id="quickImportBtn" class="menu-link" type="button">Arquivo</button><button id="quickSaveBtn" class="menu-link" type="button">Salvar</button></div>
+      <div class="file-menu"><span class="menu-flower">✿</span><button id="quickImportBtn" class="menu-link" type="button">Arquivo</button><button id="quickSaveBtn" class="menu-link" type="button">Salvar</button><button id="sgNavView" class="menu-link" type="button" title="Enquadrar modelo (Home)">View</button><button id="sgNavRig" class="menu-link" type="button">Rig</button><button id="sgNavAnimation" class="menu-link" type="button">Animation</button></div>
       <div class="workspace-switch">
         <button class="workspace-tab" data-workspace="layout" type="button">Layout</button>
         <button class="workspace-tab active" data-workspace="animation" type="button">Animation</button>
@@ -373,8 +403,9 @@
           <span class="viewport-mode" id="viewportModeLabel">PERSPECTIVE · POSE MODE</span>
         </div>
         <div id="viewport" class="viewport" aria-label="Área de visualização 3D">
+    <nav class="sg-viewport-nav" aria-label="Zoom e foco"><button id="sgZoomIn" type="button" title="Aproximar (+)">＋</button><button id="sgZoomOut" type="button" title="Afastar (−)">−</button><button id="sgZoomFocus" type="button" title="Focar seleção (F)">◎</button><button id="sgZoomAll" type="button" title="Enquadrar tudo (Home)">ALL</button></nav>
           <div class="viewport-corner top-left"><span class="axis-dot"></span> <span id="viewportLabel">Ayame · Demo Rig</span></div>
-          <div class="viewport-corner bottom-left"><span class="keyboard-badge">ARRASTAR</span> Orbitar <span class="keyboard-badge">SCROLL</span> Zoom <span class="keyboard-badge">CLICK</span> Selecionar</div>
+          <div class="viewport-corner bottom-left"><span class="keyboard-badge">ARRASTAR</span> Orbitar <span class="keyboard-badge">ALT + DIREITO</span> Zoom <span class="keyboard-badge">CLICK</span> Selecionar</div>
           <div id="loadingOverlay" class="loading-overlay hidden"><span class="spinner"></span><strong id="loadingTitle">Processando modelo...</strong><small id="loadingDescription">Aguarde</small></div>
           <div id="dropZone" class="drop-zone hidden"><strong>Solte seu FBX aqui ✿</strong><span>O arquivo é aberto no próprio navegador</span></div>
           <div class="mobile-pose-card mobile-only" id="mobilePoseCard" aria-label="Ferramentas rápidas de pose">
@@ -497,6 +528,9 @@
             <div class="inspector-section">
               <div class="section-heading">MATERIAL SLOTS <span id="materialCount">0</span></div>
               <div id="materialSlots" class="material-slots"><div class="mat-empty">Nenhum material selecionado</div></div>
+              <div class="sg-material-face-tools"><div class="sg-material-face-head"><strong>FACE ASSIGNMENT</strong><div id="sgFaceSummary">Selecione um slot de material</div></div>
+                <div class="sg-face-buttons"><button id="sgHighlightFaces" type="button">Destacar</button><button id="sgIsolateFaces" type="button">Isolar</button><button id="sgRestoreFaces" type="button">Restaurar</button></div>
+                <p class="sg-material-note" id="sgFaceHint">A seleção visual não altera a geometria ou os pesos de skinning.</p></div>
               <div class="mat-quick-actions">
                 <button type="button" class="button primary" id="newMaterialBtn">＋ Criar material</button>
                 <button type="button" class="button subtle" id="duplicateMaterialBtn">⧉ Duplicar</button>
@@ -558,7 +592,7 @@
     </section>
     <footer class="app-footer">
       <div class="footer-cluster">
-        <span class="pc-app-title">SILENT GARDEN MOTION STUDIO</span>
+        <span class="pc-app-title">SILENT GARDEN MOTION STUDIO · 0.9</span><span class="footer-tag" id="sgDirtyLabel">✓ Projeto salvo</span>
         <span class="footer-sep"></span>
         <span class="footer-tag"><span class="live-pip"></span><strong id="pcFooterStatus">Ready</strong></span>
       </div>
