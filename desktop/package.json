@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.8",
-  "description": "Alpha 0.9.8 — camera persistence, resizable workspaces, timeline length and Blender modal G/R/S",
+  "version": "0.9.9",
+  "description": "Alpha 0.9.9: full female FBX bone selection, forward knee IK, toon preview, history Undo/Redo and stable camera",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",

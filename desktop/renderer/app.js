@@ -357,10 +357,77 @@ function rigCreateChain(upper,middle,end,label){
   const pole=new THREE.Mesh(new THREE.OctahedronGeometry(Math.max(state.sceneScale*.018,.018)),new THREE.MeshBasicMaterial({color:'#ffd486',depthTest:false,transparent:true,opacity:.9}));
   pole.name='SG IK Pole '+label;pole.position.copy(rigPolePosition(upper,middle,end));pole.renderOrder=1002;
   pole.userData.sgIk='pole';pole.visible=false;scene.add(pole);
-  const chain={id,label,upper,middle,end,goal,pole,kind:hand?'arm':'leg'};
+  const chain={id,label,upper,middle,end,goal,pole,kind:hand?'arm':'leg',weights:{upper:1,middle:1,end:1}};
+  goal.quaternion.copy(end.getWorldQuaternion(new THREE.Quaternion()));
+  if(chain.kind==='leg'){
+    chain.forward=sgLegForwardDirection(chain);
+    const pelvis=rigBone('hips')||rigBone('pelvisroot');
+    chain.pelvisBindQ=pelvis?.getWorldQuaternion(new THREE.Quaternion())||null;
+    pole.position.copy(sgLegPolePosition(chain));
+  }
   goal.userData.rigChain=chain;pole.userData.rigChain=chain;
   rigAssist.chains.push(chain);return chain;
 }
+
+// FBX Female Rig: knees are nearly straight in the bind pose. The lower leg
+// may flip if the solver guesses a pole from the almost-zero bend.
+// LeftFoot/RightFoot -> Toes gives a stable anatomical FRONT direction (+Z in
+// the user's FBX). This is in world coordinates and survives armature rotation.
+function sgLegForwardDirection(chain){
+  const axis=rigWorldPos(chain.end).sub(rigWorldPos(chain.upper)).normalize();
+  let toes=null;
+  chain.end.traverse(node=>{if(!toes&&node.isBone&&/toe/.test(rigPartName(node)))toes=node;});
+  let forward=toes?rigWorldPos(toes).sub(rigWorldPos(chain.end)):new THREE.Vector3(0,0,1);
+  // Ignore the vertical distance from ankles to toes.
+  forward.addScaledVector(axis,-forward.dot(axis));
+  if(forward.lengthSq()<1e-7){
+    const pelvis=rigBone('hips')||rigBone('pelvisroot');
+    forward=new THREE.Vector3(0,0,1).applyQuaternion(pelvis?.getWorldQuaternion(new THREE.Quaternion())||new THREE.Quaternion());
+    forward.addScaledVector(axis,-forward.dot(axis));
+  }
+  if(forward.lengthSq()<1e-7){forward.set(1,0,0).addScaledVector(axis,-axis.x);}
+  return forward.normalize();
+}
+function sgCurrentLegFront(chain){
+  const front=(chain.forward||sgLegForwardDirection(chain)).clone();
+  if(chain.pelvisBindQ){
+    const pelvis=rigBone('hips')||rigBone('pelvisroot');
+    if(pelvis){
+      const current=pelvis.getWorldQuaternion(new THREE.Quaternion());
+      front.applyQuaternion(current.multiply(chain.pelvisBindQ.clone().invert()));
+    }
+  }
+  return front.normalize();
+}
+function sgLegPolePosition(chain){
+  const a=rigWorldPos(chain.upper),b=rigWorldPos(chain.middle),end=rigWorldPos(chain.end);
+  const axis=end.clone().sub(a).normalize();
+  const forward=sgCurrentLegFront(chain);
+  forward.addScaledVector(axis,-forward.dot(axis));
+  if(forward.lengthSq()<1e-8)forward.copy(sgLegForwardDirection(chain));
+  return b.addScaledVector(forward.normalize(),Math.max(a.distanceTo(b)*.68,.04));
+}
+function sgIKRefreshWeights(){
+  const chain=rigAssist.selected;
+  for(const [id,which] of [['sgIKUpper','upper'],['sgIKMiddle','middle'],['sgIKEnd','end']]){
+    const input=$(id),out=$(id+'Value');if(!input)continue;
+    input.disabled=!chain;
+    const value=chain?.weights?.[which]??1;
+    if(document.activeElement!==input)input.value=String(Math.round(value*100));
+    if(out)out.textContent=Math.round(value*100)+'%';
+  }
+  const knee=$('sgKneeStatus');
+  if(knee)knee.textContent=chain?.kind==='leg'?'Joelho orientado pelos dedos do pé · flexão limitada a 150°':'O cotovelo segue o pole control';
+}
+function sgIKWireWeights(){
+  for(const [id,which] of [['sgIKUpper','upper'],['sgIKMiddle','middle'],['sgIKEnd','end']]){
+    const input=$(id);if(!input)continue;
+    input.oninput=()=>{const chain=rigAssist.selected;if(!chain)return;chain.weights[which]=Number(input.value)/100;sgIKRefreshWeights();if(rigAssist.enabled)rigSolve(chain);};
+    input.onchange=()=>{const chain=rigAssist.selected;if(!chain)return;sgMarkDirty();sgHistoryRecord();};
+  }
+  sgIKRefreshWeights();
+}
+
 // Perfil elaborado a partir do FBX real SweaterUniformRIGGED.fbx:
 // pernas com ligação direta e braços com ossos de rotação intermediários.
 
@@ -594,6 +661,7 @@ function sgHandleRigPointerDown(evt){
   const p=new THREE.Vector2(((evt.clientX-rect.left)/rect.width)*2-1,-((evt.clientY-rect.top)/rect.height)*2+1);
   sgControlRay.setFromCamera(p,camera);
   const planePoint=sgControlRay.ray.intersectPlane(sgControlDragPlane,new THREE.Vector3())||control.position.clone();
+  sgHistoryBegin();
   sgPoseTools.dragging={id:evt.pointerId,control,startX:evt.clientX,startY:evt.clientY,offset:control.position.clone().sub(planePoint),moved:false};
   orbit.enabled=false;
   viewport.setPointerCapture?.(evt.pointerId);
@@ -615,7 +683,7 @@ function sgWirePriorityControllerDrag(){
   },true);
   const stop=evt=>{
     const drag=sgPoseTools.dragging;if(!drag||evt.pointerId!==drag.id)return;
-    sgPoseTools.dragging=null;orbit.enabled=!transform.dragging;
+    sgPoseTools.dragging=null;orbit.enabled=!transform.dragging;sgHistoryEnd();
     if(viewport.hasPointerCapture?.(evt.pointerId))viewport.releasePointerCapture(evt.pointerId);
     if(drag.moved)status('Controlador IK reposicionado. Pressione K para gravar a pose.');
     evt.preventDefault();evt.stopImmediatePropagation();
@@ -629,7 +697,7 @@ function sgRefreshViewToolbar(){
   const mirrorIndicator=$('sgMirrorPoseSide');
   if(mirrorIndicator)mirrorIndicator.textContent=sgPoseTools.mirror?'ON':'OFF';
 }
-// Alpha 0.9.8 · Real Blender-style modal transform, instead of only switching gizmo mode.
+// Alpha 0.9.9 · Real Blender-style modal transform, instead of only switching gizmo mode.
 const sgModalTransform={active:null,lastPointer:null};
 function sgModalPointerWorld(clientX,clientY,plane){
   const rect=renderer.domElement.getBoundingClientRect();
@@ -652,6 +720,7 @@ function sgModalEnd(confirmPose){
     sgModalShowText('');status('Pose ajustada. Pressione K para gravar o keyframe.');
   }
   transform.enabled=true;orbit.enabled=!transform.dragging;renderer.domElement.style.cursor='';
+  sgHistoryEnd();
   syncFields();rigRefreshUI();
 }
 function sgModalStart(key){
@@ -663,6 +732,7 @@ function sgModalStart(key){
   if(ik&&key!=='g'){
     toast('Os alvos IK controlam a posição: use G. Para R/S, selecione o osso original.',true);return false;
   }
+  sgHistoryBegin();
   const kind=key==='g'?'translate':key==='r'?'rotate':'scale';
   changeMode(kind);
   state.model?.updateMatrixWorld(true);
@@ -815,7 +885,8 @@ function rigSyncTargets(){
   if(!rigAssist.chains.length||rigAssist.solving)return;
   for(const chain of rigAssist.chains){
     chain.goal.position.copy(rigWorldPos(chain.end));
-    chain.pole.position.copy(rigPolePosition(chain.upper,chain.middle,chain.end));
+    chain.goal.quaternion.copy(chain.end.getWorldQuaternion(new THREE.Quaternion()));
+    chain.pole.position.copy(chain.kind==='leg'?sgLegPolePosition(chain):rigPolePosition(chain.upper,chain.middle,chain.end));
   }
 }
 function rigClear(){
@@ -830,6 +901,7 @@ function rigClear(){
 }
 function rigRefreshUI(){
   const select=$('rigChainSelect');if(!select)return;
+  sgIKRefreshWeights();
   const current=rigAssist.selected?.id||'';
   select.replaceChildren();
   if(!rigAssist.chains.length)select.add(new Option('Nenhuma cadeia identificada',''));
@@ -857,7 +929,7 @@ function rigSelect(chain,part='goal'){
   rigAssist.control=part==='pole'?chain.pole:chain.goal;
   state.playing=false;$('playBtn').textContent='▶';
   transform.attach(rigAssist.control);transform.setMode('translate');transform.setSpace('world');
-  rigRefreshUI();$('selectedName').textContent='IK · '+chain.label;status(`Rig Assist: ${chain.label} · ${part==='pole'?'cotovelo/joelho':'alvo de mão/pé'}.`);
+  rigRefreshUI();sgIKRefreshWeights();$('selectedName').textContent='IK · '+chain.label;status(`Rig Assist: ${chain.label} · ${part==='pole'?'cotovelo/joelho':'alvo de mão/pé'}.`);
   if(matchMedia('(max-width:790px)').matches){setWorkspace('animation');}
   rigRefreshUI();
 }
@@ -993,19 +1065,53 @@ function rigSolve(chain){
     if(rawDist<1e-8)delta.copy(c.sub(a));
     if(delta.lengthSq()<1e-12)delta.set(0,-1,0);
     const direction=delta.normalize();
-    const reach=clamp(rawDist,Math.abs(l1-l2)+.00001,l1+l2-.00001);
+    // Leg bend is constrained to the *forward* hemisphere of the model.
+    // The maximum flexion protects knees against hyperextension/inversion.
+    const maxFlex=THREE.MathUtils.degToRad(150);
+    const minReach=chain.kind==='leg'
+      ?Math.sqrt(Math.max(.0000001,l1*l1+l2*l2+2*l1*l2*Math.cos(maxFlex)))
+      :Math.abs(l1-l2)+.00001;
+    const reach=clamp(rawDist,Math.max(Math.abs(l1-l2)+.00001,minReach),l1+l2-.00001);
     const along=(l1*l1-l2*l2+reach*reach)/(2*reach);
     const height=Math.sqrt(Math.max(0,l1*l1-along*along));
     const poleDir=chain.pole.position.clone().sub(a);
     poleDir.addScaledVector(direction,-poleDir.dot(direction));
     if(poleDir.lengthSq()<1e-9){poleDir.copy(b).sub(a);poleDir.addScaledVector(direction,-poleDir.dot(direction));}
+    if(chain.kind==='leg'){
+      const front=sgCurrentLegFront(chain);
+      front.addScaledVector(direction,-front.dot(direction));
+      if(front.lengthSq()>1e-9){
+        front.normalize();
+        // A pole behind the anatomical front must never invert the knee.
+        if(poleDir.lengthSq()<1e-9||poleDir.clone().normalize().dot(front)<.25) poleDir.copy(front);
+        else poleDir.addScaledVector(front,.28).normalize();
+        // Prevent the user pole handle from being dragged behind the knee.
+        const kneePoleDistance=Math.max(l1*.7,.12);
+        chain.pole.position.copy(a).addScaledVector(poleDir.clone().normalize(),kneePoleDistance);
+      }
+    }
     if(poleDir.lengthSq()<1e-9){poleDir.set(0,0,1).addScaledVector(direction,-direction.z);}
     if(poleDir.lengthSq()<1e-9){poleDir.set(1,0,0).addScaledVector(direction,-direction.x);}
     poleDir.normalize();
     const desiredB=a.clone().addScaledVector(direction,along).addScaledVector(poleDir,height);
     const clampedTarget=a.clone().addScaledVector(direction,reach);
+    // Weights control the actual original upper/middle bones, never fake bones.
+    const priorUpper=chain.upper.quaternion.clone(),priorMiddle=chain.middle.quaternion.clone();
+    const priorEnd=chain.end.quaternion.clone();
+    const goalEndWorld=chain.goal.quaternion.clone();
     rigAlignJoint(chain.upper,chain.middle,desiredB);
+    const weightUpper=clamp(chain.weights?.upper??1,0,1);
+    chain.upper.quaternion.copy(priorUpper).slerp(chain.upper.quaternion.clone(),weightUpper);
+    chain.upper.updateWorldMatrix(true,true);
     rigAlignJoint(chain.middle,chain.end,clampedTarget);
+    const weightMiddle=clamp(chain.weights?.middle??1,0,1);
+    chain.middle.quaternion.copy(priorMiddle).slerp(chain.middle.quaternion.clone(),weightMiddle);
+    chain.middle.updateWorldMatrix(true,true);
+    // Keep feet horizontal and allow the animator to mix IK/FK foot rotation.
+    const parentWorld=chain.end.parent?.getWorldQuaternion(new THREE.Quaternion())||new THREE.Quaternion();
+    const targetLocal=parentWorld.invert().multiply(goalEndWorld);
+    chain.end.quaternion.copy(priorEnd).slerp(targetLocal,clamp(chain.weights?.end??1,0,1));
+    chain.end.updateWorldMatrix(true,true);
     state.model?.updateMatrixWorld(true);
     if(chain.kind==='leg')skirtApply();
     syncFields();
@@ -1031,7 +1137,7 @@ function rigKeyframe(){
 function rigNudge(axis,sign){
   if(!rigAssist.enabled||!rigAssist.control){toast('Ative o Rig Assist e selecione uma mão ou pé.',true);return;}
   rigAssist.control.position[axis]+=sign*Math.max(state.sceneScale*.045,.015);
-  sgProcessRigControl(rigAssist.control);status(`Rig Assist: ${rigAssist.selected?.label||'Alvo'} movido no eixo ${axis.toUpperCase()}. Grave a pose IK.`);
+  sgProcessRigControl(rigAssist.control);sgMarkDirty();status(`Rig Assist: ${rigAssist.selected?.label||'Alvo'} movido no eixo ${axis.toUpperCase()}. Grave a pose IK.`);
 }
 function rigSetupModel(){
   rigClear();
@@ -1040,6 +1146,7 @@ function rigSetupModel(){
   rigDetectChains();rigRefreshUI();skirtSetupModel();sgSetupPoseControls();
 }
 function rigWire(){
+  sgIKWireWeights();
   $('rigAssistToggle').onclick=()=>rigSetEnabled(!rigAssist.enabled);
   $('rigAssistToolbarBtn').onclick=()=>{setWorkspace('animation');setInspectorTab('pose');rigSetEnabled(!rigAssist.enabled);};
   $('rigChainSelect').onchange=e=>{const c=rigAssist.chains.find(x=>x.id===e.target.value);rigSelect(c,'goal');};
@@ -1062,6 +1169,20 @@ function rigWire(){
 // === Alpha 0.9.3 · Easy Bone Picker / screen-space selection ===
 // Selecting an FBX bone never modifies hierarchy, skin weights, or animation curves.
 const sgBonePicker={mode:'main',hover:null,lastClick:null};
+// Family filters expose every original FBX bone without altering the skeleton.
+const sgBoneFamilies=['main','all','face','fingers','skirt','helpers'];
+function sgIsInBoneFamily(bone,mode=sgBonePicker.mode){
+  if(!bone)return false;
+  const name=rigPartName(bone);
+  if(mode==='all')return true;
+  if(mode==='main')return sgIsMainBone(bone);
+  if(mode==='face')return /eye|cheek|brow|lid|lip|mouth|jaw|nose|nostr|temple|ripbtm|corner/.test(name);
+  if(mode==='fingers')return /hand(?:thumb|index|middle|ring|pinky)\d*/.test(name);
+  if(mode==='skirt')return /skart|skirt/.test(name);
+  if(mode==='helpers')return /helper|roll|twist|null|item/.test(name);
+  return true;
+}
+
 const sgBonePickingPoint=new THREE.Vector3();
 const sgBonePickingProjected=new THREE.Vector3();
 function sgIsMainBone(bone){
@@ -1069,21 +1190,23 @@ function sgIsMainBone(bone){
   return /^(hips?|pelvis|root|spine\d*|chest\d*|upperchest|neck\d*|head|(?:left|right)(?:shoulder|arm|forearm|hand|upleg|leg|foot|toe|toebase))$/.test(label);
 }
 function sgBonePickerAllowed(bone){
-  return sgBonePicker.mode==='all'||sgIsMainBone(bone)||bone===state.selected;
+  return sgIsInBoneFamily(bone)||bone===state.selected;
 }
-function sgBonePickerModeLabel(){return sgBonePicker.mode==='main'?'Principais':'Todos';}
+function sgBonePickerModeLabel(){return ({main:'Principais',all:'Todos',face:'Rosto',fingers:'Dedos',skirt:'Saia',helpers:'Auxiliares'})[sgBonePicker.mode]||'Todos';}
 function sgSetBonePickerMode(mode){
-  sgBonePicker.mode=(mode==='all'?'all':'main');
+  sgBonePicker.mode=sgBoneFamilies.includes(mode)?mode:'main';
   sgBonePicker.hover=null;sgBonePicker.lastClick=null;
   const btn=$('sgBonePickerMode');
   if(btn){
-    btn.innerHTML=sgBonePicker.mode==='main'?'◎ <span>Ossos principais</span>':'◉ <span>Todos os ossos</span>';
+    btn.innerHTML=sgBonePicker.mode==='main'?'◎ <span>Ossos principais</span>':'◉ <span>'+sgBonePickerModeLabel()+'</span>';
+    const select=$('sgBoneFamily');if(select)select.value=sgBonePicker.mode;
     btn.title='Alternar ossos principais / todos os ossos (B). Shift + clique alterna ossos sobrepostos.';
-    btn.classList.toggle('active',sgBonePicker.mode==='all');
+    btn.classList.toggle('active',sgBonePicker.mode!=='main');
   }
   const tip=$('sgBonePickerHover');if(tip)tip.hidden=true;
   if(renderer?.domElement)renderer.domElement.style.cursor='';
   status('Seleção de ossos: '+sgBonePickerModeLabel()+'. Clique nas articulações ou nas linhas. Shift + clique alterna ossos sobrepostos.');
+  if(state.model)renderBoneTree();
 }
 function sgCycleBonePickerMode(){sgSetBonePickerMode(sgBonePicker.mode==='main'?'all':'main');}
 function sgBonePickerActive(){
@@ -1105,9 +1228,9 @@ function sgBonePickingCandidates(clientX,clientY){
   const px=clientX-rect.left,py=clientY-rect.top;
   camera.updateMatrixWorld();
   const nodes=new Map(),mainCount=state.bones.reduce((n,b)=>n+Number(sgIsMainBone(b)),0);
-  const all=sgBonePicker.mode==='all'||mainCount<5;
+  const all=sgBonePicker.mode==='all'||(sgBonePicker.mode==='main'&&mainCount<5);
   for(const b of state.bones){
-    if(!all&&!sgIsMainBone(b)&&b!==state.selected)continue;
+    if(!all&&!sgIsInBoneFamily(b)&&b!==state.selected)continue;
     const pos=sgProjectBonePoint(b,rect);if(pos)nodes.set(b,pos);
   }
   const mobile=matchMedia('(max-width:790px)').matches;
@@ -1161,6 +1284,7 @@ function sgShowBonePickerHover(hit,evt){
 }
 function sgEasyBonePickerWire(){
   const canvas=renderer.domElement;
+  const familySelect=$('sgBoneFamily');if(familySelect)familySelect.onchange=e=>sgSetBonePickerMode(e.target.value);
   const toggle=$('sgBonePickerMode');
   if(toggle)toggle.onclick=sgCycleBonePickerMode;
   // Capturing at parent lets us pick near a joint instead of having to
@@ -1282,6 +1406,7 @@ function uniqueNamesCheck() {
   if(repeat) toast(`${repeat} nomes de ossos duplicados: a exportação de animação pode ficar ambígua.`,true);
 }
 function clearModel() {
+  if(sgToon.enabled)sgToggleToon(false);
   if(sgModalTransform.active)sgModalEnd(false);
   sgClearMaterialPreview();
   state.playing=false;
@@ -1354,6 +1479,8 @@ function installModel(model, filename=null, isDemo=false) {
   sgBonePicker.hover=null;sgBonePicker.lastClick=null;
   sgSetBonePickerMode(state.bones.filter(sgIsMainBone).length<5?'all':'main');
   rigSetupModel();
+  // A new rig has its own pose history; the previous model cannot be undone into it.
+  if(sgHistory.states.length)sgHistory.states=[];
   state.clips=[makeClip(isDemo?'demo_wave':'new_animation')];state.clipIndex=0;state.time=0;
   state.sourceClips = isDemo ? [] : (model.animations||[]).slice();
   state.selectedMesh=visibleModelMeshes()[0]||null;
@@ -1368,7 +1495,9 @@ function installModel(model, filename=null, isDemo=false) {
   $('originalClipsPanel').classList.toggle('hidden',state.sourceClips.length===0);
   updateSourceClips();selectBone(state.bones.find(b=>/rightarm/i.test(b.name))||state.bones[0]);
   refreshMaterials();
-  seek(0); status(isDemo?'Modelo de demonstração pronto. Selecione um osso e pressione K.':`${filename} carregado! Crie animações e exporte para a Unity.`);
+  seek(0);if(typeof sgHistoryReset==='function')sgHistoryReset();
+  status(isDemo?'Modelo de demonstração pronto. Selecione um osso e pressione K.':`${filename} carregado! Crie animações e exporte para a Unity.`);
+  sgHistoryReset();
 }
 function createDemoWave() {
   const clip=currentClip();clip.duration=2;
@@ -1437,6 +1566,7 @@ function renderBoneTree(){
   const search=$('boneSearch').value.trim().toLowerCase();
   for(const bone of state.bones){
     const id=bone.userData.sgId;if(search && !bone.name.toLowerCase().includes(search)) continue;
+    if(!sgBonePickerAllowed(bone) && !search)continue;
     const depth=Math.min(4,id.split('/').length-1);
     const row=document.createElement('div');row.className='bone-row'+(state.selected===bone?' selected':'');
     row.style.paddingLeft=`${8+depth*11}px`;row.title=id;
@@ -1446,7 +1576,7 @@ function renderBoneTree(){
   }
   if(!host.children.length)host.textContent='Nenhum osso encontrado.';
 }
-// Alpha 0.9.8 · Duration is visible above the timeline and remains linked with the inspector.
+// Alpha 0.9.9 · Duration is visible above the timeline and remains linked with the inspector.
 function sgSyncTimelineTiming(){
   const clip=currentClip?.();if(!clip)return;
   const seconds=$('sgTimelineSeconds'),fps=$('sgTimelineFPS'),frames=$('sgTimelineFrames'),hint=$('sgTimelineLengthLabel');
@@ -1642,7 +1772,7 @@ function animate(now){
     const bone=h.userData.bone;
     bone.getWorldPosition(scratchVector);h.position.copy(scratchVector);
     const selected=bone===state.selected,hovered=bone===sgBonePicker.hover;
-    const show=state.rigVisible&&(sgBonePicker.mode==='all'||sgIsMainBone(bone)||selected);
+    const show=state.rigVisible&&sgBonePickerAllowed(bone);
     h.visible=show;
     if(!show)continue;
     h.material.color.set(hovered?'#97ecff':selected?'#ffe1f0':'#dda7c8');
@@ -1662,7 +1792,7 @@ function animate(now){
       : (2*distance*Math.tan(THREE.MathUtils.degToRad(camera.fov)*.5)/Math.max(1,viewport.clientHeight));
     ctrl.scale.setScalar(perPixel*(ctrl===rigAssist.control?14:11));
   }
-  renderer.render(scene,camera);
+  sgRenderViewport();
 }
 
 async function importFBX(file){
@@ -1687,7 +1817,7 @@ function serializeProject(){
     clips:state.clips.map(c=>({name:c.name,duration:c.duration,fps:c.fps,tracks:c.tracks})),
     boneNames:state.bones.map(b=>({path:b.userData.sgId,name:b.name})),
     materials:serializeMaterials(),
-    rigAssist:{enabled:rigAssist.enabled,groundClamp:rigAssist.groundClamp,chains:rigAssist.chains.map(c=>({label:c.label,upper:c.upper.userData.sgId,middle:c.middle.userData.sgId,end:c.end.userData.sgId}))}};
+    rigAssist:{enabled:rigAssist.enabled,groundClamp:rigAssist.groundClamp,chains:rigAssist.chains.map(c=>({label:c.label,upper:c.upper.userData.sgId,middle:c.middle.userData.sgId,end:c.end.userData.sgId,weights:{...c.weights}}))}};
 }
 async function saveProject(){
   sgClearMaterialPreview();
@@ -1726,14 +1856,17 @@ async function openProject(file){
       $('rigGroundCheck').checked=rigAssist.groundClamp;
       for(const saved of p.rigAssist.chains){
         const upper=state.boneMap.get(saved.upper),middle=state.boneMap.get(saved.middle),end=state.boneMap.get(saved.end);
-        if(rigValidChain(upper,middle,end))rigCreateChain(upper,middle,end,String(saved.label||end.name));
+        if(rigValidChain(upper,middle,end)){
+          const c=rigCreateChain(upper,middle,end,String(saved.label||end.name))||rigAssist.chains.find(c=>c.upper===upper&&c.middle===middle&&c.end===end);
+          if(c&&saved.weights){c.weights.upper=clamp(Number(saved.weights.upper??1),0,1);c.weights.middle=clamp(Number(saved.weights.middle??1),0,1);}
+        }
       }
       rigRefreshUI();
       if(p.rigAssist.enabled&&rigAssist.chains.length)rigSetEnabled(true);
     }
     if(Array.isArray(p.materials))await restoreMaterials(p.materials);
     toast(`Projeto aberto: ${loaded} trilhas restauradas.${unmatched?' '+unmatched+' ossos não correspondem.':''}`);
-    sgSetClean();return true;
+    sgHistoryReset();sgSetClean();return true;
   }catch(e){toast(`Não foi possível abrir o projeto: ${e.message}`,true);return false;}
 }
 function createAnimationClip(){
@@ -1761,6 +1894,8 @@ async function makeGlb(){
   sgClearMaterialPreview();
   if(state.modelIsDemo)throw new Error('Importe o FBX da Ayame antes de exportar. O Demo Rig é apenas um exercício.');
   const clip=createAnimationClip();
+  const toonWasActive=sgToon.enabled;
+  if(toonWasActive)sgToggleToon(false);
   // O modelo exportado carrega posições base; as keyframes animam a pose de repouso.
   const old=state.bones.map(b=>capture(b));
   // Suspende a escala apenas VISUAL antes de criar o arquivo animado.
@@ -1779,6 +1914,7 @@ async function makeGlb(){
     scene.remove(state.model);
     (visualParent||displayRoot).add(state.model);
     state.model.updateMatrixWorld(true);
+    if(toonWasActive)sgToggleToon(true);
   }
 }
 async function exportGlb(){
@@ -2044,9 +2180,75 @@ function cloneWritableMaterial(){
   }
   markMaterialEdited();return mat;
 }
+
+// Toon viewport preview: clones the source materials and keeps UVs,
+// skinned meshes, FBX material slots and exports completely untouched.
+const sgToon={enabled:false,originals:new Map(),gradient:null};
+function sgMakeToonGradient(){
+  if(sgToon.gradient)return sgToon.gradient;
+  const levels=new Uint8Array([64,64,64,255, 160,160,160,255, 255,255,255,255]);
+  const grad=new THREE.DataTexture(levels,3,1,THREE.RGBAFormat);
+  grad.minFilter=THREE.NearestFilter;grad.magFilter=THREE.NearestFilter;
+  grad.generateMipmaps=false;grad.needsUpdate=true;sgToon.gradient=grad;
+  return grad;
+}
+function sgToonMaterial(source){
+  if(!source)return source;
+  const settings={name:(source.name||'Material')+' · Toon Preview',
+    color:source.color?.clone?.()||new THREE.Color('#ffffff'),
+    map:source.map||null,normalMap:source.normalMap||null,
+    transparent:Boolean(source.transparent),opacity:source.opacity??1,
+    alphaTest:source.alphaTest||0,side:source.side,
+    vertexColors:Boolean(source.vertexColors),gradientMap:sgMakeToonGradient()};
+  return new THREE.MeshToonMaterial(settings);
+}
+// Render-only material overrides. FBX materials and project serialization always
+// see the original data, including when Toon mode is ON.
+sgToon.cache=new WeakMap();
+function sgToonPreviewMaterial(original){
+  if(!original)return original;
+  let preview=sgToon.cache.get(original);
+  if(!preview){preview=sgToonMaterial(original);sgToon.cache.set(original,preview);}
+  preview.color?.copy(original.color||new THREE.Color('#ffffff'));
+  preview.map=original.map||null;
+  preview.normalMap=original.normalMap||null;
+  preview.transparent=!!original.transparent;
+  preview.opacity=original.opacity??1;
+  preview.side=original.side;
+  preview.alphaTest=original.alphaTest||0;
+  preview.needsUpdate=true;
+  return preview;
+}
+function sgRenderViewport(){
+  if(!sgToon.enabled){renderer.render(scene,camera);return;}
+  const originals=[];
+  for(const mesh of allModelMeshes()){
+    if(!mesh.material)continue;
+    originals.push([mesh,mesh.material]);
+    mesh.material=Array.isArray(mesh.material)
+      ?mesh.material.map(sgToonPreviewMaterial):sgToonPreviewMaterial(mesh.material);
+  }
+  try{renderer.render(scene,camera);}finally{
+    for(const [mesh,material] of originals)mesh.material=material;
+  }
+}
+function sgToggleToon(on=!sgToon.enabled){
+  sgToon.enabled=Boolean(on);
+  $('sgToonToggle')?.classList.toggle('active',sgToon.enabled);
+  $('sgToonToggle')?.setAttribute('aria-pressed',String(sgToon.enabled));
+  status(sgToon.enabled?'Prévia Toon ativada (3 tons). FBX original preservado.':'Visualização Lit restaurada.');
+}
+function sgWireToon(){
+  const button=$('sgToonToggle');if(button)button.onclick=()=>sgToggleToon();
+}
+
 function setWorkspace(mode){
   if(!['layout','animation','shading'].includes(mode))return;
   if(sgModalTransform.active)sgModalEnd(true);
+  // Keep the visual camera state 1:1 while changing UI layouts.
+  const cameraPose={position:camera.position.clone(),quaternion:camera.quaternion.clone(),target:orbit.target.clone(),
+    up:camera.up.clone(),zoom:camera.zoom,near:camera.near,far:camera.far,
+    fov:camera.isPerspectiveCamera?camera.fov:null,orthoHalf:sgViewState.orthoHalfHeight};
   state.workspaceMode=mode;
   document.querySelectorAll('[data-workspace]').forEach(b=>b.classList.toggle('active',b.dataset.workspace===mode));
   $('viewportModeLabel').textContent=(sgViewState.view==='perspective'?'PERSPECTIVE':sgViewState.view.toUpperCase()+' · ORTHOGRAPHIC')+' · '+(mode==='shading'?'MATERIAL MODE':mode==='layout'?'OBJECT MODE':'POSE MODE');
@@ -2064,6 +2266,13 @@ function setWorkspace(mode){
     state.outlinerMode='meshes';setInspectorTab('materials');transform.detach();
   }
   refreshOutlinerButtons();renderBoneTree();refreshMaterials();rigRefreshUI();
+  // Do not allow control reattachment or panel-layout resize to modify orbit.
+  camera.position.copy(cameraPose.position);camera.quaternion.copy(cameraPose.quaternion);
+  camera.up.copy(cameraPose.up);camera.zoom=cameraPose.zoom;camera.near=cameraPose.near;camera.far=cameraPose.far;
+  if(camera.isPerspectiveCamera && cameraPose.fov!==null)camera.fov=cameraPose.fov;
+  if(camera.isOrthographicCamera)sgViewState.orthoHalfHeight=cameraPose.orthoHalf;
+  orbit.target.copy(cameraPose.target);camera.updateProjectionMatrix();updateSize();
+  requestAnimationFrame(()=>{if(state.workspaceMode!==mode)return;updateSize();});
 }
 function setInspectorTab(mode){
   state.inspectorTab=mode;
@@ -2435,15 +2644,115 @@ function wireDesktopWorkbench(){
 const sgAppState={screen:'menu',dirty:false,preview:null,pendingProject:null,zoomDragging:false,zoomY:0};
 let sgSettings={compact:false,showGrid:true,zoomSensitivity:1};
 try{sgSettings={...sgSettings,...JSON.parse(localStorage.getItem('sg-motion-settings-v09')||'{}')};}catch{}
+
+// Non-destructive 0.9.9 history. Captures original FBX bone transforms,
+// animation curves, clip timing and editable material properties. No bind
+// poses, skeleton hierarchy or UV arrays are ever modified by Undo/Redo.
+const sgHistory={states:[],index:-1,restoring:false,batch:0,timer:null,limit:35};
+function sgHistoryCapture(){
+  return {
+    bones:state.bones.map(b=>[b.userData.sgId,capture(b)]),
+    clips:JSON.parse(JSON.stringify(state.clips)),clipIndex:state.clipIndex,time:state.time,
+    materials:allModelMeshes().map(mesh=>({mesh,materials:(Array.isArray(sgToon.originals.get(mesh)||mesh.material)?(sgToon.originals.get(mesh)||mesh.material):[sgToon.originals.get(mesh)||mesh.material]).map(mat=>mat?.clone?.()||mat),array:Array.isArray(sgToon.originals.get(mesh)||mesh.material)}))
+  };
+}
+function sgHistoryRefresh(){
+  const undo=$('sgUndoBtn'),redo=$('sgRedoBtn');
+  if(undo)undo.disabled=sgHistory.index<=0;
+  if(redo)redo.disabled=sgHistory.index>=sgHistory.states.length-1;
+}
+function sgHistoryReset(){
+  clearTimeout(sgHistory.timer);sgHistory.timer=null;sgHistory.states=[sgHistoryCapture()];sgHistory.index=0;sgHistory.batch=0;sgHistoryRefresh();
+}
+function sgHistoryRecord(){
+  if(sgHistory.restoring||sgHistory.batch>0||!state.model||sgAppState.screen!=='editor')return;
+  clearTimeout(sgHistory.timer);sgHistory.timer=null;
+  const next=sgHistoryCapture();
+  // Compact fingerprint avoids dozens of empty snapshots from UI-only events.
+  const signature=v=>JSON.stringify({bones:v.bones,clips:v.clips,clipIndex:v.clipIndex,materials:v.materials.map(m=>m.materials.map(mat=>[mat?.name,mat?.color?.getHexString?.(),mat?.opacity,mat?.metalness,mat?.roughness,mat?.map?.uuid]))});
+  if(sgHistory.index>=0&&signature(next)===signature(sgHistory.states[sgHistory.index]))return;
+  sgHistory.states=sgHistory.states.slice(0,sgHistory.index+1);
+  sgHistory.states.push(next);
+  if(sgHistory.states.length>sgHistory.limit)sgHistory.states.shift();
+  sgHistory.index=sgHistory.states.length-1;
+  sgHistoryRefresh();
+}
+function sgHistorySchedule(){
+  if(sgHistory.restoring||!sgHistory.states.length||sgHistory.batch>0)return;
+  clearTimeout(sgHistory.timer);
+  sgHistory.timer=setTimeout(sgHistoryRecord,220);
+}
+function sgHistoryBegin(){
+  if(sgHistory.batch===0&&sgHistory.timer)sgHistoryRecord();
+  sgHistory.batch++;
+}
+function sgHistoryEnd(){
+  sgHistory.batch=Math.max(0,sgHistory.batch-1);
+  if(sgHistory.batch===0)sgHistorySchedule();
+}
+function sgHistoryRestore(snapshot){
+  sgHistory.restoring=true;
+  try{
+    state.playing=false;$('playBtn').textContent='▶';
+    state.clips=JSON.parse(JSON.stringify(snapshot.clips));
+    state.clipIndex=clamp(snapshot.clipIndex,0,state.clips.length-1);
+    for(const [id,pose] of snapshot.bones){const bone=state.boneMap.get(id);if(bone)applyTransform(bone,pose);}
+    const toonBefore=sgToon.enabled;
+    if(toonBefore)sgToggleToon(false);
+    for(const entry of snapshot.materials){
+      if(!entry.mesh?.isMesh)continue;
+      const copied=entry.materials.map(mat=>mat?.clone?.()||mat);
+      entry.mesh.material=entry.array?copied:copied[0];
+    }
+    if(toonBefore)sgToggleToon(true);
+    state.model?.updateMatrixWorld(true);rigSyncTargets();
+    updateClipSelectors();renderTimeline();state.time=clamp(snapshot.time,0,currentClip().duration);
+    updatePlayhead();renderBoneTree();refreshMaterials();syncFields();
+    sgMarkDirty();
+  }finally{sgHistory.restoring=false;}
+  sgHistoryRefresh();
+}
+function sgUndo(){
+  if(sgModalTransform.active){sgModalEnd(true);}
+  if(sgHistory.timer){sgHistoryRecord();}
+  if(sgHistory.index<=0){toast('Nenhuma alteração para desfazer.');return;}
+  sgHistory.index--;sgHistoryRestore(sgHistory.states[sgHistory.index]);
+  status('↶ Desfazer · Ctrl+Z');
+}
+function sgRedo(){
+  if(sgHistory.timer){sgHistoryRecord();}
+  if(sgHistory.index>=sgHistory.states.length-1){toast('Nenhuma alteração para refazer.');return;}
+  sgHistory.index++;sgHistoryRestore(sgHistory.states[sgHistory.index]);
+  status('↷ Refazer · Ctrl+Y');
+}
+function sgWireHistory(){
+  $('sgUndoBtn')?.addEventListener('click',sgUndo);
+  $('sgRedoBtn')?.addEventListener('click',sgRedo);
+  document.addEventListener('keydown',e=>{
+    if(!(e.ctrlKey||e.metaKey)||e.altKey||sgAppState.screen!=='editor')return;
+    const k=e.key.toLowerCase();
+    if(k==='s'){e.preventDefault();e.stopImmediatePropagation();saveProject();return;}
+    if(e.target?.closest?.('input,textarea,[contenteditable="true"]'))return;
+    if(k==='z'||k==='y'){
+      e.preventDefault();e.stopImmediatePropagation();
+      if(k==='y'||e.shiftKey)sgRedo();else sgUndo();
+    }
+  },true);
+  transform.addEventListener('mouseDown',sgHistoryBegin);
+  transform.addEventListener('mouseUp',sgHistoryEnd);
+  sgHistoryRefresh();
+}
+
 function sgMarkDirty(){
   if(sgAppState.screen!=='editor')return;
   sgAppState.dirty=true;
   sgRefreshDirty();
+  sgHistorySchedule();
 }
 function sgSetClean(){sgAppState.dirty=false;sgRefreshDirty();}
 function sgRefreshDirty(){
   const label=$('sgDirtyLabel');if(label)label.textContent=sgAppState.dirty?'● Alterações não salvas':'✓ Projeto salvo';
-  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9.4';
+  document.title=(sgAppState.dirty?'● ':'')+'Silent Garden Motion Studio — Alpha 0.9.9';
 }
 function sgEnterEditor(){
   sgAppState.screen='editor';$('sgMainMenu').classList.add('sg-hidden');sgPauseMenuMusic();
@@ -2557,8 +2866,11 @@ function sgSetCameraView(view){
   if(sgAppState.screen!=='editor')return;
   if(view==='perspective'){
     if(camera!==sgPerspectiveCamera){
-      sgPerspectiveCamera.position.copy(camera.position);
-      sgPerspectiveCamera.quaternion.copy(camera.quaternion);
+      // Restore the last perspective viewpoint, rather than copying an
+      // orthographic axis position and unexpectedly rotating the model.
+      if(sgViewState.perspectivePosition)sgPerspectiveCamera.position.copy(sgViewState.perspectivePosition);
+      if(sgViewState.perspectiveQuaternion)sgPerspectiveCamera.quaternion.copy(sgViewState.perspectiveQuaternion);
+      if(sgViewState.perspectiveTarget)orbit.target.copy(sgViewState.perspectiveTarget);
       camera=sgPerspectiveCamera;orbit.object=camera;transform.camera=camera;
       camera.aspect=Math.max(.05,viewport.clientWidth/Math.max(1,viewport.clientHeight));
       camera.updateProjectionMatrix();
@@ -2568,7 +2880,12 @@ function sgSetCameraView(view){
       front:[0,0,1],back:[0,0,-1],left:[-1,0,0],right:[1,0,0],up:[0,1,0],down:[0,-1,0]
     };
     const v=orientations[view];if(!v)return;
-    if(camera!==sgOrthographicCamera){camera=sgOrthographicCamera;orbit.object=camera;transform.camera=camera;}
+    if(camera!==sgOrthographicCamera){
+      sgViewState.perspectivePosition=sgPerspectiveCamera.position.clone();
+      sgViewState.perspectiveQuaternion=sgPerspectiveCamera.quaternion.clone();
+      sgViewState.perspectiveTarget=orbit.target.clone();
+      camera=sgOrthographicCamera;orbit.object=camera;transform.camera=camera;
+    }
     camera.up.set(0,Math.abs(v[1])===1?0:1,Math.abs(v[1])===1?(v[1]===1?-1:1):0);
     camera.position.copy(orbit.target).addScaledVector(new THREE.Vector3(...v),Math.max(3,(pendingBounds?.radius||1)*6));
     camera.lookAt(orbit.target);sgUpdateOrthoFrustum();
@@ -2728,7 +3045,7 @@ function sgSetupMaterialClicks(){
     if(hit){sgSelectMaterialSlotFromHit(hit.object,hit.faceIndex);evt.stopImmediatePropagation();}
   },true);
 }
-// Alpha 0.9.8 · Resizable desktop workspaces. Canvas and camera projection resize but never re-frame.
+// Alpha 0.9.9 · Resizable desktop workspaces. Canvas and camera projection resize but never re-frame.
 function sgWireResizablePanels(){
   const workspace=document.querySelector('.workspace'),timeline=document.querySelector('.timeline-panel');
   const panels=[{handle:$('sgResizeLeft'),property:'--sg-left-panel',storage:'sg-motion-left-v098',base:280,min:174,max:450,dir:1},
@@ -2836,10 +3153,12 @@ try {
   sgWirePoseTools();
   sgEasyBonePickerWire();
   wireDesktopWorkbench();
+  sgWireHistory(); // Register Ctrl+Z/Y/S before legacy Ctrl+S handler.
   sgWireWorkspace09();
   sgWireResizablePanels();
   sgBindTimelineTiming();
   sgWireFbxExportGuide();
+  sgWireToon();
   // Exposed only for diagnostic/smoke checks; never mutates project data.
   window.sgStudioDiagnostics=Object.freeze({
     camera:()=>({position:camera.position.toArray(),target:orbit.target.toArray(),quaternion:camera.quaternion.toArray(),orthographic:camera.isOrthographicCamera}),

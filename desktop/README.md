@@ -1,3 +1,21 @@
+# Silent Garden Motion Studio Alpha 0.9.9 · Rig Control & Toon
+
+- Todos os ossos FBX são editáveis. Filtros: Corpo, Todos, Rosto, Dedos, Saia, Auxiliares.
+- IK das pernas com direção frontal baseada nos ossos de dedos dos pés. Flexão máxima aproximada de 150 graus; pole control continua disponível.
+- Influência individual da coxa/braço e canela/antebraço em cada cadeia IK, salva no projeto.
+- Prévia Toon de três níveis de luz: apenas viewport, sem modificar materiais e texturas exportados.
+- Ctrl+Z desfaz, Ctrl+Y / Ctrl+Shift+Z refaz, Ctrl+S salva o projeto.
+- Câmera persistente entre Layout / Animation / Shading e ao voltar de vista ortográfica à perspectiva.
+- Preservados: G/R/S, espelho, cabeça, quadril, Rig Assist, saia, timeline, materiais e modelo feminino.
+- Recursos do modelo original e música seguem como arquivos privados na pasta assets ao lado do EXE, e NÃO fazem parte do repositório público.
+- Exportação FBX continua exigindo Blender instalado e deve ser validada na Unity Legacy.
+
+## Executável
+Na página do GitHub Actions, baixe o artefato SilentGardenMotionStudio-Windows-Alpha-0.9.9 e extraia o EXE. Se tiver o pacote assets da 0.9.8, mantenha-o ao lado.
+
+## Limitações atuais
+A simulação de IK é uma assistência de dois segmentos com influências; não substitui um rig Rigify completo. O joelho é limitado por direção e distância, mas cenas extremas requerem ajuste do pole e verificação visual. O histórico não captura todas as operações externas e importações de arquivos binários.
+
 # Silent Garden Motion Studio — Alpha 0.9 (Windows portátil)
 
 **Workspace & Materials Update** — atualização da Alpha 0.8 que preserva o Rig Assist IK, 12 ossos de saia e o formato de animações Blood Petals.
