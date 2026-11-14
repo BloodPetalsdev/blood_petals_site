@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'android-app/**'
+      - 'studio/index.html'
       - '.github/workflows/motion-studio-android.yml'
 
 permissions:
@@ -51,11 +52,11 @@ jobs:
       - name: Preparar APK para download
         run: |
           mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/SilentGardenMotionStudio-Android-Alpha-0.1.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/SilentGardenMotionStudio-Android-FemaleRig-Alpha-0.8.apk
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: SilentGardenMotionStudio-Android-APK
-          path: android-app/dist/SilentGardenMotionStudio-Android-Alpha-0.1.apk
+          name: SilentGardenMotionStudio-Android-FemaleRig-APK
+          path: android-app/dist/SilentGardenMotionStudio-Android-FemaleRig-Alpha-0.8.apk
           if-no-files-found: error
           retention-days: 30
