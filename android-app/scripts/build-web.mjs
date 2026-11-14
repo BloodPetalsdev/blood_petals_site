@@ -9,6 +9,9 @@ const original = await readFile(inputPath, 'utf8');
 const inlineModule = /<script\s+type=["']module["']\s*>([\s\S]*?)<\/script>/i;
 const found = original.match(inlineModule);
 if (!found) throw new Error('Editor JS não encontrado no HTML de origem');
+if (!found[1].includes('function rigSolve(chain)') || !original.includes('id="rigAssistToggle"')) {
+  throw new Error('A origem do aplicativo Android não contém o Rig Assist IK');
+}
 if (!found[1].includes('FBXLoader') || !found[1].includes('wireShading()')) {
   throw new Error('A origem não contém os recursos necessários de FBX e materiais');
 }
