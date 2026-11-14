@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "1.0.0",
-  "description": "Motion Studio 1.0 — professional Windows workspace, verified IK linkage, toon preview and undo/redo",
+  "version": "1.1.0",
+  "description": "Silent Garden Motion Studio v1.1 — reference-based professional editor with customizable Studio Themes",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,7 @@
     "prepare:assets": "node prepare-assets.cjs",
     "start": "npm run prepare:assets && electron .",
     "dist:win": "npm run prepare:assets && electron-builder --win portable --x64 --publish never",
-    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/app.js && node --check renderer/startup.js",
+    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/startup.js && node --check renderer/app.js && node --check renderer/theme.js",
     "smoke:win": "npm run prepare:assets && electron . --sg-smoke-test"
   },
   "devDependencies": {
