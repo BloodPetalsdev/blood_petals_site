@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.7",
-  "description": "Silent Garden Motion Studio Alpha 0.9.7 - startup, menu audio and 3D editor fixes",
+  "version": "0.9.8",
+  "description": "Alpha 0.9.8 — camera persistence, resizable workspaces, timeline length and Blender modal G/R/S",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,7 @@
     "prepare:assets": "node prepare-assets.cjs",
     "start": "npm run prepare:assets && electron .",
     "dist:win": "npm run prepare:assets && electron-builder --win portable --x64 --publish never",
-    "check": "node --check main.cjs && node --check preload.cjs && node scripts/check-modules.cjs",
+    "check": "node --check main.cjs && node --check preload.cjs && node --check renderer/app.js && node --check renderer/startup.js",
     "smoke:win": "npm run prepare:assets && electron . --sg-smoke-test"
   },
   "devDependencies": {

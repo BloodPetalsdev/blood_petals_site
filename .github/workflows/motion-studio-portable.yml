@@ -38,7 +38,7 @@ jobs:
       - name: Upload Windows portable executable
         uses: actions/upload-artifact@v4
         with:
-          name: SilentGardenMotionStudio-Windows-Alpha-0.9.7
+          name: SilentGardenMotionStudio-Windows-Alpha-0.9.8
           path: desktop/dist/SilentGardenMotionStudio-Portable-*.exe
           if-no-files-found: error
           retention-days: 30

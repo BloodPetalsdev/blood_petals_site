@@ -629,6 +629,132 @@ function sgRefreshViewToolbar(){
   const mirrorIndicator=$('sgMirrorPoseSide');
   if(mirrorIndicator)mirrorIndicator.textContent=sgPoseTools.mirror?'ON':'OFF';
 }
+// Alpha 0.9.8 · Real Blender-style modal transform, instead of only switching gizmo mode.
+const sgModalTransform={active:null,lastPointer:null};
+function sgModalPointerWorld(clientX,clientY,plane){
+  const rect=renderer.domElement.getBoundingClientRect();
+  if(rect.width<3||rect.height<3)return null;
+  const ndc=new THREE.Vector2((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);
+  const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);
+  return ray.ray.intersectPlane(plane,new THREE.Vector3());
+}
+function sgModalShowText(text){const el=$('sgModalTransformHint');if(!el)return;el.hidden=!text;if(text)el.textContent=text;}
+function sgModalEnd(confirmPose){
+  const mode=sgModalTransform.active;if(!mode)return;
+  sgModalTransform.active=null;
+  if(!confirmPose){
+    for(const [bone,pose] of mode.before)applyTransform(bone,pose);
+    for(const [ctrl,pos] of mode.controlPos)ctrl.position.copy(pos);
+    state.model?.updateWorldMatrix(true,true);
+    sgModalShowText('');status('Transformação cancelada.');
+  }else{
+    sgMarkDirty();
+    sgModalShowText('');status('Pose ajustada. Pressione K para gravar o keyframe.');
+  }
+  transform.enabled=true;orbit.enabled=!transform.dragging;renderer.domElement.style.cursor='';
+  syncFields();rigRefreshUI();
+}
+function sgModalStart(key){
+  if(sgAppState.screen!=='editor'||state.playing||state.workspaceMode==='shading')return false;
+  if(sgModalTransform.active)sgModalEnd(true);
+  const ik=rigAssist.control && rigAssist.enabled?rigAssist.control:null;
+  const bone=(!ik&&state.selected?.isBone)?state.selected:null;
+  if(!ik&&!bone){toast('Selecione primeiro um osso ou controlador IK.',true);return false;}
+  if(ik&&key!=='g'){
+    toast('Os alvos IK controlam a posição: use G. Para R/S, selecione o osso original.',true);return false;
+  }
+  const kind=key==='g'?'translate':key==='r'?'rotate':'scale';
+  changeMode(kind);
+  state.model?.updateMatrixWorld(true);
+  const target=ik||bone;
+  const origin=target.getWorldPosition(new THREE.Vector3());
+  const rect=renderer.domElement.getBoundingClientRect();
+  const pointer=sgModalTransform.lastPointer;
+  const start=pointer&&pointer.x>=rect.left&&pointer.x<=rect.right&&pointer.y>=rect.top&&pointer.y<=rect.bottom
+    ?{x:pointer.x,y:pointer.y}:{x:rect.left+rect.width*.5,y:rect.top+rect.height*.5};
+  const plane=new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()),origin);
+  const anchor=sgModalPointerWorld(start.x,start.y,plane)||origin.clone();
+  const before=new Map(state.bones.map(b=>[b,capture(b)]));
+  const controlPos=new Map();
+  for(const chain of rigAssist.chains){controlPos.set(chain.goal,chain.goal.position.clone());controlPos.set(chain.pole,chain.pole.position.clone());}
+  for(const ctrl of [sgPoseTools.head,sgPoseTools.hips])if(ctrl)controlPos.set(ctrl,ctrl.position.clone());
+  sgModalTransform.active={kind,key,ik,bone,target,start,origin,plane,anchor,
+    before,controlPos,startPosition:target.position.clone(),startQuat:bone?.quaternion.clone(),startScale:bone?.scale.clone(),axis:null};
+  orbit.enabled=false;transform.enabled=false;renderer.domElement.style.cursor='crosshair';
+  sgModalShowText(`${key.toUpperCase()} · Mova o mouse | Clique ou Enter: confirmar | Esc: cancelar | X/Y/Z: eixo`);
+  status(`Transformação ${key.toUpperCase()} iniciada. Mova o cursor no 3D.`);
+  return true;
+}
+function sgModalUpdate(clientX,clientY){
+  const m=sgModalTransform.active;if(!m)return;
+  const dx=clientX-m.start.x,dy=clientY-m.start.y;
+  if(m.kind==='translate'){
+    let offset;
+    if(m.axis){
+      const axis=new THREE.Vector3(m.axis==='x'?1:0,m.axis==='y'?1:0,m.axis==='z'?1:0);
+      const rect=renderer.domElement.getBoundingClientRect();
+      const project=p=>{const q=p.clone().project(camera);return new THREE.Vector2((q.x*.5+.5)*rect.width,(-q.y*.5+.5)*rect.height);};
+      const p0=project(m.origin),p1=project(m.origin.clone().add(axis));
+      const v=p1.sub(p0);const length2=v.lengthSq();
+      const units=length2>1?new THREE.Vector2(dx,dy).dot(v)/length2:-dy*(state.sceneScale||1)/Math.max(1,rect.height);
+      offset=axis.multiplyScalar(units);
+    }else{
+      const hit=sgModalPointerWorld(clientX,clientY,m.plane);
+      if(!hit)return;
+      offset=hit.sub(m.anchor);
+    }
+    const wanted=m.origin.clone().add(offset);
+    if(m.ik)m.target.position.copy(wanted); // IK helpers are world-space scene objects.
+    else m.bone.position.copy(m.bone.parent.worldToLocal(wanted));
+  } else if(m.kind==='rotate'){
+    const angle=(dx-dy)*.008;
+    const worldAxis=m.axis?new THREE.Vector3(m.axis==='x'?1:0,m.axis==='y'?1:0,m.axis==='z'?1:0):camera.getWorldDirection(new THREE.Vector3());
+    const parentQ=m.bone.parent.getWorldQuaternion(new THREE.Quaternion());
+    const localAxis=worldAxis.applyQuaternion(parentQ.invert()).normalize();
+    m.bone.quaternion.copy(new THREE.Quaternion().setFromAxisAngle(localAxis,angle).multiply(m.startQuat));
+  } else if(m.kind==='scale'){
+    const scale=clamp(Math.exp((dx-dy)*.007),.05,20);
+    if(m.axis){m.bone.scale.copy(m.startScale);m.bone.scale[m.axis]=m.startScale[m.axis]*scale;}
+    else m.bone.scale.copy(m.startScale).multiplyScalar(scale);
+  }
+  state.model?.updateMatrixWorld(true);
+  if(m.ik)sgProcessRigControl(m.ik);
+  else {
+    sgMirrorBonePose(m.bone);
+    if(skirtAssist.enabled&&/^(leftupleg|rightupleg)$/.test(rigPartName(m.bone)))skirtApply();
+  }
+  syncFields();
+}
+function sgWireModalTransforms(){
+  document.addEventListener('pointermove',evt=>{
+    sgModalTransform.lastPointer={x:evt.clientX,y:evt.clientY};
+    if(!sgModalTransform.active)return;
+    if(evt.pointerType==='touch'&&evt.isPrimary===false)return;
+    sgModalUpdate(evt.clientX,evt.clientY);
+    evt.preventDefault();evt.stopImmediatePropagation();
+  },true);
+  document.addEventListener('pointerdown',evt=>{
+    if(!sgModalTransform.active)return;
+    if(evt.button===2){sgModalEnd(false);evt.preventDefault();evt.stopImmediatePropagation();return;}
+    if(evt.button===0 && (evt.target===renderer.domElement||evt.target?.closest?.('#viewport'))){
+      sgModalEnd(true);evt.preventDefault();evt.stopImmediatePropagation();
+    }
+  },true);
+  document.addEventListener('keydown',evt=>{
+    if(!sgModalTransform.active)return;
+    if(evt.key==='Escape'||evt.key==='Enter'||evt.code==='NumpadEnter'){
+      sgModalEnd(evt.key!=='Escape');evt.preventDefault();evt.stopImmediatePropagation();return;
+    }
+    const axis=evt.key?.toLowerCase();if(['x','y','z'].includes(axis)){
+      const m=sgModalTransform.active;m.axis=m.axis===axis?null:axis;
+      sgModalUpdate(sgModalTransform.lastPointer?.x??m.start.x,sgModalTransform.lastPointer?.y??m.start.y);
+      sgModalShowText(`${m.key.toUpperCase()} · ${m.axis?.toUpperCase()||'Livre'} | Clique/Enter confirmar | Esc cancelar`);
+      evt.preventDefault();evt.stopImmediatePropagation();
+    }
+  },true);
+  renderer.domElement.addEventListener('contextmenu',evt=>{if(sgModalTransform.active)evt.preventDefault();},true);
+  window.addEventListener('blur',()=>sgModalEnd(false));
+}
 function sgWirePoseTools(){
   $('sgMirrorPose').onclick=()=>{
     sgPoseTools.mirror=!sgPoseTools.mirror;sgRefreshViewToolbar();
@@ -647,7 +773,7 @@ function sgWirePoseTools(){
     if(code==='Numpad7'){evt.preventDefault();sgSetCameraView(evt.ctrlKey?'down':'up');return;}
     if(code==='Numpad5'){evt.preventDefault();sgSetCameraView('perspective');return;}
     if(key==='g'||key==='r'||key==='s'){
-      evt.preventDefault();changeMode(key==='g'?'translate':key==='r'?'rotate':'scale');
+      evt.preventDefault();evt.stopImmediatePropagation();sgModalStart(key);
     }
   },true);
 }
@@ -1156,6 +1282,7 @@ function uniqueNamesCheck() {
   if(repeat) toast(`${repeat} nomes de ossos duplicados: a exportação de animação pode ficar ambígua.`,true);
 }
 function clearModel() {
+  if(sgModalTransform.active)sgModalEnd(false);
   sgClearMaterialPreview();
   state.playing=false;
   transform.detach();
@@ -1288,7 +1415,7 @@ function selectBone(bone) {
   state.selected=bone;
   if(rigAssist.control){rigAssist.control=null;rigAssist.selected=null;rigRefreshUI();}
   for(const id of ['sgHeadControlBtn','sgHipsControlBtn'])$(id)?.classList.remove('active');
-  if(state.workspaceMode!=='shading'){transform.attach(bone);transform.setMode(state.editMode==='rotate'?'rotate':'translate');transform.setSpace('local');}
+  if(state.workspaceMode!=='shading'){transform.attach(bone);transform.setMode(state.editMode==='scale'?'scale':state.editMode==='rotate'?'rotate':'translate');transform.setSpace('local');}
   $('selectedName').textContent=bone.name||'Unnamed Bone';
   $('mobileBoneName').textContent=bone.name||'Osso';
   syncFields();renderBoneTree();renderTimeline();
@@ -1319,6 +1446,39 @@ function renderBoneTree(){
   }
   if(!host.children.length)host.textContent='Nenhum osso encontrado.';
 }
+// Alpha 0.9.8 · Duration is visible above the timeline and remains linked with the inspector.
+function sgSyncTimelineTiming(){
+  const clip=currentClip?.();if(!clip)return;
+  const seconds=$('sgTimelineSeconds'),fps=$('sgTimelineFPS'),frames=$('sgTimelineFrames'),hint=$('sgTimelineLengthLabel');
+  if(seconds&&document.activeElement!==seconds)seconds.value=Number(clip.duration.toFixed(3));
+  if(fps&&document.activeElement!==fps)fps.value=String(clip.fps);
+  if(frames&&document.activeElement!==frames)frames.value=String(Math.max(1,Math.round(clip.duration*clip.fps)));
+  if(hint)hint.textContent=`${Math.max(1,Math.round(clip.duration*clip.fps))} quadros · ${clip.duration.toFixed(2)} s`;
+}
+function sgBindTimelineTiming(){
+  const seconds=$('sgTimelineSeconds'),fps=$('sgTimelineFPS'),frames=$('sgTimelineFrames');
+  if(!seconds||!fps||!frames)return;
+  seconds.addEventListener('change',()=>{
+    const secondsWanted=clamp(Number(seconds.value)||currentClip().duration,.1,120);
+    const original=$('durationInput');original.value=String(secondsWanted);
+    original.onchange?.({target:original});
+    sgSyncTimelineTiming();sgMarkDirty();
+  });
+  fps.addEventListener('change',()=>{
+    const original=$('fpsInput');original.value=fps.value;
+    original.onchange?.({target:original});
+    renderTimeline();sgSyncTimelineTiming();sgMarkDirty();
+  });
+  frames.addEventListener('change',()=>{
+    const frameCount=Math.round(clamp(Number(frames.value)||1,1,120*currentClip().fps));
+    const original=$('durationInput');original.value=String(frameCount/currentClip().fps);
+    original.onchange?.({target:original});
+    sgSyncTimelineTiming();sgMarkDirty();
+  });
+  const origSeconds=$('durationInput');origSeconds.addEventListener('change',sgSyncTimelineTiming);
+  const origFps=$('fpsInput');origFps.addEventListener('change',()=>{renderTimeline();sgSyncTimelineTiming();});
+  sgSyncTimelineTiming();
+}
 function updateClipSelectors(){
   const sel=$('clipSelect');sel.replaceChildren();
   state.clips.forEach((clip,i)=>{const o=new Option(clip.name, String(i));sel.add(o);});
@@ -1326,8 +1486,10 @@ function updateClipSelectors(){
   const mobile=$('mobileClipSelect');mobile.replaceChildren();
   state.clips.forEach((clip,i)=>mobile.add(new Option(clip.name,String(i))));mobile.value=String(state.clipIndex);
   const clip=currentClip();$('timelineClipName').textContent=clip.name;
+  sgSyncTimelineTiming();
   if($('mobileClipSelect').value!==String(state.clipIndex))$('mobileClipSelect').value=String(state.clipIndex);
   $('durationInput').value=clip.duration;$('fpsInput').value=String(clip.fps);
+  sgSyncTimelineTiming();
 }
 function updateSourceClips(){
   const select=$('originalClipSelect');select.replaceChildren();
@@ -1391,6 +1553,7 @@ function removeKey(boneId,time){
 function renderTimeline(){
   if(!state.clips.length)return;
   const clip=currentClip();$('timelineClipName').textContent=clip.name;
+  sgSyncTimelineTiming();
   if($('mobileClipSelect').value!==String(state.clipIndex))$('mobileClipSelect').value=String(state.clipIndex);
   const total=Object.values(clip.tracks).reduce((sum,frames)=>sum+frames.length,0);
   $('keyCount').textContent=`${total} keys`;
@@ -1457,7 +1620,7 @@ function updateSize(){
   const aspectChanged = !camera.isOrthographicCamera && Math.abs(camera.aspect-nextAspect)>1e-4;
   if(camera.isOrthographicCamera)sgUpdateOrthoFrustum();
   else if(aspectChanged){camera.aspect=nextAspect;camera.updateProjectionMatrix();}
-  if(pendingBounds && (prevViewportAspect===null || Math.abs(prevViewportAspect-nextAspect)>.18))frameModel();
+  // Do NOT call frameModel here: switching workspaces or dragging a panel must preserve the camera target, rotation and distance.
   prevViewportAspect=nextAspect;
 }
 new ResizeObserver(updateSize).observe(viewport);
@@ -1883,9 +2046,11 @@ function cloneWritableMaterial(){
 }
 function setWorkspace(mode){
   if(!['layout','animation','shading'].includes(mode))return;
+  if(sgModalTransform.active)sgModalEnd(true);
   state.workspaceMode=mode;
   document.querySelectorAll('[data-workspace]').forEach(b=>b.classList.toggle('active',b.dataset.workspace===mode));
-  $('viewportModeLabel').textContent='PERSPECTIVE · '+(mode==='shading'?'MATERIAL MODE':mode==='layout'?'OBJECT MODE':'POSE MODE');
+  $('viewportModeLabel').textContent=(sgViewState.view==='perspective'?'PERSPECTIVE':sgViewState.view.toUpperCase()+' · ORTHOGRAPHIC')+' · '+(mode==='shading'?'MATERIAL MODE':mode==='layout'?'OBJECT MODE':'POSE MODE');
+  // A workspace is a UI mode, not a camera view. Never move the camera here.
   $('viewport').classList.toggle('viewport-shading',mode==='shading');
   if(mode==='shading'){
     if(rigAssist.control){transform.detach();rigAssist.control=null;rigAssist.selected=null;}
@@ -2563,6 +2728,54 @@ function sgSetupMaterialClicks(){
     if(hit){sgSelectMaterialSlotFromHit(hit.object,hit.faceIndex);evt.stopImmediatePropagation();}
   },true);
 }
+// Alpha 0.9.8 · Resizable desktop workspaces. Canvas and camera projection resize but never re-frame.
+function sgWireResizablePanels(){
+  const workspace=document.querySelector('.workspace'),timeline=document.querySelector('.timeline-panel');
+  const panels=[{handle:$('sgResizeLeft'),property:'--sg-left-panel',storage:'sg-motion-left-v098',base:280,min:174,max:450,dir:1},
+    {handle:$('sgResizeRight'),property:'--sg-right-panel',storage:'sg-motion-right-v098',base:350,min:220,max:540,dir:-1}];
+  function readSize(key,fallback){try{const v=Number(localStorage.getItem(key));return Number.isFinite(v)&&v>0?v:fallback;}catch{return fallback;}}
+  function remember(key,v){try{localStorage.setItem(key,String(v));}catch{}}
+  const maxTimeline=()=>Math.max(170,Math.min(620,window.innerHeight-350));
+  const savedHeight=clamp(readSize('sg-motion-timeline-v098',260),145,maxTimeline());
+  timeline.style.setProperty('--sg-timeline-height',savedHeight+'px');
+  for(const part of panels){
+    let value=clamp(readSize(part.storage,part.base),part.min,part.max);
+    workspace.style.setProperty(part.property,value+'px');
+    let drag=null;
+    const h=part.handle;if(!h)continue;
+    h.addEventListener('pointerdown',evt=>{
+      if(evt.button!==0)return;
+      drag={id:evt.pointerId,start:evt.clientX,width:parseFloat(getComputedStyle(workspace).getPropertyValue(part.property))||value};
+      h.setPointerCapture(evt.pointerId);h.classList.add('active');evt.preventDefault();
+    });
+    h.addEventListener('pointermove',evt=>{
+      if(!drag||evt.pointerId!==drag.id)return;
+      const other=panels.find(p=>p!==part);
+      const otherWidth=parseFloat(getComputedStyle(workspace).getPropertyValue(other.property))||other.base;
+      const usable=Math.max(part.min,workspace.clientWidth-otherWidth-280);
+      value=clamp(drag.width+part.dir*(evt.clientX-drag.start),part.min,Math.min(part.max,usable));
+      workspace.style.setProperty(part.property,value+'px');updateSize();
+    });
+    const done=evt=>{if(!drag||drag.id!==evt.pointerId)return;drag=null;h.classList.remove('active');remember(part.storage,value);updateSize();};
+    h.addEventListener('pointerup',done);h.addEventListener('pointercancel',done);
+    h.addEventListener('dblclick',()=>{value=part.base;workspace.style.setProperty(part.property,value+'px');remember(part.storage,value);updateSize();});
+  }
+  const th=$('sgResizeTimeline');if(th){let drag=null;
+    th.addEventListener('pointerdown',evt=>{if(evt.button!==0)return;
+      drag={id:evt.pointerId,start:evt.clientY,height:timeline.getBoundingClientRect().height};
+      th.setPointerCapture(evt.pointerId);th.classList.add('active');evt.preventDefault();
+    });
+    th.addEventListener('pointermove',evt=>{if(!drag||evt.pointerId!==drag.id)return;
+      const h=clamp(drag.height+drag.start-evt.clientY,145,maxTimeline());
+      timeline.style.setProperty('--sg-timeline-height',h+'px');updateSize();
+    });
+    const done=evt=>{if(!drag||evt.pointerId!==drag.id)return;
+      drag=null;th.classList.remove('active');remember('sg-motion-timeline-v098',parseFloat(timeline.style.getPropertyValue('--sg-timeline-height')));updateSize();
+    };
+    th.addEventListener('pointerup',done);th.addEventListener('pointercancel',done);
+    th.addEventListener('dblclick',()=>{timeline.style.setProperty('--sg-timeline-height','260px');remember('sg-motion-timeline-v098',260);updateSize();});
+  }
+}
 function sgWireWorkspace09(){
   $('sgMenuNew').onclick=sgNewProject;$('sgMenuOpen').onclick=sgOpenProjectFromMenu;
   $('sgMenuSettings').onclick=sgOpenSettings;$('sgBackToMenu').onclick=sgShowMenu;
@@ -2619,11 +2832,20 @@ try {
   wireMobile();
   rigWire();
   skirtWire();
+  sgWireModalTransforms();
   sgWirePoseTools();
   sgEasyBonePickerWire();
   wireDesktopWorkbench();
   sgWireWorkspace09();
+  sgWireResizablePanels();
+  sgBindTimelineTiming();
   sgWireFbxExportGuide();
+  // Exposed only for diagnostic/smoke checks; never mutates project data.
+  window.sgStudioDiagnostics=Object.freeze({
+    camera:()=>({position:camera.position.toArray(),target:orbit.target.toArray(),quaternion:camera.quaternion.toArray(),orthographic:camera.isOrthographicCamera}),
+    modal:()=>sgModalTransform.active?.kind||null,
+    timing:()=>({seconds:currentClip()?.duration||0,fps:currentClip()?.fps||0,frames:Math.round((currentClip()?.duration||0)*(currentClip()?.fps||0))})
+  });
   installModel(createDemoModel(),null,true);
   window.sgEditorBooted = true;
   window.sgStartup?.markReady?.();

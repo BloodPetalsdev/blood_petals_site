@@ -11,10 +11,11 @@ const ROOT = path.resolve(__dirname, 'renderer');
 const MAX_BYTES = 128 * 1024 * 1024;
 const smokeTest = process.argv.includes('--sg-smoke-test');
 const softwareRendering = smokeTest || process.argv.includes('--sg-software');
-// Permit automatic software WebGL fallback on older Windows Intel GPUs.
-// Only force software mode when explicitly requested with --sg-software.
-app.commandLine.appendSwitch('enable-unsafe-swiftshader');
-if(softwareRendering)app.commandLine.appendSwitch('use-angle','swiftshader');
+// Electron 45 / Chromium: enable SwiftShader only as a user-requested fallback.
+if(softwareRendering){
+  app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+  app.commandLine.appendSwitch('use-angle','swiftshader');
+}
 // Menu music should start when opening the application; Chromium normally blocks autoplay.
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 let activeExport = false;
@@ -156,6 +157,27 @@ function createWindow(){
           const next=await win.webContents.executeJavaScript(`({menuHidden:document.querySelector('#sgMainMenu').classList.contains('sg-hidden'),canvas:!!document.querySelector('#viewport canvas'),loading:!document.querySelector('#loadingOverlay')?.classList.contains('hidden')})`);
           console.log('SG_SMOKE_EDITOR',JSON.stringify(next));
           if(!next.menuHidden||!next.canvas)throw Error('3D Editor did not open');
+          const regression=await win.webContents.executeJavaScript(`(() => {
+            const diag=window.sgStudioDiagnostics;
+            const ids=['sgResizeTimeline','sgResizeLeft','sgResizeRight','sgTimelineSeconds','sgTimelineFPS','sgTimelineFrames','sgModalTransformHint'];
+            const controls=ids.every(id=>!!document.getElementById(id));
+            if(!diag||!controls)return {ok:false,reason:'Missing interactive desktop UI or diagnostics',controls};
+            const before=diag.camera();
+            document.querySelector('[data-workspace="shading"]').click();
+            document.querySelector('[data-workspace="animation"]').click();
+            const after=diag.camera();
+            const poseStable=[...before.position,...before.target,...before.quaternion].every((v,i)=>Math.abs(v-[...after.position,...after.target,...after.quaternion][i])<1e-5);
+            const seconds=document.getElementById('sgTimelineSeconds');seconds.value='4';seconds.dispatchEvent(new Event('change',{bubbles:true}));
+            const durationOk=Math.abs(diag.timing().seconds-4)<0.01&&diag.timing().frames===4*diag.timing().fps;
+            const bone=document.querySelector('.bone-row');bone?.click();
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'g',code:'KeyG',bubbles:true}));
+            const modalActive=diag.modal()==='translate';
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}));
+            const modalCancelled=diag.modal()===null;
+            return {ok:controls&&poseStable&&durationOk&&modalActive&&modalCancelled,controls,poseStable,durationOk,modalActive,modalCancelled};
+          })()`);
+          console.log('SG_SMOKE_REGRESSION',JSON.stringify(regression));
+          if(!regression.ok)throw Error('Camera, duration, or modal G regression: '+JSON.stringify(regression));
           app.exit(0);
         }catch(error){console.error('SG_SMOKE_FAILED',error);app.exit(1);}
       },5000);
