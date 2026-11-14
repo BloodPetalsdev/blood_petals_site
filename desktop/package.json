@@ -1,8 +1,8 @@
 {
   "name": "silent-garden-motion-studio",
   "productName": "Silent Garden Motion Studio",
-  "version": "0.9.1",
-  "description": "Silent Garden Motion Studio PC Alpha 0.9.1 — camera aspect ratio fix, Rig Assist and materials",
+  "version": "0.9.2",
+  "description": "Silent Garden Motion Studio PC Alpha 0.9.2 - official Silent Garden icon",
   "author": "Silent Garden Team",
   "private": true,
   "license": "UNLICENSED",
@@ -29,7 +29,8 @@
       "preload.cjs",
       "renderer/**/*",
       "blender/export_to_fbx.py",
-      "package.json"
+      "package.json",
+      "assets/icon.ico"
     ],
     "asar": true,
     "win": {

@@ -9,6 +9,8 @@ const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, 'renderer');
 const MAX_BYTES = 128 * 1024 * 1024;
+// Windows uses the same identity and icon in the executable and its taskbar window.
+if (process.platform === 'win32') app.setAppUserModelId('com.silentgarden.motionstudio');
 let activeExport = false;
 
 protocol.registerSchemesAsPrivileged([{
@@ -126,6 +128,7 @@ function createWindow(){
     title:'Silent Garden Motion Studio · Blood Petals',
     width:1440,height:900,minWidth:1060,minHeight:680,backgroundColor:'#14161c',
     show:false,autoHideMenuBar:true,
+    icon:path.join(__dirname,'assets','icon.ico'),
     webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}
   });
   win.once('ready-to-show',()=>win.show());
