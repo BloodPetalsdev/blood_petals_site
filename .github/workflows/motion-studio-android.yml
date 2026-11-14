@@ -1,0 +1,61 @@
+name: Motion Studio - Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android-app/**'
+      - '.github/workflows/motion-studio-android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: Compilar APK Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Preparar editor web
+        run: |
+          mkdir -p renderer
+          cp ../studio/index.html renderer/index.html
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+      - name: Empacotar Three.js e app offline
+        run: npm run build
+      - name: Criar projeto Android e sincronizar plugins
+        run: |
+          npx cap add android
+          npx cap sync android
+      - name: Compilar aplicativo debug
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Preparar APK para download
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/SilentGardenMotionStudio-Android-Alpha-0.1.apk
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SilentGardenMotionStudio-Android-APK
+          path: android-app/dist/SilentGardenMotionStudio-Android-Alpha-0.1.apk
+          if-no-files-found: error
+          retention-days: 30
