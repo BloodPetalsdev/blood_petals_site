@@ -1,4 +1,4 @@
-name: Compilar EduClass APK
+name: Compilar EduClass APK\n# EduClass 3.0 — compilação Android
 on:
   push:
     branches: [educlass-apk-build]
