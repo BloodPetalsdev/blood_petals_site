@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" id="themeColorMeta" content="#f5f7fb">
+<meta name="description" content="EduClass: painel escolar para cadastrar alunos, gerenciar turmas, lançar notas, publicar resultados e emitir boletins.">
+<meta name="application-name" content="EduClass">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+
+
+
+<title>EduClass Professor 5.0 — Diário do Professor</title>
+<style>
+:root{--nav:#121e36;--nav2:#192944;--ink:#1e293b;--muted:#718096;--line:#e5eaf1;--bg:#f5f7fb;--white:#fff;--blue:#5269ed;--blue2:#4056d8;--sky:#ebefff;--green:#13865c;--greenbg:#e4f7ee;--amber:#a56608;--amberbg:#fff3d9;--red:#bf3e4b;--redbg:#ffebed;--shadow:0 3px 20px rgba(20,37,65,.045);--radius:17px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #a9b5ff;outline-offset:2px}button:disabled{opacity:.45;cursor:not-allowed}a{color:inherit;text-decoration:none}.app{min-height:100vh}.sidebar{background:var(--nav);color:#c5d1e3;position:fixed;inset:0 auto 0 0;width:253px;padding:30px 16px;display:flex;flex-direction:column;z-index:31}.brand{display:flex;align-items:center;gap:12px;padding:0 13px 36px;color:white}.logo{width:43px;height:43px;flex-shrink:0;background:linear-gradient(140deg,#8193ff,#5066e7);border-radius:13px;display:grid;place-items:center;box-shadow:0 6px 20px #3a54d64c}.logo svg{width:26px;height:26px}.brand strong{display:block;font-size:22px;letter-spacing:-.7px;line-height:1.06}.brand small{display:block;color:#99a9c3;font-size:11px;margin-top:5px;letter-spacing:.45px}.side-label{font-size:10px;letter-spacing:1.7px;color:#6e83a3;font-weight:800;padding:0 18px;margin:0 0 13px}.nav{display:grid;gap:5px}.nav button{color:#b4c4d9;background:transparent;border:0;border-radius:10px;text-align:left;display:flex;align-items:center;gap:12px;padding:12px 14px;font-weight:600;transition:.15s}.nav button:hover{background:#ffffff12;color:white}.nav button.active{color:#fff;background:linear-gradient(100deg,#516af0,#6578e8);box-shadow:0 5px 19px #07102938}.nav svg{width:19px;height:19px;stroke-width:1.9}.sidebar-bottom{margin-top:auto;padding:17px 12px 0;border-top:1px solid #ffffff15}.teacher-avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#34486d;color:white;font-weight:800;font-size:14px;flex-shrink:0}.teacher-row{display:flex;align-items:center;gap:11px;min-width:0}.teacher-row strong{color:white;display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}.teacher-row small{font-size:11px;color:#8fa4c1}.main{margin-left:253px;min-height:100vh}.topbar{height:85px;background:#ffffffc9;backdrop-filter:blur(15px);border-bottom:1px solid #e9edf4;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,4.1vw,65px);position:sticky;top:0;z-index:20;gap:20px}.top-left{min-width:0}.crumb{display:flex;align-items:center;gap:9px;color:#8b98ad;font-size:11px;font-weight:750;letter-spacing:1.2px;text-transform:uppercase}.crumb svg{width:12px;height:12px}.top-title{font-size:20px;font-weight:800;letter-spacing:-.65px;margin:4px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-actions{display:flex;align-items:center;gap:13px}.top-date{font-size:12px;color:#76859c;font-weight:600;white-space:nowrap}.icon-btn{height:39px;width:39px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:white}.icon-btn svg{width:20px;height:20px}.mobile-trigger{display:none}.container{padding:36px clamp(20px,4.1vw,65px) 75px;max-width:1700px;margin:auto}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:27px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.65px;font-weight:800;color:#6275dc}.h1{font-size:29px;letter-spacing:-1.05px;line-height:1.15;margin:8px 0 9px;font-weight:820}.sub{color:var(--muted);margin:0;line-height:1.55;font-size:13px}.btn{border:1px solid transparent;border-radius:10px;min-height:40px;padding:10px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;font-weight:720;font-size:12px;transition:.16s}.btn svg{width:16px;height:16px}.btn-primary{color:#fff;background:var(--blue);box-shadow:0 6px 13px #5269ed24}.btn-primary:hover{background:var(--blue2);transform:translateY(-1px)}.btn-outline{background:white;border-color:#dfe5ee;color:#475571}.btn-outline:hover{border-color:#9ba7f5;background:#f8f9ff}.btn-ghost{background:transparent;color:#5164ce}.btn-danger{background:var(--redbg);color:var(--red)}.btn-small{padding:7px 10px;min-height:31px;font-size:11px;border-radius:8px}.btn-block{width:100%}.btn-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}.card{background:#fff;border:1px solid #edf0f5;border-radius:var(--radius);box-shadow:var(--shadow)}.stat{padding:21px 20px;min-width:0}.stat-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.stat-label{color:#738197;font-size:12px;font-weight:650}.stat-icon{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:#eef1ff;color:var(--blue)}.stat-icon svg{width:20px;height:20px}.stat-icon.green{background:#e7f7f0;color:#2b9875}.stat-icon.orange{background:#fff2e4;color:#ca8236}.stat-icon.pink{background:#ffedf2;color:#da6c88}.stat-value{font-size:30px;font-weight:820;letter-spacing:-1.3px;margin:11px 0 2px;font-variant-numeric:tabular-nums}.stat-note{font-size:11px;color:#9aa7b7}.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:18px;align-items:start}.panel{padding:22px 23px}.panel-title{font-size:16px;font-weight:790;letter-spacing:-.4px;margin:0 0 5px}.panel-sub{color:#91a0b2;font-size:12px;margin:0 0 19px}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.simple-list{display:grid;gap:0}.student-entry{padding:13px 0;border-top:1px solid #edf1f5;display:flex;align-items:center;gap:11px;min-width:0}.student-entry:first-child{border-top:0}.avatar{flex-shrink:0;height:38px;width:38px;display:grid;place-items:center;background:#e8edff;color:#5066dc;border-radius:11px;font-weight:800}.avatar.pink{background:#ffedf3;color:#ce6383}.avatar.green{background:#e7f6ee;color:#37916c}.entry-main{min-width:0;flex:1}.entry-main strong{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.entry-main small{color:#8b98ab;display:block;font-size:11px;margin-top:3px}.grade-label{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}.pill{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border-radius:99px;font-size:10px;font-weight:790;padding:5px 9px}.pill.green{background:var(--greenbg);color:var(--green)}.pill.amber{background:var(--amberbg);color:var(--amber)}.pill.red{background:var(--redbg);color:var(--red)}.pill.blue{background:#ebefff;color:#4d61ce}.progress-group{display:grid;gap:17px;margin-top:9px}.progress-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}.progress-head strong{font-weight:700}.progress-head span{font-weight:790;font-variant-numeric:tabular-nums}.progress{height:9px;background:#eef1f8;border-radius:20px;overflow:hidden}.progress>div{background:linear-gradient(90deg,#8391ff,#5269ed);height:100%;border-radius:20px;min-width:0}.progress>div.low{background:#f5b75a}.helper-box{background:linear-gradient(120deg,#eef1ff,#f8faff);border:1px solid #e0e6ff;border-radius:14px;padding:18px;margin-top:20px}.helper-box strong{display:block;font-size:12px;color:#4154ac}.helper-box p{color:#647399;font-size:12px;line-height:1.5;margin:5px 0 12px}.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.field,.filter-input{height:40px;border:1px solid #e0e6f0;background:#fff;border-radius:10px;padding:0 13px;font-size:12px;color:#41506a;max-width:100%}.filter-input{min-width:210px}.field:focus,.filter-input:focus{border-color:#7185f3;outline:2px solid #7185f320}.table-wrap{width:100%;overflow:auto}.data-table{width:100%;border-collapse:collapse;white-space:nowrap}.data-table th{text-align:left;background:#f9fafd;color:#8290a5;font-size:10px;text-transform:uppercase;letter-spacing:.9px;padding:15px 18px;font-weight:810}.data-table th:first-child{border-top-left-radius:12px}.data-table th:last-child{border-top-right-radius:12px}.data-table td{padding:15px 18px;border-top:1px solid #f0f2f7;font-size:12px;vertical-align:middle}.data-table tbody tr:hover{background:#fcfdff}.data-table strong{font-size:12px}.data-table .muted{display:block;margin-top:4px;color:#94a0b2;font-size:11px}.actions-cell{display:flex;align-items:center;gap:5px}.row-icon-btn{border:1px solid #e5eaf3;border-radius:8px;background:#fff;color:#66778f;width:31px;height:31px;display:grid;place-items:center}.row-icon-btn:hover{background:#f2f4ff;color:#5269ed}.row-icon-btn.red:hover{background:#ffedf0;color:#bf3e4b}.row-icon-btn svg{width:15px;height:15px}.empty{text-align:center;padding:50px 25px}.empty .empty-icon{width:57px;height:57px;margin:0 auto 12px;background:#eef1ff;color:#6073df;border-radius:17px;display:grid;place-items:center}.empty .empty-icon svg{width:27px;height:27px}.empty h3{margin:6px 0;font-size:17px;letter-spacing:-.4px}.empty p{max-width:360px;margin:0 auto 16px;color:#8997ab;font-size:12px;line-height:1.6}.class-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:15px}.class-card{padding:23px}.class-head{display:flex;align-items:center;justify-content:space-between}.class-icon{width:44px;height:44px;background:#ebefff;color:#5b6fdb;display:grid;place-items:center;border-radius:13px}.class-icon svg{width:23px;height:23px}.class-card h3{font-size:18px;margin:20px 0 5px}.class-card p{color:#8d9bad;font-size:12px;margin:0}.class-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eef1f7;margin-top:19px;padding-top:15px}.class-footer strong{font-size:12px}.report-layout{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:17px;align-items:start}.report-header{padding:27px 28px 23px;border-bottom:1px solid #edf0f5;display:flex;justify-content:space-between;gap:16px;align-items:center}.report-brand{font-size:12px;color:#6576e4;font-weight:850;letter-spacing:1.3px}.report-header h2{margin:8px 0 4px;font-size:24px;letter-spacing:-.75px}.report-header p{font-size:12px;color:#8e9caf;margin:0}.report-inner{padding:22px 27px 27px}.report-big{border-radius:14px;padding:19px;background:linear-gradient(120deg,#586ef0,#7b8cef);color:#fff}.report-big small{font-size:11px;color:#e2e7ff}.report-big strong{font-size:37px;display:block;margin:7px 0;font-variant-numeric:tabular-nums}.report-big span{font-size:11px}.report-person{display:flex;gap:10px;align-items:center;margin-bottom:18px}.report-person strong{display:block;font-size:14px}.report-person small{color:#8d9baa;font-size:11px}.report-summary{margin-top:17px;padding:18px;border:1px solid #e6ebf6;background:#fbfcff;border-radius:12px;color:#7b8aa0;font-size:11px;line-height:1.7}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-group{display:flex;flex-direction:column;gap:7px;min-width:0}.form-group label{font-size:12px;font-weight:730;color:#485671}.form-group input,.form-group select,.form-group textarea{width:100%;border:1px solid #dfe5ee;border-radius:10px;background:white;padding:11px 12px;min-height:42px;color:#283850}.form-group textarea{resize:vertical;min-height:80px}.form-group small{color:#95a3b6;font-size:10px;line-height:1.5}.full{grid-column:1/-1}.modal-backdrop{position:fixed;inset:0;background:#111b32a6;z-index:60;display:grid;place-items:center;padding:20px;animation:fadein .15s}.modal{width:min(530px,100%);max-height:min(90dvh,800px);display:flex;flex-direction:column;background:white;border-radius:19px;box-shadow:0 18px 75px #050c2080;overflow:hidden}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:23px 25px 19px;border-bottom:1px solid #edf0f5}.modal-head h2{margin:0;font-size:19px;letter-spacing:-.5px}.modal-body{padding:25px;overflow-y:auto}.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:17px 25px;border-top:1px solid #edf0f5}.close-btn{border:0;background:#f2f4f8;border-radius:9px;width:31px;height:31px;display:grid;place-items:center}.close-btn svg{height:17px}.modal form{display:contents}.switch-label{display:flex;align-items:center;gap:9px;font-size:12px;cursor:pointer;font-weight:700}.switch-label input{width:17px;height:17px;accent-color:var(--blue)}.toast-wrap{position:fixed;bottom:20px;right:22px;z-index:100;display:grid;gap:8px;pointer-events:none}.toast{background:#1a2942;color:#fff;box-shadow:0 8px 30px #111b3045;border-radius:12px;padding:13px 17px;display:flex;align-items:center;gap:9px;animation:fadein .2s;min-width:240px;max-width:360px;font-size:12px}.toast svg{width:17px;height:17px;stroke:#84e5c4}.toast.error svg{stroke:#ff9aaa}.storage-warning{background:#fff1ed;border-bottom:1px solid #ffd0c3;padding:11px 30px;color:#a64b39;font-size:12px;line-height:1.5}.footer-note{margin-top:30px;text-align:center;font-size:11px;color:#9aa8bc;line-height:1.8}.footer-note b{color:#7a89a1}.mobile-backdrop{display:none}.settings-wrap{max-width:780px;display:grid;gap:17px}.settings-card{padding:24px}.settings-title{font-size:16px;font-weight:820;margin:0 0 6px}.settings-desc{color:#8694a8;font-size:12px;margin:0 0 20px;line-height:1.6}.settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.mini-divider{border-top:1px solid #e9eef5;margin:21px 0}.hint{padding:12px 14px;background:#f5f7ff;border-radius:10px;color:#6373a0;font-size:12px;line-height:1.6}.notice-dot{width:7px;height:7px;display:inline-block;border-radius:50%;background:#3bb58c;margin-right:5px}.hidden{display:none!important}.print-only{display:none}.status-dot{display:inline-block;height:7px;width:7px;border-radius:50%;margin-right:6px;background:#40b98a}.now-sub{color:#94a3b8;font-size:12px}.menu-trigger{width:35px;height:35px;display:none;place-items:center;border-radius:10px;background:white;border:1px solid #dde5ef}.menu-trigger svg{height:20px;width:20px}.nowrap{white-space:nowrap}@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1200px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:1000px){.sidebar{transform:translateX(-100%);transition:transform .2s}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.mobile-trigger,.menu-trigger{display:grid}.mobile-backdrop.open{display:block;position:fixed;inset:0;background:#0007;z-index:29}.topbar{height:72px}}@media(max-width:740px){.container{padding:25px 16px 65px}.topbar{padding:0 16px}.dashboard-grid,.report-layout{grid-template-columns:1fr}.section-heading{align-items:start}.h1{font-size:25px}.top-date{display:none}.stats{gap:10px}.stat{padding:16px}.stat-value{font-size:26px}.panel{padding:17px}.data-table td,.data-table th{padding:12px 13px}.form-grid{gap:12px}.report-header{padding:20px}.report-inner{padding:17px}.report-layout>.card:last-child{order:-1}.toolbar{align-items:stretch}.filters{width:100%}.filter-input{flex:1;min-width:145px}.modal-body{padding:18px}.modal-head{padding:18px}.modal-foot{padding:13px 18px}.settings-card{padding:19px}}@media(max-width:430px){.stat-label{font-size:11px}.stat-icon{width:33px;height:33px}.stat-icon svg{width:17px;height:17px}.stats{gap:9px}.top-title{font-size:17px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.report-header h2{font-size:19px}.report-header .logo{width:36px;height:36px}}@media print{body{background:#fff;font-size:12pt}.sidebar,.topbar,.section-heading,.report-layout>.card:last-child,.footer-note,.noprint,.btn,.modal-backdrop,.toast-wrap,.storage-warning{display:none!important}.main{margin:0}.container{padding:0}.report-layout{display:block}.report-layout>.card:first-child{border:0;box-shadow:none;border-radius:0}.report-header{padding:20px 0}.report-inner{padding:20px 0}.print-only{display:block}.data-table th{background:#eee!important}.data-table td,.data-table th{font-size:10pt;color:#111}.pill{color:#111!important;background:none!important;padding:0}.report-big{-webkit-print-color-adjust:exact;print-color-adjust:exact}.report-summary{margin-top:30px}}
+/* Fotografias de alunos: miniaturas, cartões e boletins */
+.avatar.photo-avatar{overflow:hidden;padding:0;border:1px solid #e2e7f2;background:#f0f3fa}
+.photo-avatar img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.avatar.avatar-xl{width:82px;height:82px;border-radius:21px;font-size:27px}
+.avatar.avatar-lg{width:58px;height:58px;border-radius:15px;font-size:19px}
+.report-person .avatar{height:56px;width:56px;border-radius:13px;font-size:18px}
+.student-name-btn{font-weight:800;font-size:12px;background:none;border:none;padding:0;text-align:left;color:var(--ink);cursor:pointer}
+.student-name-btn:hover{text-decoration:underline;color:var(--blue)}
+.photo-picker{display:flex;align-items:center;gap:17px;background:#f8faff;border:1px solid #e6ebff;border-radius:15px;padding:16px}
+.photo-picker-preview{position:relative;flex-shrink:0}
+.photo-picker-actions{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.photo-picker-actions small{font-size:11px;color:#8995aa;line-height:1.45}
+.photo-picker-actions .btn{white-space:normal;text-align:center}
+.photo-loading{font-size:11px;color:#536bd5;min-height:15px}
+.profile-head{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid #edf0f6}
+.profile-head h3{font-size:20px;line-height:1.2;margin:0 0 5px;letter-spacing:-.5px}
+.profile-head p{font-size:12px;color:#8290a3;margin:0}
+.profile-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.profile-meta>div{background:#f7f9fd;border:1px solid #edf1f8;border-radius:12px;padding:13px}
+.profile-meta small{font-size:10px;color:#8e9cb0;display:block;margin-bottom:6px}
+.profile-meta strong{font-size:13px;color:#303f5c;word-break:break-word}
+.profile-section-title{font-size:12px;margin:22px 0 10px;color:#61708a;text-transform:uppercase;letter-spacing:.8px}
+.profile-grades{max-height:160px;overflow:auto;border-top:1px solid #edf1f5}
+.profile-grades .student-entry{padding:10px 0}
+@media(max-width:430px){.photo-picker{gap:12px;padding:11px}.avatar.avatar-xl{width:72px;height:72px}.photo-picker-actions .btn{font-size:11px}.profile-meta{grid-template-columns:1fr 1fr}}
+@media print{.photo-avatar img{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* EduClass App 2.0 — aplicativo com fotos grandes e diário expansível */
+:root{--nav:#101d35;--blue:#4e65e8;--blue2:#334ac6;--radius:19px}
+.avatar.avatar-student{width:102px;height:102px;border-radius:23px;font-size:31px;box-shadow:0 5px 18px #2537540b}
+.avatar.avatar-diary{width:88px;height:88px;border-radius:22px;font-size:27px}
+.avatar.avatar-profile{width:126px;height:126px;border-radius:25px;font-size:34px}
+.avatar.avatar-picker{width:116px;height:116px;border-radius:25px;font-size:32px}
+.avatar.avatar-report,.report-person .avatar{width:76px;height:76px;border-radius:18px;font-size:25px}
+.students-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:15px}
+.student-tile{padding:18px;min-width:0;transition:border .15s,transform .15s}
+.student-tile:hover{border-color:#dce3fa}
+.student-tile-body{display:flex;align-items:center;gap:17px;min-width:0}
+.student-tile-photo{flex-shrink:0;padding:0;background:transparent;border:0;border-radius:23px;line-height:0}
+.student-tile-info{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;flex:1}
+.student-tile-name{border:0;background:transparent;text-align:left;font-size:16px;color:#1c2c4b;font-weight:850;letter-spacing:-.4px;padding:0;overflow-wrap:anywhere}
+.student-tile-name:hover{color:var(--blue)}
+.student-tile-class{font-size:12px;color:#5064c7;background:#eef1ff;border-radius:6px;padding:4px 7px;font-weight:700}
+.student-tile-meta{font-size:11px;color:#8b98ac;overflow-wrap:anywhere}
+.student-tile-average{color:#6b7b92;font-size:12px;margin-top:4px}
+.student-tile-average b{color:#203154;font-size:15px;margin-left:5px}
+.student-tile-actions{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #eef0f5;padding-top:14px;margin-top:16px}
+.student-tile-actions button{border:0;color:#53658b;font-weight:720;font-size:12px;border-radius:9px;background:#f6f8fc;padding:10px 12px;display:inline-flex;align-items:center;gap:6px}
+.student-tile-actions button:first-child{background:#ebefff;color:#455cc7}
+.student-tile-actions svg{width:16px;height:16px}
+.diary-intro{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:23px;margin-bottom:14px;background:linear-gradient(110deg,#fff,#f7f8ff)}
+.diary-intro h2{font-size:22px;font-weight:850;letter-spacing:-.6px;margin:6px 0 5px}
+.diary-intro p{font-size:12px;color:#8997ac;margin:0}
+.diary-class-select{display:flex;flex-direction:column;gap:7px;min-width:185px}
+.diary-class-select label{font-size:11px;font-weight:800;color:#7b8ba2}
+.diary-class-select .field{width:100%}
+.diary-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:17px}
+.diary-metrics .card{padding:16px 19px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.diary-metrics small{font-size:12px;color:#8190a6}
+.diary-metrics b{font-size:22px;color:#2c3d5d;font-variant-numeric:tabular-nums}
+.diary-list{display:grid;gap:12px}
+.diary-student{overflow:hidden}
+.diary-student.expanded{border-color:#bfcbff;box-shadow:0 8px 28px #3d55a80b}
+.diary-student-toggle{background:white;display:flex;width:100%;align-items:center;text-align:left;gap:18px;border:none;padding:17px 22px;color:inherit}
+.diary-student-toggle:active{background:#f9faff}
+.diary-student-identity{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.diary-student-identity strong{font-size:17px;line-height:1.3;color:#21304c;font-weight:850;overflow-wrap:anywhere}
+.diary-student-identity small{font-size:12px;color:#8b98ab}
+.diary-student-mean{display:flex;flex-direction:column;gap:4px;text-align:center;min-width:52px}
+.diary-student-mean small,.diary-grade-value small{color:#93a0b3;font-size:10px;letter-spacing:1px;font-weight:800}
+.diary-student-mean strong{font-size:24px;color:#4760cf;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.diary-chevron{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#f2f4fc;color:#7c88ac;transition:transform .2s}
+.diary-chevron svg{width:19px;height:19px}
+.diary-student.expanded .diary-chevron{transform:rotate(180deg);background:#e9edff;color:#4f64e0}
+.diary-details{display:none;border-top:1px solid #e8edfa;background:#fbfcff;padding:20px 23px 24px}
+.diary-student.expanded .diary-details{display:block}
+.diary-details-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.diary-details-head>span{color:#62718c;font-size:12px;font-weight:750}
+.diary-subject+.diary-subject{margin-top:23px}
+.diary-subject-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.diary-subject-title>strong{font-size:14px;color:#25344f}
+.diary-subject-title>span{font-size:11px;color:#7c8da4;background:#eef2f9;padding:6px 11px;border-radius:99px}
+.diary-subject-title b{color:#4059c7}
+.diary-grade-stack{display:grid;gap:9px}
+.diary-grade-item{display:flex;align-items:center;gap:14px;background:white;border:1px solid #e8edf5;border-radius:13px;padding:14px 15px;min-width:0}
+.activity-num{width:37px;height:37px;flex-shrink:0;display:grid;place-items:center;background:#f1f3ff;color:#5b6dd4;border-radius:10px;font-weight:800;font-size:12px}
+.diary-grade-text{display:flex;flex-direction:column;min-width:0;gap:5px;flex:1}
+.diary-grade-text strong{color:#283753;font-size:13px;overflow-wrap:anywhere}
+.diary-grade-text small{font-size:11px;color:#8b99a9;line-height:1.4}
+.diary-grade-value{display:flex;flex-direction:column;align-items:center;gap:1px}
+.diary-grade-value b{font-size:22px;color:#15916b;font-variant-numeric:tabular-nums}
+.diary-grade-value b.below{color:#d18142}
+.diary-bottom-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.diary-no-grades{padding:20px;background:white;border:1px dashed #dce4f5;border-radius:13px;color:#798aa2;font-size:13px}
+.diary-explain{font-size:12px;color:#8593a8;line-height:1.7;margin:16px 4px}
+.mobile-bottom-nav{display:none}
+@media(max-width:1000px){
+ .mobile-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:calc(64px + env(safe-area-inset-bottom));padding:7px 7px calc(7px + env(safe-area-inset-bottom));background:#fffffff5;backdrop-filter:blur(16px);z-index:22;border-top:1px solid #e5e9f2;box-shadow:0 -7px 24px #1a274509}
+ .mobile-bottom-nav button{display:flex;flex:1;flex-direction:column;gap:4px;align-items:center;justify-content:center;border:0;background:transparent;border-radius:11px;color:#93a0b3;font-weight:760;font-size:10px;padding:5px 0;min-width:0}
+ .mobile-bottom-nav button.active{color:#4e64de;background:#eef1ff}
+ .mobile-bottom-nav button svg{width:20px;height:20px}
+ .container{padding-bottom:calc(105px + env(safe-area-inset-bottom))}
+ .sidebar{overflow-y:auto;padding-bottom:25px}
+}
+@media(max-width:740px){
+ .students-grid{grid-template-columns:1fr}
+ .student-tile{padding:17px}
+ .diary-intro{padding:18px}
+ .diary-student-toggle{padding:15px}
+ .diary-details{padding:16px}
+ .diary-metrics .card{padding:14px 12px;flex-direction:column;align-items:flex-start;gap:4px}
+ .diary-metrics b{font-size:20px}
+ .profile-head{gap:12px}
+ .avatar.avatar-profile{width:105px;height:105px;border-radius:22px}
+ .photo-picker{padding:14px}
+ .avatar.avatar-picker{width:106px;height:106px}
+}
+@media(max-width:430px){
+ .avatar.avatar-student{height:90px;width:90px;border-radius:20px}
+ .avatar.avatar-diary{height:75px;width:75px;border-radius:18px;font-size:22px}
+ .avatar.avatar-picker{width:94px;height:94px;border-radius:20px}
+ .avatar.avatar-profile{width:99px;height:99px}
+ .student-tile-body{gap:13px}
+ .student-tile-name{font-size:15px}
+ .student-tile-actions button{font-size:11px;padding:10px 9px}
+ .diary-intro{flex-direction:column;align-items:stretch;gap:15px}
+ .diary-class-select{width:100%}
+ .diary-student-toggle{gap:11px;padding:13px}
+ .diary-student-identity strong{font-size:15px}
+ .diary-student-mean strong{font-size:20px}
+ .diary-student-mean{min-width:37px}
+ .diary-chevron{width:26px;height:27px}
+ .diary-grade-item{padding:12px 9px;gap:8px}
+ .activity-num{height:30px;width:30px;font-size:10px}
+ .diary-grade-text strong{font-size:12px}
+ .diary-grade-text small{font-size:10px}
+ .diary-grade-value b{font-size:19px}
+ .diary-grade-item .row-icon-btn{width:28px;height:28px}
+ .diary-details-head{flex-wrap:wrap}
+ .diary-details-head .btn{min-height:34px;padding:7px 11px}
+}
+@media print{.mobile-bottom-nav{display:none!important}}
+
+\n/* EduClass 3.0 — design system e identidade visual */
+:root{--nav:#101c34;--blue:#566ef0;--blue2:#405ad9;--radius:19px;--shadow:0 9px 30px rgba(27,49,92,.048)}
+body{font-size:14px;-webkit-font-smoothing:antialiased}
+.card{transition:border-color .18s,box-shadow .18s}
+.card:hover{box-shadow:0 11px 30px rgba(27,49,92,.07)}
+.brand strong{letter-spacing:-.8px}
+.h1{font-weight:850}
+.eyebrow{letter-spacing:1.8px}
+.btn-primary{box-shadow:0 7px 19px rgba(79,102,227,.20)}
+.icon-btn.theme-trigger{background:#f0f3ff;color:#4c61df;border-color:#e2e8ff}
+.icon-btn.theme-trigger:hover{background:#e5e9ff}
+.class-cover{position:relative;width:100%;aspect-ratio:2.65/1;background:linear-gradient(110deg,#5b6fe8 0%,#8097ee 45%,#bccaff 100%);border-radius:15px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0}
+.class-cover::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(6,17,60,.17),transparent 52%)}
+.class-cover img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.class-cover-decoration{display:flex;align-items:center;justify-content:space-between;width:82%;opacity:.85}
+.class-cover-decoration span:first-child{font-size:54px;font-weight:900;letter-spacing:-5px;color:#ffffff8c}
+.class-cover-decoration svg{width:76px;height:76px;opacity:.66}
+.pro-class-card{padding:12px;overflow:hidden}
+.class-card-inside{padding:9px 8px 6px}
+.class-card-inside h3{margin:13px 0 17px;font-size:20px;letter-spacing:-.5px}
+.class-kicker{display:flex;align-items:center;justify-content:space-between;color:#7382a1;font-size:10px;font-weight:850;letter-spacing:1.2px;margin-top:14px}
+.class-kicker svg{width:13px;height:13px;vertical-align:middle}
+.class-stat-row{display:grid;grid-template-columns:.8fr .85fr 1.1fr;gap:9px}
+.class-stat-row>div{border:1px solid #edf1f7;background:#f8faff;border-radius:12px;padding:12px 9px}
+.class-stat-row small{display:block;font-size:9px;color:#8895ad;letter-spacing:.7px;font-weight:800;white-space:nowrap}
+.class-stat-row b{display:block;font-size:22px;font-weight:850;margin-top:5px;letter-spacing:-.8px;color:#273855}
+.class-stat-row .class-average{background:#eef1ff;border-color:#e1e8ff}
+.class-stat-row .class-average b{color:#465ddb}
+.class-subject-caption{margin:15px 0 0;color:#8b9ab0;font-size:11px}
+.class-footer{margin-top:15px;padding-top:14px}
+.class-summary-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;color:#8a97a9;font-size:12px}
+.class-summary-label{color:var(--ink);font-weight:850;font-size:14px}
+.class-photo-picker{display:flex;flex-direction:column;gap:12px;background:#f7f9fd;border:1px solid #e6eaf3;border-radius:15px;padding:11px}
+.class-cover-preview{height:145px;aspect-ratio:auto;border-radius:10px}
+.class-photo-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.class-photo-toolbar small{display:block;flex-basis:100%}
+.photo-button{cursor:pointer}
+.class-averages-overview{padding:20px 22px;margin-bottom:22px}
+.class-averages-overview .panel-sub{margin-bottom:12px}
+.overview-classes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.overview-class{background:#f8faff;border:1px solid #e9edf7;border-radius:13px;display:flex;align-items:center;gap:11px;padding:10px;min-width:0;text-align:left;color:var(--ink)}
+.overview-class:hover{background:#f2f5ff;border-color:#ccd4ff}
+.overview-cover{height:50px;width:62px;aspect-ratio:auto;border-radius:10px}
+.overview-cover .class-cover-decoration span:first-child{font-size:20px;letter-spacing:-2px}
+.overview-cover .class-cover-decoration svg{width:19px;height:19px}
+.overview-class>span{min-width:0;flex:1}
+.overview-class strong,.overview-class small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.overview-class strong{font-size:12px}
+.overview-class small{color:#92a0b3;font-size:10px;margin-top:4px}
+.overview-class>b{font-size:21px;color:#4c62df;font-variant-numeric:tabular-nums}
+.overview-class>svg{width:15px;height:15px;color:#92a1ba}
+.diary-intro{flex-wrap:wrap;justify-content:initial;gap:20px}
+.diary-cover{height:90px;width:125px;aspect-ratio:auto;border-radius:14px}
+.diary-cover .class-cover-decoration span:first-child{font-size:28px;letter-spacing:-2px}
+.diary-cover .class-cover-decoration svg{width:33px;height:33px}
+.diary-intro-text{flex:1;min-width:120px}
+.diary-class-select{min-width:190px}
+.class-subject-panel{padding:20px 23px;margin-top:16px}
+.subject-bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 24px}
+.subject-bar>div{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}
+.subject-bar strong{font-size:12px;color:#43516a}
+.subject-bar b{font-size:13px;color:#465ed8}
+.subject-bar .progress{display:block;width:100%}
+.subject-bar .bar-fill{height:100%;display:block;border-radius:99px;background:linear-gradient(90deg,#7080f1,#475edf)}
+.muted-copy{font-size:12px;color:var(--muted)}
+.appearance-head{display:flex;align-items:flex-start;gap:13px}
+.appearance-icon{display:grid;place-items:center;flex-shrink:0;width:43px;height:43px;border-radius:12px;background:#edf0ff;color:#5369dc}
+.appearance-icon svg{width:23px;height:23px}
+.appearance-head .settings-desc{margin:0 0 17px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.theme-option{padding:11px;border-radius:14px;border:2px solid #edf0f6;background:#fff;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:6px}
+.theme-option.selected{border-color:#6076ea;background:#f8faff;box-shadow:0 0 0 3px rgba(85,107,230,.1)}
+.theme-option .theme-preview{height:77px;display:flex;align-items:flex-start;gap:6px;padding:12px;border-radius:10px;margin-bottom:4px}
+.theme-preview span{height:45px;display:block;border-radius:6px;width:22%}
+.theme-preview span:nth-child(2){width:33%}
+.theme-preview span:nth-child(3){width:25%}
+.light-preview{background:#f0f3fa;border:1px solid #e6ebf5}
+.light-preview span{background:white;border:1px solid #e3e7f3}
+.dark-preview{background:#0f192c;border:1px solid #33415d}
+.dark-preview span{background:#253652;border:1px solid #35496a}
+.theme-option strong{display:flex;align-items:center;gap:7px;font-size:13px}
+.theme-option strong svg{width:17px;height:17px}
+.theme-option small{color:#8a9ab1;font-size:10px}
+@media(max-width:740px){.class-averages-overview{padding:16px}.diary-cover{width:82px;height:78px}.class-subject-panel{padding:17px}}
+@media(max-width:430px){.diary-intro{flex-direction:row;gap:12px}.diary-intro-text{min-width:150px}.diary-class-select{width:100%}.class-stat-row small{font-size:8px}.overview-classes{grid-template-columns:1fr}.class-photo-toolbar{align-items:flex-start}}
+/* Dark theme: applied consistently to all pages, forms and mobile navigation */
+html[data-theme="dark"]{--nav:#0a1323;--ink:#e8eefc;--muted:#97a7c0;--line:#34445e;--bg:#0c1424;--white:#172339;--sky:#212d52;--green:#6bd0a3;--greenbg:#173d36;--amber:#ffd089;--amberbg:#453720;--red:#ff8796;--redbg:#48272e;--shadow:0 10px 32px rgba(0,0,0,.15)}
+html[data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+html[data-theme="dark"] .card,html[data-theme="dark"] .modal{background:#172339;border-color:#2c3b54;color:var(--ink)}
+html[data-theme="dark"] .topbar{background:#121d31ec;border-color:#29394f}
+html[data-theme="dark"] .icon-btn,html[data-theme="dark"] .menu-trigger,html[data-theme="dark"] .close-btn{background:#23334d;color:#d7e3fc;border-color:#34445f}
+html[data-theme="dark"] .icon-btn.theme-trigger{background:#273b65;color:#bfd0ff}
+html[data-theme="dark"] .btn-outline,html[data-theme="dark"] .row-icon-btn{background:#223149;color:#d3dffa;border-color:#374861}
+html[data-theme="dark"] .btn-ghost{color:#a9bcff}
+html[data-theme="dark"] .btn-outline:hover,html[data-theme="dark"] .row-icon-btn:hover{background:#2a4161;color:#fff}
+html[data-theme="dark"] .stat-label,html[data-theme="dark"] .stat-note,html[data-theme="dark"] .panel-sub,html[data-theme="dark"] .sub{color:#93a5c1}
+html[data-theme="dark"] .stat-icon{background:#293b65;color:#aec1ff}
+html[data-theme="dark"] .stat-icon.green{background:#193f36;color:#6fdeb2}
+html[data-theme="dark"] .stat-icon.orange{background:#473522;color:#ffd49c}
+html[data-theme="dark"] .stat-icon.pink{background:#492d44;color:#ffa6c9}
+html[data-theme="dark"] .eyebrow{color:#a8b6ff}
+html[data-theme="dark"] .top-date,html[data-theme="dark"] .crumb,html[data-theme="dark"] .class-card p{color:#94a3bd}
+html[data-theme="dark"] .student-entry,html[data-theme="dark"] .modal-head,html[data-theme="dark"] .modal-foot,html[data-theme="dark"] .report-header,html[data-theme="dark"] .class-footer,html[data-theme="dark"] .mini-divider,html[data-theme="dark"] .diary-details{border-color:#2a3952}
+html[data-theme="dark"] .student-tile-actions{border-color:#2d3b52}
+html[data-theme="dark"] .student-tile-actions button{background:#233651;color:#d3deff}
+html[data-theme="dark"] .student-tile-actions button:first-child{background:#2a3e73;color:#cad3ff}
+html[data-theme="dark"] .student-tile-name,html[data-theme="dark"] .student-tile-average b,html[data-theme="dark"] .diary-student-identity strong,html[data-theme="dark"] .diary-student-mean strong,html[data-theme="dark"] .diary-subject-title strong,html[data-theme="dark"] .diary-grade-text strong,html[data-theme="dark"] .diary-metrics b{color:#e1eafb}
+html[data-theme="dark"] .student-tile-class,html[data-theme="dark"] .diary-chevron{background:#293a61;color:#becbff}
+html[data-theme="dark"] .diary-intro{background:linear-gradient(115deg,#172339,#1c2b4c)}
+html[data-theme="dark"] .diary-student-toggle,html[data-theme="dark"] .diary-grade-item{background:#172339;color:var(--ink)}
+html[data-theme="dark"] .diary-details{background:#121d30}
+html[data-theme="dark"] .diary-grade-item{border-color:#2f405b}
+html[data-theme="dark"] .diary-subject-title>span,html[data-theme="dark"] .activity-num{background:#273a5e;color:#b4c8ff}
+html[data-theme="dark"] .diary-no-grades{background:#1a2a43;border-color:#334861;color:#b5c4d8}
+html[data-theme="dark"] .helper-box,html[data-theme="dark"] .hint{background:#1e3052;border-color:#2b426c;color:#afc0e6}
+html[data-theme="dark"] .helper-box strong,html[data-theme="dark"] .helper-box p{color:#bdcbec}
+html[data-theme="dark"] .progress{background:#2a3955}
+html[data-theme="dark"] .field,html[data-theme="dark"] .filter-input,html[data-theme="dark"] .form-group input,html[data-theme="dark"] .form-group select,html[data-theme="dark"] .form-group textarea{background:#121c2f;border-color:#35455e;color:#ebf2fe;color-scheme:dark}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#8393aa}
+html[data-theme="dark"] .form-group label,html[data-theme="dark"] .profile-meta strong{color:#ccd8ed}
+html[data-theme="dark"] .data-table th{background:#22304a;color:#b6c5d9}
+html[data-theme="dark"] .data-table td{border-color:#30415b;color:#e6edfb}
+html[data-theme="dark"] .data-table tbody tr:hover{background:#1b2b45}
+html[data-theme="dark"] .report-summary,html[data-theme="dark"] .profile-meta>div,html[data-theme="dark"] .photo-picker,html[data-theme="dark"] .class-photo-picker{background:#1b2b45;border-color:#354766;color:#c6d2e9}
+html[data-theme="dark"] .report-person small,html[data-theme="dark"] .profile-head p,html[data-theme="dark"] .profile-meta small{color:#9eafc8}
+html[data-theme="dark"] .profile-head{border-color:#33445c}
+html[data-theme="dark"] .class-stat-row>div,html[data-theme="dark"] .overview-class,html[data-theme="dark"] .theme-option{background:#1c2c45;border-color:#30415e;color:#e5edfb}
+html[data-theme="dark"] .class-stat-row .class-average,html[data-theme="dark"] .theme-option.selected{background:#243a65;border-color:#506acd}
+html[data-theme="dark"] .class-stat-row b,html[data-theme="dark"] .class-kicker,html[data-theme="dark"] .subject-bar strong{color:#dbe7fc}
+html[data-theme="dark"] .class-stat-row .class-average b,html[data-theme="dark"] .overview-class>b,html[data-theme="dark"] .subject-bar b{color:#a9bcff}
+html[data-theme="dark"] .overview-class:hover{background:#293a58}
+html[data-theme="dark"] .appearance-icon{background:#293f6f;color:#b3c3ff}
+html[data-theme="dark"] .empty p,html[data-theme="dark"] .settings-desc,html[data-theme="dark"] .footer-note{color:#9aaac0}
+html[data-theme="dark"] .footer-note b{color:#bac8df}
+html[data-theme="dark"] .mobile-bottom-nav{background:#152137f7;border-color:#2e3e55}
+html[data-theme="dark"] .mobile-bottom-nav button{color:#9dadc8}
+html[data-theme="dark"] .mobile-bottom-nav button.active{background:#253a64;color:#aec2ff}
+@media print{html[data-theme="dark"] body{background:#fff;color:#111}html[data-theme="dark"] .card,html[data-theme="dark"] .report-header,html[data-theme="dark"] .report-inner{background:#fff!important;color:#111!important;border-color:#ddd}html[data-theme="dark"] .data-table td,html[data-theme="dark"] .data-table th{color:#111!important;background:#fff!important}html[data-theme="dark"] .report-summary,html[data-theme="dark"] .report-person strong{color:#222!important;background:#fff!important}}
+
+.freq-history{display:grid;gap:11px;margin-bottom:18px}.freq-history>strong{font-size:12px;color:var(--ink)}.freq-history-buttons{display:flex;flex-wrap:wrap;gap:8px}.freq-history-date{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;background:var(--white);color:var(--muted);font-size:11px;padding:8px 10px;font-weight:800}.freq-history-date svg{height:15px;width:15px}.freq-history-date.selected{border-color:var(--blue);color:var(--blue);background:var(--sky)}.freq-history-empty{font-size:11px;color:var(--muted)}
+
+/* EduClass 4.0 · Frequência e fechamento mensal */
+.freq-selector{padding:20px 22px;margin-bottom:14px;display:grid;gap:12px}
+.freq-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.freq-picker-grid .form-group{margin:0;min-width:0}.freq-picker-grid .field,.freq-month-head .field{width:100%;min-height:43px}
+.freq-context{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;font-weight:700;flex-wrap:wrap}.freq-context svg{width:18px;height:18px;color:var(--blue)}
+.freq-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}.freq-stat{padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px}.freq-stat small{font-weight:750;color:var(--muted)}.freq-stat b{font-size:25px;color:var(--ink)}.freq-stat.present b{color:var(--green)}.freq-stat.absent b{color:var(--red)}
+.freq-panel,.freq-month-panel{padding:23px;margin-bottom:16px}.freq-panel .panel-header{align-items:center;gap:10px;flex-wrap:wrap}.freq-list{display:grid;gap:9px}
+.freq-student{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:15px;padding:13px 15px;background:var(--white);transition:border-color .2s,background .2s}.freq-student.is-absent{border-color:#f1c3c8;background:#fff9f9}
+.freq-order{font-size:11px;min-width:24px;font-weight:850;color:var(--muted)}.freq-student-name{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}.freq-student-name strong{color:var(--ink);font-weight:800;overflow-wrap:anywhere}.freq-student-name small{font-size:11px;color:var(--muted)}.is-absent .freq-student-name small{color:#ca4f65}
+.freq-toggle{border:1px solid #f3bcc5;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;background:#fff1f3;color:#b43952;font-weight:850;min-width:124px;justify-content:center;flex-shrink:0}.freq-toggle.active{border-color:#b8e8d2;background:#eaf8f1;color:#12784e}
+.freq-toggle-track{width:36px;height:20px;border-radius:99px;background:#e5a4b0;display:block;padding:3px;flex-shrink:0;transition:.2s}.freq-toggle.active .freq-toggle-track{background:#20a777}.freq-toggle-knob{width:14px;height:14px;border-radius:50%;background:white;display:block;transition:transform .2s}.freq-toggle.active .freq-toggle-knob{transform:translateX(16px)}.freq-toggle-text{font-size:12px}
+.freq-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px;margin-top:18px}.freq-actions small{font-size:11px;color:var(--muted);line-height:1.5;flex-basis:100%}
+.freq-month-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:20px}.freq-month-head h2{margin:6px 0 5px}.freq-month-head .form-group{min-width:180px}.freq-month-head .form-group label{font-size:11px;font-weight:850;color:var(--muted)}
+.freq-month-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px}.freq-month-insights>div{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:17px}.freq-month-insights small{font-size:11px;color:var(--muted)}.freq-month-insights b{font-size:24px;color:var(--ink)}
+.freq-month-list{display:grid;gap:8px}.freq-month-row{display:flex;align-items:center;gap:13px;padding:14px 10px;border-bottom:1px solid var(--line)}.freq-month-identity{display:grid;gap:5px;min-width:0;flex:1}.freq-month-identity strong{font-size:13px;font-weight:850;overflow-wrap:anywhere}.freq-month-identity small{font-size:11px;color:var(--muted)}.freq-month-scores{display:flex;gap:12px}.freq-month-scores span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:64px}.freq-month-scores small{font-size:9px;letter-spacing:.6px;color:var(--muted);font-weight:850}.freq-month-scores b{font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}.freq-month-scores .final{border-radius:10px;padding:9px;background:var(--sky)}.freq-month-scores .final b{color:var(--blue)}
+.freq-formula{display:flex;align-items:flex-start;gap:12px;border-radius:13px;background:var(--sky);padding:16px;margin-top:20px;color:var(--ink)}.freq-formula>svg{width:21px;height:21px;color:var(--blue);flex-shrink:0}.freq-formula strong{font-size:13px}.freq-formula p{font-size:11px;line-height:1.75;color:var(--muted);margin:7px 0 0}.freq-formula b{color:var(--ink)}
+.freq-report-section{display:grid;gap:10px}.freq-report-section h4{margin:0;font-size:14px}.freq-report-section label{font-size:11px;color:var(--muted);font-weight:750}.freq-report-values{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.freq-report-values>div{border:1px solid var(--line);border-radius:10px;padding:12px 6px;display:grid;gap:6px;text-align:center}.freq-report-values small{font-size:9px;color:var(--muted)}.freq-report-values strong{font-size:18px;color:var(--ink)}
+html[data-theme="dark"] .freq-student{background:#18263e;border-color:#344663}html[data-theme="dark"] .freq-student.is-absent{background:#342334;border-color:#784456}html[data-theme="dark"] .freq-toggle{background:#4c2b41;border-color:#854257;color:#ffb2c0}html[data-theme="dark"] .freq-toggle.active{background:#153b34;border-color:#2f755e;color:#9ee6c1}html[data-theme="dark"] .freq-month-insights>div{background:#132039;border-color:#354966}html[data-theme="dark"] .freq-month-scores .final,html[data-theme="dark"] .freq-formula{background:#22385f}html[data-theme="dark"] .freq-month-scores .final b{color:#adc4ff}
+@media(max-width:740px){.freq-panel,.freq-month-panel{padding:16px}.freq-month-head{align-items:stretch;flex-direction:column}.freq-month-head .form-group{width:100%}}
+@media(max-width:530px){.freq-picker-grid{grid-template-columns:1fr}.freq-selector{padding:15px}.freq-stats{gap:7px}.freq-stat{padding:13px 10px;flex-direction:column;align-items:flex-start;gap:6px}.freq-stat b{font-size:23px}.freq-student{gap:8px;padding:11px 9px}.freq-student .avatar{width:38px;height:38px}.freq-order{display:none}.freq-toggle{min-width:90px;flex-direction:column;gap:4px;padding:6px}.freq-toggle-text{font-size:10px}.freq-month-insights{gap:7px}.freq-month-insights>div{padding:12px 9px}.freq-month-insights b{font-size:19px}.freq-month-row{gap:8px;align-items:flex-start;flex-wrap:wrap}.freq-month-identity{min-width:calc(100% - 54px)}.freq-month-scores{width:100%;justify-content:space-between;padding-left:6px}.freq-month-scores span{flex:1}.freq-month-scores b{font-size:18px}}
+</style>
+
+<style>
+.cloud-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.cloud-panel{padding:25px;min-width:0}.cloud-panel h2{font-size:20px;margin:10px 0 7px;color:var(--ink)}.cloud-panel p{color:var(--muted);line-height:1.65;font-size:14px;margin:8px 0 15px}.cloud-panel label{display:block;color:var(--ink);font-weight:650;margin:14px 0 6px;font-size:13px}.cloud-panel .field{width:100%;box-sizing:border-box;min-height:44px}.cloud-panel small{display:block;color:var(--muted);margin:10px 0;line-height:1.4}.cloud-kicker{color:var(--blue);font-size:11px;font-weight:850;letter-spacing:1.4px}.cloud-wide{grid-column:1/-1}.cloud-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}.cloud-btn{background:var(--blue);border:1px solid var(--blue);color:white;min-height:40px;padding:9px 14px;border-radius:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.cloud-btn-light{background:transparent;color:var(--blue);border-color:var(--line)}.cloud-btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}.cloud-student{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:14px 0;border-top:1px solid var(--line)}.cloud-student strong{display:block;color:var(--ink)}.cloud-student small{margin:0;color:var(--muted)}.cloud-status{padding:10px;background:var(--sky);color:var(--blue);font-weight:700;border-radius:10px;font-size:13px;margin:12px 0}@media(max-width:800px){.cloud-layout{grid-template-columns:1fr}.cloud-wide{grid-column:auto}.cloud-panel{padding:20px}.cloud-btn{font-size:12px}}
+</style>
+</head>
+<body>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-school" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h10M7 12h3m4 0h3M7 17h3m4 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="16" width="7" height="5" rx="1.4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><path d="M9 4h-3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3M9 4a3 3 0 0 1 6 0v2H9V4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 12h8M8 16h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-notes" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-report" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H5V3h2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M8 13h8M8 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-classes" viewBox="0 0 24 24"><path d="m3 6 9-4 9 4-9 4-9-4ZM3 12l9 4 9-4M3 18l9 4 9-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m19.5 12 .9-1.4-1.5-2.6-1.7.1-1.2-.7-.8-1.6h-3l-.8 1.6-1.2.7-1.7-.1L7 10.6 8 12l-1 1.4L8.5 16l1.7-.1 1.2.7.8 1.6h3l.8-1.6 1.2-.7 1.7.1 1.5-2.6-.9-1.4Z" fill="none" stroke="currentColor" stroke-width="1.6" transform="translate(-1.7 -1.4) scale(1.14)"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4.4-.7L20 7.7 16.3 4 4.7 15.6 4 20Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7M10 11v6m4-6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4V10h16v8h-2M6 15h12v6H6v-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 17v4h16v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.7 15.9A9.2 9.2 0 0 1 8.1 3.3 9.3 9.3 0 1 0 20.7 15.9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8" r="1.5" fill="currentColor"/><path d="m4 18 5-5 3 3 3-5 5 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-attendance" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.9" fill="none"/><path d="M7 2v5m10-5v5M3 10h18M8 15l2.6 2.6L16 12" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M7 3v4m10-4v4M3 10h18" stroke="currentColor" stroke-width="1.8"/></symbol>
+</svg>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span class="logo"><svg><use href="#i-school"></use></svg></span><span><strong>EduClass</strong><small>PROFESSOR 5.0</small></span></div>
+  <div class="side-label">MENU PRINCIPAL</div>
+  <nav class="nav" aria-label="Navegação principal" id="nav">
+    <button data-page="dashboard"><svg><use href="#i-dashboard"></use></svg>Visão geral</button>
+    <button data-page="students"><svg><use href="#i-users"></use></svg>Alunos</button>
+    <button data-page="diary"><svg><use href="#i-clipboard"></use></svg>Diário da turma</button>
+    <button data-page="attendance"><svg><use href="#i-attendance"></use></svg>Frequência</button>
+    <button data-page="grades"><svg><use href="#i-notes"></use></svg>Notas e avaliações</button>
+    <button data-page="reports"><svg><use href="#i-report"></use></svg>Boletins</button>
+    <button data-page="classes"><svg><use href="#i-classes"></use></svg>Turmas</button>
+    <button data-page="cloud"><svg><use href="#i-users"></use></svg>Conectar alunos</button>
+    <button data-page="settings"><svg><use href="#i-settings"></use></svg>Configurações</button>
+  </nav>
+  <div class="sidebar-bottom"><div class="teacher-row"><div class="teacher-avatar" id="teacherInitial">P</div><div style="min-width:0"><strong id="teacherName">Professor(a)</strong><small>Conta local • Administrador</small></div></div></div>
+</aside>
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+<div class="main">
+  <header class="topbar"><div class="top-left"><div style="display:flex;align-items:center;gap:12px"><button class="menu-trigger" data-action="toggleMenu" aria-label="Abrir menu"><svg><use href="#i-menu"></use></svg></button><div><div class="crumb">PAINEL ESCOLAR <svg><use href="#i-arrow"></use></svg> <span id="crumbPage">Visão geral</span></div><div class="top-title" id="topTitle">Bem-vindo ao seu painel</div></div></div></div><div class="top-actions"><span class="top-date" id="topDate"></span><button class="icon-btn theme-trigger" type="button" data-action="toggleTheme" id="themeTopButton" title="Alternar tema" aria-label="Ativar tema escuro"> <svg><use href="#i-moon"></use></svg></button><button class="icon-btn" data-page="settings" title="Configurações" aria-label="Configurações"><svg><use href="#i-settings"></use></svg></button></div></header>
+  <div class="storage-warning hidden" id="storageWarning"><b>Atenção:</b> este navegador bloqueou o salvamento local. Exporte um backup em Configurações para não perder seus dados.</div>
+  <main class="container" id="content"></main>
+</div>
+</div>
+<nav class="mobile-bottom-nav noprint" aria-label="Abas do aplicativo">
+<button type="button" data-page="dashboard"><svg><use href="#i-dashboard"></use></svg><span>Início</span></button>
+<button type="button" data-page="students"><svg><use href="#i-users"></use></svg><span>Alunos</span></button>
+<button type="button" data-page="diary"><svg><use href="#i-clipboard"></use></svg><span>Diário</span></button>
+<button type="button" data-page="attendance"><svg><use href="#i-attendance"></use></svg><span>Frequência</span></button>
+<button type="button" data-page="classes"><svg><use href="#i-classes"></use></svg><span>Turmas</span></button>
+</nav>
+<div id="modalRoot"></div><div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+<input type="file" accept="application/json,.json" id="importFile" hidden>
+<script>
+(() => {'use strict';
+const KEY='educlass-professor-v1';
+const $=(q,root=document)=>root.querySelector(q);
+const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
+const icon=(id)=>`<svg aria-hidden="true"><use href="#i-${id}"></use></svg>`;
+const esc=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>globalThis.crypto?.randomUUID?.() || ('id_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+const now=()=>new Date().toISOString();
+const defaultData=()=>({version:2,settings:{teacher:'Professor(a)',school:'Minha escola',pass:6,attendanceWeight:20,theme:'light',subjects:['Língua Portuguesa','Matemática','Ciências','História','Geografia','Inglês']},classes:[{id:uid(),name:'Turma 1',year:new Date().getFullYear()}],students:[],grades:[],attendance:[],modifiedAt:now()});
+let storageEnabled=true;
+function load(){try{const str=localStorage.getItem(KEY);if(!str)return defaultData();const raw=JSON.parse(str);if(!validData(raw))return defaultData();return {...defaultData(),...raw,attendance:Array.isArray(raw.attendance)?raw.attendance.map(a=>({...a,records:a.records&&typeof a.records==='object'?a.records:(a.presences&&typeof a.presences==='object'?a.presences:{})})):[],settings:{...defaultData().settings,...raw.settings}};}catch(e){storageEnabled=false;return defaultData();}}
+function validData(v){return !!v&&typeof v==='object'&&!Array.isArray(v)&&Array.isArray(v.classes)&&Array.isArray(v.students)&&Array.isArray(v.grades)&&typeof v.settings==='object'&&v.settings!==null;}
+let db=load();
+function theme(){return db.settings.theme==='dark'?'dark':'light';}
+function applyTheme(){const dark=theme()==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.documentElement.style.colorScheme=dark?'dark':'light';const meta=$('#themeColorMeta');if(meta)meta.setAttribute('content',dark?'#101827':'#f5f7fb');const t=$('#themeTopButton');if(t){t.innerHTML=icon(dark?'sun':'moon');t.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');t.title=dark?'Usar tema claro':'Usar tema escuro';}}
+function setTheme(value){db.settings.theme=value==='dark'?'dark':'light';persist();applyTheme();render();toast(db.settings.theme==='dark'?'Tema escuro ativado.':'Tema claro ativado.');}
+let page='dashboard';let openDiaryStudentId='';const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};const localMonth=()=>localDate().slice(0,7);let filters={studentsSearch:'',studentsClass:'',classDiary:'',gradesSearch:'',gradesClass:'',gradesSubject:'',gradesStatus:'',reportStudentId:'',attendanceClass:'',attendanceDate:localDate(),attendanceMonth:localMonth(),reportMonth:localMonth()};let attendanceDraft=null;let attendanceDraftKey='';let attendanceDirty=false;
+function persist(){db.modifiedAt=now();window.EduCloudTeacher?.schedulePush();try{localStorage.setItem(KEY,JSON.stringify(db));storageEnabled=true;}catch(e){storageEnabled=false;toast('Não foi possível salvar neste navegador. Faça um backup!',true);}$('#storageWarning').classList.toggle('hidden',storageEnabled);return storageEnabled;}
+function initials(s){return String(s||'P').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+// Apenas fotos JPEG/PNG/WEBP em data URL; nunca URLs externas ou SVG.
+const safePhoto=v=>typeof v==='string'&&v.length<450000&&/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(v)?v:'';
+function avatarHtml(s,size='',tone=''){const image=safePhoto(s?.photo);return `<span class="avatar ${size} ${tone} ${image?'photo-avatar':''}">${image?`<img src="${image}" alt="Foto de ${esc(s?.name||'aluno')}" loading="lazy">`:esc(initials(s?.name||'Aluno'))}</span>`;}
+function compressPhoto(file,limit=320){return new Promise((resolve,reject)=>{
+ if(!file||!file.type.startsWith('image/')){reject(Error('Escolha uma imagem JPG, PNG ou WebP.'));return;}
+ if(file.size>12*1024*1024){reject(Error('A foto deve ter até 12 MB.'));return;}
+ const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{try{const ratio=Math.min(1,limit/Math.max(img.naturalWidth,img.naturalHeight));const w=Math.max(1,Math.round(img.naturalWidth*ratio)),h=Math.max(1,Math.round(img.naturalHeight*ratio));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);let data=canvas.toDataURL('image/jpeg',.73);if(data.length>350000){const smaller=document.createElement('canvas');smaller.width=Math.max(1,Math.round(w*.75));smaller.height=Math.max(1,Math.round(h*.75));smaller.getContext('2d').drawImage(canvas,0,0,smaller.width,smaller.height);data=smaller.toDataURL('image/jpeg',.6);}if(data.length>420000)throw Error('Esta imagem ficou muito grande. Escolha uma foto mais simples.');resolve(data);}catch(e){reject(e);}finally{URL.revokeObjectURL(url);}};
+ img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Não foi possível abrir esta foto. Tente JPG ou PNG.'));};
+ img.src=url;
+ });}
+const fmt=(n)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+function avgGrade(items){let total=0,weight=0;for(const g of items){const n=Number(g.score),w=Number(g.weight)||1;if(Number.isFinite(n)&&n>=0&&n<=10&&w>0){total+=n*w;weight+=w;}}return weight?total/weight:null;}
+function allSubjectNames(studentId,onlyPublished){const g=db.grades.filter(x=>x.studentId===studentId && (!onlyPublished||x.published));return [...new Set(g.map(x=>x.subject))].sort((a,b)=>a.localeCompare(b,'pt-BR'));}
+function studentAvg(id,onlyPublished=false){const subs=allSubjectNames(id,onlyPublished);const avgs=subs.map(sub=>avgGrade(db.grades.filter(g=>g.studentId===id&&g.subject===sub&&(!onlyPublished||g.published)))).filter(x=>x!==null);return avgs.length?avgs.reduce((a,b)=>a+b,0)/avgs.length:null;}
+function globalAvg(){const vals=db.students.map(s=>studentAvg(s.id)).filter(x=>x!==null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
+
+// Frequência: somente dias com chamada salva entram nos cálculos. Nenhuma presença é inferida.
+function gradeDate(g){return /^\d{4}-\d{2}-\d{2}$/.test(g?.date||'')?g.date:String(g?.createdAt||'').slice(0,10);}
+function monthGrades(studentId,month,publishedOnly=true){return db.grades.filter(g=>g.studentId===studentId&&gradeDate(g).slice(0,7)===month&&(!publishedOnly||g.published));}
+function monthlyGradeAverage(id,month,publishedOnly=true){const gs=monthGrades(id,month,publishedOnly);const subs=[...new Set(gs.map(g=>g.subject))];const vals=subs.map(sub=>avgGrade(gs.filter(g=>g.subject===sub))).filter(x=>x!==null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
+function storedAttendance(classId,date){return db.attendance.find(x=>x.classId===classId&&x.date===date);}
+function monthAttendance(studentId,classId,month){let present=0,days=0;for(const a of db.attendance){if(a.classId!==classId||!a.date.startsWith(month))continue;if(!a.records||typeof a.records!=='object'||!Object.prototype.hasOwnProperty.call(a.records,studentId))continue;days++;if(a.records[studentId]===true)present++;}return {days,present,absent:days-present,percent:days?present/days*100:null};}
+function monthlyResult(id,classId,month){const grades=monthlyGradeAverage(id,month,true),freq=monthAttendance(id,classId,month);const w=Math.min(50,Math.max(0,Number(db.settings.attendanceWeight)||0))/100;const final=grades===null?null:freq.days?(1-w)*grades+w*(freq.percent/10):grades;return {...freq,grades,final};}
+function monthLabel(month){const [y,m]=month.split('-').map(Number);return Number.isInteger(y)&&m>=1&&m<=12?new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}):month;}
+function draftKey(){return filters.attendanceClass+'|'+filters.attendanceDate;}
+function initAttendanceDraft(){const key=draftKey();if(attendanceDraft&&key===attendanceDraftKey){const ids=new Set(db.students.filter(s=>s.classId===filters.attendanceClass).map(s=>s.id));for(const id of ids)if(!(id in attendanceDraft)){attendanceDraft[id]=true;attendanceDirty=true;}for(const id of Object.keys(attendanceDraft))if(!ids.has(id))delete attendanceDraft[id];return;}const saved=storedAttendance(filters.attendanceClass,filters.attendanceDate);attendanceDraft=Object.fromEntries(db.students.filter(s=>s.classId===filters.attendanceClass).map(s=>[s.id,saved?.records?.[s.id]===false?false:true]));attendanceDraftKey=key;attendanceDirty=false;}
+function clearAttendanceDraft(){attendanceDraft=null;attendanceDraftKey='';attendanceDirty=false;}
+const classById=id=>db.classes.find(c=>c.id===id);
+function classAverage(id,onlyPublished=false){const vals=db.students.filter(s=>s.classId===id).map(s=>studentAvg(s.id,onlyPublished)).filter(v=>v!==null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
+function classSubjectAverages(id){const ids=new Set(db.students.filter(s=>s.classId===id).map(s=>s.id));const subs=[...new Set(db.grades.filter(g=>ids.has(g.studentId)).map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'pt-BR'));return subs.map(name=>({name,average:avgGrade(db.grades.filter(g=>ids.has(g.studentId)&&g.subject===name))})).filter(x=>x.average!==null);}
+function classCover(c,cls=''){const photo=safePhoto(c?.photo);return `<div class="class-cover ${cls} ${photo?'with-photo':''}">${photo?`<img src="${photo}" alt="Capa da turma ${esc(c?.name||'')}">`:`<div class="class-cover-decoration"><span>EC</span><span>${icon('classes')}</span></div>`}</div>`;}
+const studentById=id=>db.students.find(s=>s.id===id);
+const className=id=>classById(id)?.name || 'Sem turma';
+const studentName=id=>studentById(id)?.name || 'Aluno removido';
+function dateFmt(value){try{return new Date(value).toLocaleDateString('pt-BR');}catch(e){return '-';}}
+function statusPill(g){return g.published?'<span class="pill green">● Publicada</span>':'<span class="pill amber">● Rascunho</span>';}
+function scorePill(score){return `<span class="pill ${Number(score)>=Number(db.settings.pass)?'green':'red'}">${fmt(score)}</span>`;}
+function empty(title,sub,iconName='users',button=''){return `<div class="empty"><div class="empty-icon">${icon(iconName)}</div><h3>${esc(title)}</h3><p>${esc(sub)}</p>${button}</div>`;}
+function optionList(items,selected,placeholder,val=x=>x.id,label=x=>x.name){return `<option value="">${esc(placeholder)}</option>`+items.map(x=>`<option value="${esc(val(x))}" ${String(selected)===String(val(x))?'selected':''}>${esc(label(x))}</option>`).join('');}
+function heading(kicker,title,desc,actions=''){return `<div class="section-heading"><div><span class="eyebrow">${esc(kicker)}</span><h1 class="h1">${esc(title)}</h1><p class="sub">${esc(desc)}</p></div><div class="btn-row noprint">${actions}</div></div>`;}
+function btn(action,label,kind='primary',id='',extra=''){return `<button type="button" class="btn btn-${kind}" data-action="${action}" ${id?`data-id="${esc(id)}"`:''} ${extra}>${label}</button>`;}
+function setPage(p){if(page==='attendance'&&p!=='attendance'){if(attendanceDirty&&!confirm('Existem alterações de frequência não salvas. Deseja sair sem salvar?'))return;clearAttendanceDraft();}if(!['dashboard','students','diary','attendance','grades','reports','classes','settings','cloud'].includes(p))return;page=p;$('#sidebar').classList.remove('open');$('#mobileBackdrop').classList.remove('open');render();window.scrollTo({top:0,behavior:'smooth'});}
+function render(){applyTheme();const names={dashboard:'Visão geral',students:'Alunos',diary:'Diário da turma',attendance:'Frequência',grades:'Notas e avaliações',reports:'Boletins',classes:'Turmas',settings:'Configurações',cloud:'Conectar alunos'};$$('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));$('#crumbPage').textContent=names[page];$('#topTitle').textContent=page==='dashboard'?'Bem-vindo ao seu painel':names[page];$('#teacherName').textContent=db.settings.teacher||'Professor(a)';$('#teacherInitial').textContent=initials(db.settings.teacher);$('#topDate').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});$('#storageWarning').classList.toggle('hidden',storageEnabled);$('#content').innerHTML=({dashboard:renderDashboard,students:renderStudents,diary:renderDiary,attendance:renderAttendance,grades:renderGrades,reports:renderReports,classes:renderClasses,settings:renderSettings,cloud:()=>window.EduCloudTeacher?.render()||'<p>Conectando...</p>'})[page]()+`<p class="footer-note">EduClass Professor 5.0 • Dados salvos no aparelho e sincronizados apenas quando ativados.<br><b>Mantenha backups locais.</b> Configure a conexão em 'Conectar alunos' para atualizar os estudantes em outros aparelhos.</p>`;}
+function renderDashboard(){const total=db.students.length,pub=db.grades.filter(g=>g.published).length,mean=globalAvg();const recent=[...db.grades].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);const subs=[...new Set(db.grades.map(g=>g.subject))];const classStats=db.classes.map(c=>({c,n:db.students.filter(s=>s.classId===c.id).length,average:classAverage(c.id)}));const progress=subs.map(sub=>({sub,n:avgGrade(db.grades.filter(g=>g.subject===sub))})).filter(x=>x.n!==null).sort((a,b)=>b.n-a.n).slice(0,6);return heading('SEU ESPAÇO DE ENSINO','Visão geral','Acompanhe suas turmas, alunos e resultados em um só lugar.',btn('newGrade',icon('plus')+' Lançar nota')+btn('openAttendance',icon('attendance')+' Fazer chamada','outline'))+
+`<div class="stats"><div class="card stat"><div class="stat-top"><span class="stat-label">Total de alunos</span><span class="stat-icon">${icon('users')}</span></div><div class="stat-value">${total}</div><div class="stat-note">Alunos cadastrados</div></div><div class="card stat"><div class="stat-top"><span class="stat-label">Turmas</span><span class="stat-icon green">${icon('classes')}</span></div><div class="stat-value">${db.classes.length}</div><div class="stat-note">Turmas cadastradas</div></div><div class="card stat"><div class="stat-top"><span class="stat-label">Notas publicadas</span><span class="stat-icon orange">${icon('notes')}</span></div><div class="stat-value">${pub}</div><div class="stat-note">${db.grades.length-pub} nota(s) em rascunho</div></div><div class="card stat"><div class="stat-top"><span class="stat-label">Média geral</span><span class="stat-icon pink">${icon('report')}</span></div><div class="stat-value">${mean===null?'—':fmt(mean)}</div><div class="stat-note">Média das médias dos alunos</div></div></div>
+<section class="card class-averages-overview"><div class="panel-header"><div><h2 class="panel-title">Desempenho das turmas</h2><p class="panel-sub">Média geral de cada sala, calculada pelas médias dos alunos com notas.</p></div>${btn('goClasses','Ver turmas '+icon('arrow'),'ghost')}</div><div class="overview-classes">${classStats.map(x=>`<button type="button" class="overview-class" data-action="openDiaryForClass" data-id="${esc(x.c.id)}">${classCover(x.c,'overview-cover')}<span><strong>${esc(x.c.name)}</strong><small>${x.n} aluno(s)</small></span><b>${x.average===null?'—':fmt(x.average)}</b>${icon('arrow')}</button>`).join('')}</div></section>
+<div class="dashboard-grid"><section class="card panel"><div class="panel-header"><div><h2 class="panel-title">Últimas notas lançadas</h2><p class="panel-sub">Registros recentes em suas turmas</p></div>${btn('goGrades','Ver todas '+icon('arrow'),'ghost')}</div>${recent.length?`<div class="simple-list">${recent.map(g=>`<div class="student-entry">${avatarHtml(studentById(g.studentId),'',g.published?'green':'pink')}<div class="entry-main"><strong>${esc(studentName(g.studentId))}</strong><small>${esc(g.subject)} • ${esc(g.assessment)} • ${dateFmt(g.createdAt)}</small></div><strong class="grade-label">${fmt(g.score)}</strong>${statusPill(g)}</div>`).join('')}</div>`:empty('Nenhuma nota lançada','Clique em “Lançar nota” para começar a avaliar seus alunos.','notes',btn('newGrade',icon('plus')+' Lançar nota'))}</section>
+<section class="card panel"><h2 class="panel-title">Desempenho por disciplina</h2><p class="panel-sub">Média das notas lançadas em cada matéria</p>${progress.length?`<div class="progress-group">${progress.map(x=>`<div><div class="progress-head"><strong>${esc(x.sub)}</strong><span>${fmt(x.n)} / 10</span></div><div class="progress"><div class="${x.n<Number(db.settings.pass)?'low':''}" style="width:${Math.max(0,Math.min(100,x.n*10))}%"></div></div></div>`).join('')}</div>`:empty('Sem desempenho ainda','As médias por disciplina aparecerão aqui.','report')}
+<div class="helper-box"><strong>Organize suas aulas com facilidade</strong><p>Cadastre alunos, registre avaliações e publique resultados quando estiverem prontos.</p>${btn('newClass','Criar turma '+icon('arrow'),'outline')}</div></section></div>`;}
+function renderStudents(){
+ const q=filters.studentsSearch.toLocaleLowerCase('pt-BR');
+ const students=db.students.filter(s=>(!filters.studentsClass||s.classId===filters.studentsClass)&&(!q||s.name.toLocaleLowerCase('pt-BR').includes(q)||(s.enrollment||'').toLocaleLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ return heading('GESTÃO DE ALUNOS','Alunos','Fotos maiores, perfis completos e acesso rápido às notas.',btn('newStudent',icon('plus')+' Cadastrar aluno'))+
+ `<div class="toolbar"><div class="filters"><input class="filter-input" data-filter="studentsSearch" value="${esc(filters.studentsSearch)}" type="search" placeholder="Buscar aluno" aria-label="Buscar alunos"><select class="field" data-filter="studentsClass" aria-label="Filtrar por turma">${optionList(db.classes,filters.studentsClass,'Todas as turmas')}</select></div>${btn('exportStudents',icon('download')+' Exportar CSV','outline')}</div>`+
+ (students.length?`<div class="students-grid">${students.map(s=>{const avg=studentAvg(s.id);return `<article class="card student-tile">
+ <div class="student-tile-body"><button class="student-tile-photo" data-action="viewStudent" data-id="${esc(s.id)}" aria-label="Abrir perfil de ${esc(s.name)}">${avatarHtml(s,'avatar-student')}</button><div class="student-tile-info"><button type="button" class="student-tile-name" data-action="viewStudent" data-id="${esc(s.id)}">${esc(s.name)}</button><span class="student-tile-class">${esc(className(s.classId))}</span><span class="student-tile-meta">Matrícula: ${esc(s.enrollment||'—')}</span><span class="student-tile-average">Média geral <b>${avg===null?'Sem notas':fmt(avg)}</b></span></div></div>
+ <div class="student-tile-actions"><button type="button" data-action="openDiaryForStudent" data-id="${esc(s.id)}">${icon('clipboard')} Ver notas</button><button type="button" data-action="reportStudent" data-id="${esc(s.id)}">${icon('report')} Boletim</button><button type="button" data-action="editStudent" data-id="${esc(s.id)}">${icon('pencil')} Editar</button></div>
+ </article>`}).join('')}</div>`:`<div class="card">${empty(db.students.length?'Nenhum aluno encontrado':'Sua lista de alunos está vazia',db.students.length?'Tente mudar os filtros para encontrar alguém.':'Cadastre o primeiro aluno para começar.','users',btn('newStudent',icon('plus')+' Cadastrar aluno'))}</div>`);
+}
+function renderDiary(){
+ const allClasses=db.classes;
+ const chosen=allClasses.some(c=>c.id===filters.classDiary)?filters.classDiary:(allClasses[0]?.id||'');
+ filters.classDiary=chosen;
+ const students=db.students.filter(s=>s.classId===chosen).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const cl=classById(chosen);
+ const selectedGrades=db.grades.filter(g=>students.some(s=>s.id===g.studentId));
+ const classAvg=classAverage(chosen);
+ const cards=students.map(s=>{
+   const grades=db.grades.filter(g=>g.studentId===s.id).sort((a,b)=>a.subject.localeCompare(b.subject,'pt-BR')||a.createdAt.localeCompare(b.createdAt));
+   const avg=studentAvg(s.id);
+   const expanded=openDiaryStudentId===s.id;
+   const subjects=[...new Set(grades.map(g=>g.subject))];
+   return `<article class="card diary-student ${expanded?'expanded':''}" data-student-card="${esc(s.id)}">
+    <button type="button" class="diary-student-toggle" data-action="toggleDiaryStudent" data-id="${esc(s.id)}" aria-expanded="${expanded?'true':'false'}" aria-label="${expanded?'Recolher':'Expandir'} notas de ${esc(s.name)}">
+     ${avatarHtml(s,'avatar-diary')}<span class="diary-student-identity"><strong>${esc(s.name)}</strong><small>${grades.length} ${grades.length===1?'atividade':'atividades'} lançada${grades.length===1?'':'s'}</small></span>
+     <span class="diary-student-mean"><small>MÉDIA</small><strong>${avg===null?'—':fmt(avg)}</strong></span><span class="diary-chevron">${icon('chevron')}</span>
+    </button>
+    <div class="diary-details"><div class="diary-details-head"><span>Notas e atividades de ${esc(s.name)}</span>${btn('gradeForStudent',icon('plus')+' Nova nota','primary',s.id)}</div>
+     ${grades.length?subjects.map(subject=>{
+       const sg=grades.filter(g=>g.subject===subject);const subAvg=avgGrade(sg);
+       return `<section class="diary-subject"><div class="diary-subject-title"><strong>${esc(subject)}</strong><span>Média da matéria: <b>${subAvg===null?'—':fmt(subAvg)}</b></span></div>
+        <div class="diary-grade-stack">${sg.map((g,i)=>`<div class="diary-grade-item">
+         <span class="activity-num">${String(i+1).padStart(2,'0')}</span><div class="diary-grade-text"><strong>${esc(g.assessment)}</strong><small>${g.published?'Nota publicada':'Rascunho • não aparece no boletim'}${Number(g.weight)>1?' · Peso '+Number(g.weight):''}</small></div>
+         <div class="diary-grade-value"><small>NOTA</small><b class="${g.score<Number(db.settings.pass)?'below':''}">${fmt(g.score)}</b></div>
+         <button class="row-icon-btn" type="button" data-action="editGrade" data-id="${esc(g.id)}" aria-label="Editar nota de ${esc(g.assessment)}" title="Editar nota">${icon('pencil')}</button>
+          <button class="row-icon-btn red" type="button" data-action="deleteGrade" data-id="${esc(g.id)}" aria-label="Excluir nota de ${esc(g.assessment)}" title="Excluir nota">${icon('trash')}</button>
+        </div>`).join('')}</div></section>`}).join(''):`<div class="diary-no-grades">Nenhuma atividade lançada para este aluno. Toque em “Nova nota” para começar.</div>`}
+     <div class="diary-bottom-actions"><button type="button" class="btn btn-outline btn-small" data-action="reportStudent" data-id="${esc(s.id)}">${icon('report')} Ver boletim</button><button type="button" class="btn btn-ghost btn-small" data-action="viewStudent" data-id="${esc(s.id)}">${icon('users')} Abrir perfil</button></div>
+    </div>
+   </article>`;
+ }).join('');
+ return heading('DIÁRIO DE CLASSE','Notas por turma','Selecione uma turma e toque no nome de um aluno para abrir suas avaliações.',btn('newGrade',icon('plus')+' Lançar nota'))+
+ `<section class="card diary-intro">${classCover(cl,'diary-cover')}<div class="diary-intro-text"><span class="eyebrow">TURMA SELECIONADA</span><h2>${esc(cl?.name||'Selecione uma turma')}</h2><p>Ano letivo ${esc(cl?.year||new Date().getFullYear())}</p></div><div class="diary-class-select"><label for="classDiarySelect">Escolher turma</label><select class="field" id="classDiarySelect" data-filter="classDiary" aria-label="Escolher turma">${optionList(allClasses,chosen,'Selecione a turma')}</select></div></section>
+ <div class="diary-metrics"><div class="card"><small>Alunos</small><b>${students.length}</b></div><div class="card"><small>Atividades lançadas</small><b>${selectedGrades.length}</b></div><div class="card"><small>Média da turma</small><b>${classAvg===null?'—':fmt(classAvg)}</b></div></div>
+ <div class="diary-list">${students.length?cards:`<div class="card">${empty('Nenhum aluno nesta turma','Cadastre alunos ou escolha outra turma para visualizar o diário.','users',btn('newStudent',icon('plus')+' Cadastrar aluno'))}</div>`}</div>
+ <section class="card class-subject-panel"><div class="panel-header"><div><h3 class="panel-title">Médias por disciplina · ${esc(cl?.name||'Turma')}</h3><p class="panel-sub">Média das avaliações lançadas em cada matéria da sala.</p></div></div>${classSubjectAverages(chosen).length?`<div class="subject-bars">${classSubjectAverages(chosen).map(x=>`<div class="subject-bar"><div><strong>${esc(x.name)}</strong><b>${fmt(x.average)}</b></div><span class="progress"><span class="bar-fill" style="width:${Math.max(0,Math.min(100,x.average*10))}%"></span></span></div>`).join('')}</div>`:`<p class="muted-copy">Ainda não existem notas para calcular as médias das disciplinas desta turma.</p>`}</section>
+  <p class="diary-explain">As médias deste diário consideram todas as avaliações lançadas e seus pesos, inclusive rascunhos. Os boletins mostram somente as notas publicadas.</p>`;
+}
+
+function renderAttendance(){
+ const selectedClass=db.classes.some(c=>c.id===filters.attendanceClass)?filters.attendanceClass:(db.classes[0]?.id||'');
+ filters.attendanceClass=selectedClass;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(filters.attendanceDate))filters.attendanceDate=localDate();
+ if(!/^\d{4}-\d{2}$/.test(filters.attendanceMonth))filters.attendanceMonth=localMonth();
+ initAttendanceDraft();
+ const students=db.students.filter(st=>st.classId===selectedClass).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const saved=storedAttendance(selectedClass,filters.attendanceDate);
+ const present=students.filter(st=>attendanceDraft[st.id]===true).length,absent=students.length-present;
+ const chosenMonth=filters.attendanceMonth;
+ const rows=students.map(st=>({student:st,...monthlyResult(st.id,selectedClass,chosenMonth)}));
+ const have=rows.filter(x=>x.final!==null),classFinal=have.length?have.reduce((a,b)=>a+b.final,0)/have.length:null;
+ const freqRows=rows.filter(x=>x.days>0),classPresence=freqRows.length?freqRows.reduce((a,b)=>a+b.percent,0)/freqRows.length:null;
+ const dates=db.attendance.filter(a=>a.classId===selectedClass&&a.date.startsWith(chosenMonth)).sort((a,b)=>b.date.localeCompare(a.date));
+ return heading('CHAMADA E DESEMPENHO','Frequência','Marque os presentes e as faltas por data. Só os dias salvos entram no fechamento mensal.',btn('exportAttendance',icon('download')+' Exportar frequência','outline'))+
+ `<div class="card freq-selector"><div class="freq-picker-grid"><div class="form-group"><label for="attendanceClass">Turma</label><select class="field" id="attendanceClass" data-filter="attendanceClass">${optionList(db.classes,selectedClass,'Selecione a turma')}</select></div><div class="form-group"><label for="attendanceDate">Data da chamada</label><input class="field" type="date" id="attendanceDate" data-filter="attendanceDate" value="${esc(filters.attendanceDate)}"></div></div><div class="freq-context">${icon('calendar')} ${esc(classById(selectedClass)?.name||'Nenhuma turma')} · ${esc(dateFmt(filters.attendanceDate+'T12:00:00'))} <span class="pill ${saved?'green':'amber'}">${saved?'Chamada salva':'Ainda não salva'}</span></div></div>`+
+ `<div class="freq-stats"><div class="card freq-stat"><small>Alunos</small><b>${students.length}</b></div><div class="card freq-stat present"><small>Presentes</small><b>${present}</b></div><div class="card freq-stat absent"><small>Faltas</small><b>${absent}</b></div></div>`+
+ `<section class="card freq-panel"><div class="panel-header"><div><h2 class="panel-title">Lista de chamada</h2><p class="panel-sub">Todos começam presentes em uma data nova. Toque no controle para marcar falta.</p></div><span class="pill ${attendanceDirty?'amber':saved?'green':'amber'}">${attendanceDirty?'Alterações não salvas':saved?'Salva':'Aguardando salvamento'}</span></div>`+
+ (students.length?`<div class="freq-list">${students.map((st,index)=>{const ok=attendanceDraft[st.id]!==false;return `<div class="freq-student ${ok?'is-present':'is-absent'}"><span class="freq-order">${String(index+1).padStart(2,'0')}</span>${avatarHtml(st,'avatar-diary')}<span class="freq-student-name"><strong>${esc(st.name)}</strong><small>${ok?'Presente':'Falta registrada'}</small></span><button type="button" class="freq-toggle ${ok?'active':''}" role="switch" aria-checked="${ok}" aria-label="${esc(st.name)}: ${ok?'presente':'faltou'}; alternar frequência" data-action="toggleAttendance" data-id="${esc(st.id)}"><span class="freq-toggle-track"><span class="freq-toggle-knob"></span></span><span class="freq-toggle-text">${ok?'Presente':'Faltou'}</span></button></div>`;}).join('')}</div>`:empty('Nenhum aluno nesta turma','Cadastre alunos antes de fazer a chamada.','users',btn('newStudent',icon('plus')+' Cadastrar aluno')))+
+ `<div class="freq-actions">${btn('saveAttendance',icon('check')+' Salvar chamada','primary','',''+(!students.length?'disabled':''))}${saved?btn('deleteAttendance',icon('trash')+' Excluir chamada desta data','outline'):''}<small>As alterações só contam nas médias depois de salvar. Você pode editar um dia já salvo.</small></div></section>`+
+ `<section class="card freq-month-panel"><div class="freq-month-head"><div><span class="eyebrow">FECHAMENTO MENSAL</span><h2 class="panel-title">Médias e frequência do mês</h2><p class="panel-sub">Notas publicadas do mês e presenças das chamadas salvas.</p></div><div class="form-group"><label for="attendanceMonth">Mês</label><input class="field" type="month" id="attendanceMonth" data-filter="attendanceMonth" value="${esc(chosenMonth)}"></div></div><div class="freq-month-insights"><div><small>Chamadas salvas em ${esc(monthLabel(chosenMonth))}</small><b>${dates.length}</b></div><div><small>Presença média da turma</small><b>${classPresence===null?'—':Math.round(classPresence)+'%'}</b></div><div><small>Média final da turma</small><b>${classFinal===null?'—':fmt(classFinal)}</b></div></div>`+
+ `<div class="freq-history"><strong>Chamadas registradas no mês</strong><div class="freq-history-buttons">${dates.length?dates.map(a=>`<button type="button" class="freq-history-date ${filters.attendanceDate===a.date?'selected':''}" data-action="openAttendanceDate" data-id="${esc(a.date)}">${icon('calendar')} ${esc(dateFmt(a.date+'T12:00:00'))}</button>`).join(''):'<span class="freq-history-empty">Nenhuma chamada foi salva neste mês.</span>'}</div></div>`+
+ (rows.length?`<div class="freq-month-list">${rows.map(x=>`<div class="freq-month-row">${avatarHtml(x.student)}<div class="freq-month-identity"><strong>${esc(x.student.name)}</strong><small>${x.days?`${x.present} presença(s) · ${x.absent} falta(s) de ${x.days} chamada(s)`:'Sem chamada registrada neste mês'}</small></div><div class="freq-month-scores"><span><small>NOTAS</small><b>${x.grades===null?'—':fmt(x.grades)}</b></span><span><small>PRESENÇA</small><b>${x.percent===null?'—':Math.round(x.percent)+'%'}</b></span><span class="final"><small>FINAL</small><b>${x.final===null?'—':fmt(x.final)}</b></span></div></div>`).join('')}</div>`:empty('Nenhum aluno nesta sala','Os resultados mensais aparecerão após cadastrar alunos.','users'))+
+ `<div class="freq-formula">${icon('report')} <div><strong>Como funciona a média final simulada?</strong><p>Com notas e chamada no mês: <b>média final = média das notas × ${(100-(Number(db.settings.attendanceWeight)||0))}% + (frequência em % ÷ 10) × ${Number(db.settings.attendanceWeight)||0}%.</b> Se não houver chamada salva, a média final é a média das notas; sem notas publicadas, não há média final. O peso da frequência é ajustável em Configurações. Este cálculo é apenas para atividades simuladas, não equivale às regras oficiais de uma escola.</p></div></div></section>`;
+}
+function matchingGrades(){const search=filters.gradesSearch.toLocaleLowerCase('pt-BR');return db.grades.filter(g=>(!filters.gradesClass||studentById(g.studentId)?.classId===filters.gradesClass)&&(!filters.gradesSubject||g.subject===filters.gradesSubject)&&(!filters.gradesStatus||(filters.gradesStatus==='published'?g.published:!g.published))&&(!search||studentName(g.studentId).toLocaleLowerCase('pt-BR').includes(search)||g.assessment.toLocaleLowerCase('pt-BR').includes(search))).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));}
+function renderGrades(){const grades=matchingGrades();const allSubs=[...new Set([...db.settings.subjects,...db.grades.map(g=>g.subject)])].sort((a,b)=>a.localeCompare(b,'pt-BR'));const drafts=grades.filter(g=>!g.published);return heading('CONTROLE DE AVALIAÇÕES','Notas e avaliações','Registre notas de 0 a 10. Rascunhos ficam ocultos nos boletins até a publicação.',btn('newGrade',icon('plus')+' Lançar nota')+btn('publishFiltered',icon('check')+' Publicar rascunhos','outline','',drafts.length?'':'disabled'))+
+`<div class="toolbar"><div class="filters"><input class="filter-input" data-filter="gradesSearch" value="${esc(filters.gradesSearch)}" type="search" placeholder="Buscar aluno ou avaliação" aria-label="Buscar notas"><select class="field" data-filter="gradesClass" aria-label="Filtrar turma">${optionList(db.classes,filters.gradesClass,'Todas as turmas')}</select><select class="field" data-filter="gradesSubject" aria-label="Filtrar disciplina"><option value="">Todas as disciplinas</option>${allSubs.map(s=>`<option ${filters.gradesSubject===s?'selected':''} value="${esc(s)}">${esc(s)}</option>`).join('')}</select><select class="field" data-filter="gradesStatus" aria-label="Filtrar publicação"><option value="">Todos os status</option><option value="draft" ${filters.gradesStatus==='draft'?'selected':''}>Rascunhos</option><option value="published" ${filters.gradesStatus==='published'?'selected':''}>Publicadas</option></select></div>${btn('exportGrades',icon('download')+' Exportar CSV','outline')}</div>
+<div class="card table-wrap">${grades.length?`<table class="data-table"><thead><tr><th>Aluno</th><th>Disciplina / avaliação</th><th>Nota</th><th>Peso</th><th>Publicação</th><th>Ações</th></tr></thead><tbody>${grades.map(g=>`<tr><td><strong>${esc(studentName(g.studentId))}</strong><span class="muted">${esc(className(studentById(g.studentId)?.classId))}</span></td><td><strong>${esc(g.subject)}</strong><span class="muted">${esc(g.assessment)}</span></td><td>${scorePill(g.score)}</td><td>${Number(g.weight)||1}</td><td>${statusPill(g)}</td><td><div class="actions-cell">${!g.published?`<button class="row-icon-btn" data-action="publishGrade" data-id="${esc(g.id)}" title="Publicar nota" aria-label="Publicar nota">${icon('check')}</button>`:`<button class="btn btn-ghost btn-small" data-action="unpublishGrade" data-id="${esc(g.id)}" title="Voltar para rascunho">Retirar</button>`}<button class="row-icon-btn" data-action="editGrade" data-id="${esc(g.id)}" title="Editar nota">${icon('pencil')}</button><button class="row-icon-btn red" data-action="deleteGrade" data-id="${esc(g.id)}" title="Excluir nota">${icon('trash')}</button></div></td></tr>`).join('')}</tbody></table>`:empty(db.grades.length?'Nenhuma nota encontrada':'Você ainda não lançou notas',db.grades.length?'Não há resultados com estes filtros.':'Lance a primeira avaliação e publique quando quiser.','notes',btn('newGrade',icon('plus')+' Lançar nota'))}</div>`;}
+function renderReports(){const id=filters.reportStudentId&&studentById(filters.reportStudentId)?filters.reportStudentId:(db.students[0]?.id||'');filters.reportStudentId=id;const s=studentById(id);const published=db.grades.filter(g=>g.studentId===id&&g.published);const subjects=allSubjectNames(id,true);const general=studentAvg(id,true);return heading('RESULTADOS ESCOLARES','Boletins','Consulte as notas publicadas e imprima o boletim de cada aluno.',s?btn('printReport',icon('print')+' Imprimir / salvar em PDF','outline'):'')+
+`<div class="toolbar noprint"><div class="filters"><select class="field" style="min-width:270px" data-filter="reportStudentId" aria-label="Selecionar aluno">${optionList(db.students.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')),id,'Selecione um aluno',x=>x.id,x=>x.name+' — '+className(x.classId))}</select></div></div>`+
+(!s?`<div class="card">${empty('Nenhum aluno cadastrado','Cadastre um aluno para visualizar os boletins.','report',btn('newStudent',icon('plus')+' Cadastrar aluno'))}</div>`:
+`<div class="report-layout"><div class="card" id="reportSheet"><div class="report-header"><div><div class="report-brand">EDUCLASS · BOLETIM ESCOLAR</div><h2>${esc(db.settings.school)}</h2><p>Ano letivo ${esc(classById(s.classId)?.year||new Date().getFullYear())} • Data de emissão: ${new Date().toLocaleDateString('pt-BR')}</p></div><span class="logo">${icon('school')}</span></div><div class="report-inner"><div class="report-person">${avatarHtml(s,'avatar-report')}<div><strong>${esc(s.name)}</strong><small>Turma: ${esc(className(s.classId))} ${s.enrollment?'• Matrícula: '+esc(s.enrollment):''}</small></div></div>${subjects.length?`<div class="table-wrap"><table class="data-table"><thead><tr><th>Disciplina</th><th>Notas publicadas</th><th>Média ponderada</th><th>Situação</th></tr></thead><tbody>${subjects.map(sub=>{const gs=published.filter(g=>g.subject===sub),avg=avgGrade(gs);return `<tr><td><strong>${esc(sub)}</strong></td><td style="white-space:normal;min-width:190px">${gs.map(g=>`${esc(g.assessment)}: ${fmt(g.score)}${g.weight!==1?' (peso '+g.weight+')':''}`).join(' · ')}</td><td><strong>${avg===null?'—':fmt(avg)}</strong></td><td>${avg===null?'—':`<span class="pill ${avg>=Number(db.settings.pass)?'green':'amber'}">${avg>=Number(db.settings.pass)?'Média atingida':'Abaixo da média'}</span>`}</td></tr>`}).join('')}</tbody></table></div>`:empty('Nenhuma nota publicada','Publique as notas do aluno na página “Notas e avaliações” para aparecerem aqui.','report')}
+<div class="report-summary">A média de cada disciplina é calculada pelas notas publicadas, considerando o peso de cada avaliação. A média geral é a média aritmética das disciplinas que possuem notas. O indicador de média não representa uma decisão oficial de aprovação.</div><div class="print-only" style="margin-top:70px"><div>____________________________________</div>Assinatura do(a) professor(a): ${esc(db.settings.teacher)}</div></div></div>
+<aside class="card panel"><h3 class="panel-title">Resumo do aluno</h3><p class="panel-sub">Somente avaliações publicadas</p><div class="report-big"><small>MÉDIA GERAL</small><strong>${general===null?'—':fmt(general)}</strong><span>${general===null?'Nenhuma nota disponível':general>=Number(db.settings.pass)?'Média de referência atingida':'Abaixo da média de referência'}</span></div><div class="mini-divider"></div><div class="student-entry"><div class="entry-main"><strong>Disciplinas avaliadas</strong><small>Com notas publicadas</small></div><b>${subjects.length}</b></div><div class="student-entry"><div class="entry-main"><strong>Avaliações publicadas</strong><small>Registros visíveis no boletim</small></div><b>${published.length}</b></div><div class="student-entry"><div class="entry-main"><strong>Média de referência</strong><small>Definida em Configurações</small></div><b>${fmt(db.settings.pass)}</b></div><div class="mini-divider"></div><div class="freq-report-section"><h4>Fechamento mensal</h4><label for="reportMonth">Selecionar mês</label><input type="month" class="field" id="reportMonth" data-filter="reportMonth" value="${esc(filters.reportMonth)}"><div class="freq-report-values">${(()=>{const r=monthlyResult(s.id,s.classId,filters.reportMonth);return `<div><small>Presença</small><strong>${r.percent===null?'—':Math.round(r.percent)+'%'}</strong></div><div><small>Média das notas</small><strong>${r.grades===null?'—':fmt(r.grades)}</strong></div><div><small>Média final simulada</small><strong>${r.final===null?'—':fmt(r.final)}</strong></div>`;})()}</div></div><p class="hint" style="margin-top:17px">Este boletim exibe somente notas publicadas. Use “Imprimir / salvar em PDF” para compartilhar.</p></aside></div>`);}
+function renderClasses(){return heading('ORGANIZAÇÃO ESCOLAR','Turmas','Capa personalizada, média da sala e acesso direto ao diário.',btn('newClass',icon('plus')+' Cadastrar turma'))+
+ `<div class="class-summary-row"><div class="class-summary-label">Visão das turmas</div><div class="class-summary-value">${db.classes.length} ${db.classes.length===1?'turma cadastrada':'turmas cadastradas'} · ${db.students.length} alunos</div></div>
+ <div class="class-cards">${db.classes.map(c=>{const st=db.students.filter(s=>s.classId===c.id);const gr=db.grades.filter(g=>st.some(s=>s.id===g.studentId));const av=classAverage(c.id);const sub=classSubjectAverages(c.id);
+ return `<section class="card class-card pro-class-card">${classCover(c)}<div class="class-card-inside"><div class="class-kicker"><span>${icon('classes')} TURMA</span><span>${esc(c.year)}</span></div><h3>${esc(c.name)}</h3><div class="class-stat-row"><div><small>ALUNOS</small><b>${st.length}</b></div><div><small>AVALIAÇÕES</small><b>${gr.length}</b></div><div class="class-average"><small>MÉDIA DA SALA</small><b>${av===null?'—':fmt(av)}</b></div></div><div class="class-subject-caption">${sub.length?`Disciplinas com notas: ${sub.length}`:'Ainda sem notas registradas'}</div><div class="class-footer"><button class="btn btn-primary btn-small" data-action="openDiaryForClass" data-id="${esc(c.id)}">${icon('clipboard')} Abrir diário</button><div class="actions-cell"><button class="row-icon-btn" data-action="attendanceForClass" data-id="${esc(c.id)}" title="Abrir chamada da turma" aria-label="Frequência da turma">${icon('attendance')}</button><button class="row-icon-btn" data-action="editClass" data-id="${esc(c.id)}" title="Alterar foto ou dados da turma" aria-label="Editar turma">${icon('pencil')}</button><button class="row-icon-btn red" data-action="deleteClass" data-id="${esc(c.id)}" title="Excluir turma" aria-label="Excluir turma">${icon('trash')}</button></div></div></div></section>`}).join('')}</div>`;}
+
+function renderSettings(){return heading('PERSONALIZAÇÃO','Configurações','Ajuste o painel e proteja seus dados com cópias de segurança.')+`<div class="settings-wrap"><section class="card settings-card appearance-card"><div class="appearance-head"><span class="appearance-icon">${icon('moon')}</span><div><h2 class="settings-title">Aparência do aplicativo</h2><p class="settings-desc">Escolha um visual confortável. Sua preferência é salva automaticamente.</p></div></div><div class="theme-grid"><button type="button" class="theme-option ${theme()==='light'?'selected':''}" data-action="setThemeLight" aria-pressed="${theme()==='light'}"><span class="theme-preview light-preview"><span></span><span></span><span></span></span><strong>${icon('sun')} Claro</strong><small>Interface luminosa</small></button><button type="button" class="theme-option ${theme()==='dark'?'selected':''}" data-action="setThemeDark" aria-pressed="${theme()==='dark'}"><span class="theme-preview dark-preview"><span></span><span></span><span></span></span><strong>${icon('moon')} Escuro</strong><small>Interface noturna</small></button></div></section><section class="card settings-card"><h2 class="settings-title">Dados da escola</h2><p class="settings-desc">Essas informações aparecem no seu painel e nos boletins.</p><form id="settingsForm"><div class="form-grid"><div class="form-group"><label for="settingTeacher">Nome do(a) professor(a)</label><input id="settingTeacher" name="teacher" value="${esc(db.settings.teacher)}" maxlength="100" required></div><div class="form-group"><label for="settingSchool">Nome da escola</label><input id="settingSchool" name="school" value="${esc(db.settings.school)}" maxlength="100" required></div><div class="form-group"><label for="settingPass">Média de referência (0 a 10)</label><input id="settingPass" name="pass" type="number" min="0" max="10" step="0.1" value="${db.settings.pass}" required></div><div class="form-group"><label for="settingAttendanceWeight">Peso da frequência no fechamento mensal (%)</label><input id="settingAttendanceWeight" name="attendanceWeight" type="number" min="0" max="50" step="5" value="${Number(db.settings.attendanceWeight)||0}" required><small>De 0 a 50%. As notas originais não são alteradas. Padrão: 20%.</small></div><div class="form-group full"><label for="settingSubjects">Disciplinas disponíveis</label><textarea id="settingSubjects" name="subjects" maxlength="2500" rows="3" required>${esc(db.settings.subjects.join(', '))}</textarea><small>Separe cada disciplina por vírgula. Alterar uma disciplina não modifica as notas antigas.</small></div></div><div class="settings-actions"><button class="btn btn-primary" type="submit">${icon('check')} Salvar alterações</button></div></form></section>
+<section class="card settings-card"><h2 class="settings-title">Backup e exportação</h2><p class="settings-desc">Seus dados ficam neste navegador, mesmo ao fechar a página. Baixe um arquivo de backup antes de limpar dados ou trocar de aparelho.</p><div class="hint"><span class="notice-dot"></span> ${storageEnabled?'Salvamento local disponível neste navegador.':'Salvamento local indisponível: faça um backup manual.'}<br>Última alteração: ${db.modifiedAt?new Date(db.modifiedAt).toLocaleString('pt-BR'):'—'}</div><div class="settings-actions">${btn('downloadBackup',icon('download')+' Baixar backup (.json)')}${btn('importBackup',icon('upload')+' Restaurar backup','outline')}</div><div class="mini-divider"></div><h2 class="settings-title">Exportar planilhas</h2><p class="settings-desc">Exportações CSV podem ser abertas em Excel ou outros aplicativos de planilhas.</p><div class="settings-actions">${btn('exportStudents','Exportar alunos','outline')}${btn('exportGrades','Exportar notas','outline')}${btn('exportAttendance','Exportar frequência','outline')}</div></section>
+<section class="card settings-card"><h2 class="settings-title">Zona de exclusão</h2><p class="settings-desc">Apaga alunos, turmas, notas, frequência e preferências salvos neste navegador. Essa ação não pode ser desfeita sem backup.</p>${btn('resetData',icon('trash')+' Apagar todos os dados','danger')}</section></div>`;}
+function toast(message,error=false){const box=document.createElement('div');box.className='toast'+(error?' error':'');box.innerHTML=`${icon(error?'close':'check')}<span>${esc(message)}</span>`;$('#toastWrap').append(box);setTimeout(()=>box.remove(),3700);}
+function openModal(title,fields,onSubmit,actionLabel='Salvar'){closeModal();const root=$('#modalRoot');root.innerHTML=`<div class="modal-backdrop" role="presentation"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle">${esc(title)}</h2><button type="button" data-action="closeModal" class="close-btn" aria-label="Fechar">${icon('close')}</button></div><form id="modalForm"><div class="modal-body"><div class="form-grid">${fields}</div></div><div class="modal-foot"><button type="button" data-action="closeModal" class="btn btn-outline">Cancelar</button><button type="submit" class="btn btn-primary">${icon('check')} ${esc(actionLabel)}</button></div></form></div></div>`;const form=$('#modalForm');form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form);onSubmit(fd,form);});$('.modal-backdrop').addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))closeModal()});const f=$('input,select,textarea',form);f?.focus();}
+function closeModal(){$('#modalRoot').innerHTML='';}
+function classForm(id){
+ const c=id?classById(id):null;
+ let photo=safePhoto(c?.photo),loading=false;
+ const fields=`<div class="form-group full"><label>Foto ou capa da turma (opcional)</label><div class="class-photo-picker"><div id="classPhotoPreview">${classCover({name:c?.name||'Turma',photo},'class-cover-preview')}</div><div class="class-photo-toolbar"><label for="classPhotoInput" class="btn btn-outline btn-small photo-button">${icon('image')} Selecionar foto</label><input id="classPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><button type="button" class="btn btn-ghost btn-small ${photo?'':'hidden'}" id="removeClassPhoto">${icon('trash')} Remover foto</button><small id="classPhotoStatus">A imagem será compactada e salva neste aparelho junto com a turma.</small></div></div></div><div class="form-group full"><label for="className">Nome da turma</label><input name="name" id="className" required minlength="2" maxlength="65" value="${esc(c?.name||'')}" placeholder="Ex.: 1º Ano A"></div><div class="form-group full"><label for="classYear">Ano letivo</label><input name="year" id="classYear" type="number" min="2000" max="2100" required value="${esc(c?.year||new Date().getFullYear())}"></div>`;
+ openModal(c?'Editar turma':'Cadastrar turma',fields,fd=>{
+  if(loading){toast('A foto ainda está sendo processada.',true);return;}
+  const name=String(fd.get('name')).trim(),year=Number(fd.get('year'));
+  if(!name||!Number.isInteger(year)||year<2000||year>2100){toast('Confira o nome e o ano da turma.',true);return;}
+  const old=c?{...c}:null;
+  if(c){Object.assign(c,{name,year,photo});}else{db.classes.push({id:uid(),name,year,photo});}
+  if(!persist()) {if(c)Object.assign(c,old);else db.classes.pop();toast('Não foi possível salvar. Faça um backup e libere espaço.',true);return;}
+  closeModal();render();toast(c?'Turma atualizada!':'Turma cadastrada!');
+ });
+ const preview=$('#classPhotoPreview'),input=$('#classPhotoInput'),remove=$('#removeClassPhoto'),status=$('#classPhotoStatus');
+ const redraw=()=>{preview.innerHTML=classCover({name:$('#className')?.value||'Turma',photo},'class-cover-preview');remove.classList.toggle('hidden',!photo);};
+ $('#className').addEventListener('input',()=>{if(!photo)redraw();});
+ remove.addEventListener('click',()=>{photo='';input.value='';redraw();status.textContent='Capa removida. Salve para confirmar.';});
+ input.addEventListener('change',async()=>{const f=input.files?.[0];if(!f)return;loading=true;status.textContent='Preparando a foto...';try{photo=await compressPhoto(f,720);if(!input.isConnected)return;redraw();status.textContent='Foto pronta para salvar!';}catch(err){toast(err.message||'Erro ao processar imagem.',true);status.textContent='Escolha outra imagem.';}finally{loading=false;input.value='';}});
+}
+
+function studentForm(id){
+ const s=id?studentById(id):null;
+ if(!db.classes.length){toast('Cadastre uma turma antes de cadastrar alunos.',true);classForm();return;}
+ let photo=safePhoto(s?.photo),loading=false;
+ const photoFields=`<div class="form-group full"><label>Foto do aluno (opcional)</label><div class="photo-picker"><div class="photo-picker-preview" id="studentPhotoPreview">${avatarHtml({...s,photo,name:s?.name||'Aluno'},'avatar-picker')}</div><div class="photo-picker-actions"><label for="studentPhotoInput" class="btn btn-outline btn-small" style="cursor:pointer">${icon('upload')} Escolher foto</label><input type="file" id="studentPhotoInput" accept="image/jpeg,image/png,image/webp,image/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" aria-label="Escolher foto do aluno"><button type="button" class="btn btn-ghost btn-small ${photo?'':'hidden'}" id="removeStudentPhoto">${icon('trash')} Remover foto</button><small>JPG, PNG ou WebP • até 12 MB. Reduzida automaticamente para economizar espaço.</small><span class="photo-loading" id="photoLoading" aria-live="polite"></span></div></div></div>`;
+ const studentFields=`${photoFields}<div class="form-group full"><label for="studentName">Nome completo</label><input id="studentName" name="name" required minlength="2" maxlength="100" value="${esc(s?.name||'')}" placeholder="Nome do aluno"></div><div class="form-group"><label for="studentClass">Turma</label><select name="classId" id="studentClass" required>${optionList(db.classes,s?.classId||db.classes[0]?.id,'Selecione a turma')}</select></div><div class="form-group"><label for="studentEnrollment">Matrícula (opcional)</label><input name="enrollment" id="studentEnrollment" maxlength="40" value="${esc(s?.enrollment||'')}" placeholder="Ex.: 2026-001"></div>`;
+ openModal(s?'Editar aluno':'Cadastrar aluno',studentFields,fd=>{
+  if(loading){toast('A foto ainda está sendo preparada.',true);return;}
+  const name=String(fd.get('name')).trim(),classId=String(fd.get('classId')),enrollment=String(fd.get('enrollment')).trim();
+  if(!name||!classById(classId)){toast('Preencha o nome e selecione a turma.',true);return;}
+  const previous=s?{...s}:null;
+  if(s){Object.assign(s,{name,classId,enrollment,photo});}
+  else{db.students.push({id:uid(),name,classId,enrollment,photo,createdAt:now()});}
+  if(!persist()){if(s)Object.assign(s,previous);else db.students.pop();toast('Armazenamento cheio. Remova algumas fotos ou faça um backup antes de tentar novamente.',true);return;}
+  closeModal();render();toast(s?'Aluno atualizado!':'Aluno cadastrado com sucesso!');
+ });
+ const preview=$('#studentPhotoPreview'),fileInput=$('#studentPhotoInput'),remove=$('#removeStudentPhoto'),status=$('#photoLoading'),nameInput=$('#studentName');
+ function refreshPreview(){preview.innerHTML=avatarHtml({name:nameInput.value||'Aluno',photo},'avatar-picker');remove.classList.toggle('hidden',!photo);}
+ nameInput.addEventListener('input',()=>{if(!photo)refreshPreview();});
+ remove.addEventListener('click',()=>{photo='';fileInput.value='';refreshPreview();status.textContent='Foto removida. Clique em Salvar para confirmar.';});
+ fileInput.addEventListener('change',async()=>{
+  const file=fileInput.files?.[0];if(!file)return;loading=true;status.textContent='Preparando a foto...';
+  try{const newPhoto=await compressPhoto(file);if(!fileInput.isConnected)return;photo=newPhoto;refreshPreview();status.textContent='Foto pronta para salvar!';}
+  catch(err){if(fileInput.isConnected){status.textContent='';toast(err.message||'Não foi possível ler a imagem.',true);}}
+  finally{loading=false;fileInput.value='';}
+ });
+}
+function viewStudent(id){const s=studentById(id);if(!s)return;const grades=db.grades.filter(g=>g.studentId===id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)),mean=studentAvg(id),published=grades.filter(g=>g.published).length;
+ const body=`<div class="profile-head">${avatarHtml(s,'avatar-profile')}<div><h3>${esc(s.name)}</h3><p>${esc(className(s.classId))} • Perfil do estudante</p></div></div><div class="profile-meta"><div><small>MATRÍCULA</small><strong>${esc(s.enrollment||'Não informada')}</strong></div><div><small>MÉDIA GERAL</small><strong>${mean===null?'Sem notas':fmt(mean)}</strong></div><div><small>AVALIAÇÕES</small><strong>${grades.length} registrada(s)</strong></div><div><small>NOTAS PUBLICADAS</small><strong>${published} publicada(s)</strong></div></div><h4 class="profile-section-title">Últimas avaliações</h4><div class="profile-grades">${grades.length?grades.slice(0,5).map(g=>`<div class="student-entry"><div class="entry-main"><strong>${esc(g.subject)} · ${esc(g.assessment)}</strong><small>${g.published?'Publicada':'Rascunho'}</small></div><strong>${fmt(g.score)}</strong></div>`).join(''):'<p class="sub">Nenhuma avaliação registrada.</p>'}</div>`;
+ openModal('Perfil do aluno',`<div class="full">${body}</div>`,()=>{});
+ const form=$('#modalForm');form.querySelector('.modal-foot').innerHTML=`<button type="button" class="btn btn-outline" data-action="closeModal">Fechar</button><button type="button" class="btn btn-primary" data-action="editStudent" data-id="${esc(s.id)}">${icon('pencil')} Editar perfil e foto</button>`;
+}
+function gradeForm(id,selectedStudentId=''){const g=id?db.grades.find(x=>x.id===id):null;if(!db.students.length){toast('Cadastre um aluno antes de lançar notas.',true);studentForm();return;}const subs=[...new Set([...db.settings.subjects,...db.grades.map(x=>x.subject)])];openModal(g?'Editar nota':'Lançar nota',`<div class="form-group full"><label for="gradeStudent">Aluno</label><select id="gradeStudent" name="studentId" required>${optionList(db.students.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')),g?.studentId||selectedStudentId||db.students[0]?.id,'Selecione o aluno',s=>s.id,s=>s.name+' — '+className(s.classId))}</select></div><div class="form-group"><label for="gradeSubject">Disciplina</label><select id="gradeSubject" name="subject" required>${optionList(subs.map(s=>({name:s})),g?.subject||db.settings.subjects[0],'Selecione a disciplina',s=>s.name)}</select></div><div class="form-group"><label for="gradeAssessment">Avaliação</label><input name="assessment" id="gradeAssessment" required maxlength="100" value="${esc(g?.assessment||'')}" placeholder="Ex.: Prova 1, Trabalho"></div><div class="form-group"><label for="gradeScore">Nota (0 a 10)</label><input id="gradeScore" type="number" name="score" min="0" max="10" step="0.01" required value="${g?g.score:''}" placeholder="Ex.: 8,5"></div><div class="form-group"><label for="gradeDate">Data da avaliação</label><input type="date" name="date" id="gradeDate" required value="${esc(gradeDate(g)||localDate())}"></div><div class="form-group"><label for="gradeWeight">Peso da avaliação</label><select id="gradeWeight" name="weight">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(g?.weight||1)===n?'selected':''}>${n}</option>`).join('')}</select></div><div class="form-group full"><label class="switch-label"><input type="checkbox" name="published" value="yes" ${g?.published?'checked':''}> Publicar esta nota imediatamente</label><small>Notas não publicadas ficam em rascunho e não aparecem nos boletins.</small></div>`,fd=>{const studentId=String(fd.get('studentId')),subject=String(fd.get('subject')),assessment=String(fd.get('assessment')).trim(),score=Number(fd.get('score')),weight=Number(fd.get('weight')),date=String(fd.get('date')),published=fd.get('published')==='yes';if(!studentById(studentId)||!subject||!assessment||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(score)||score<0||score>10||![1,2,3,4,5].includes(weight)){toast('Confira os campos e informe uma nota entre 0 e 10.',true);return;}if(g){Object.assign(g,{studentId,subject,assessment,score,weight,date,published});}else{db.grades.push({id:uid(),studentId,subject,assessment,score,weight,date,published,createdAt:now()});}persist();closeModal();render();toast(g?'Nota atualizada!':published?'Nota publicada!':'Nota salva em rascunho!');});}
+function doAction(action,id){switch(action){case 'toggleTheme':setTheme(theme()==='dark'?'light':'dark');break;case 'setThemeLight':setTheme('light');break;case 'setThemeDark':setTheme('dark');break;case 'toggleMenu':$('#sidebar').classList.toggle('open');$('#mobileBackdrop').classList.toggle('open');break;case 'closeModal':closeModal();break;case 'newStudent':studentForm();break;case 'editStudent':studentForm(id);break;case 'viewStudent':viewStudent(id);break;case 'gradeForStudent':gradeForm(null,id);break;case 'toggleDiaryStudent':{openDiaryStudentId=openDiaryStudentId===id?'':id;const el=document.querySelector('[data-student-card="'+CSS.escape(id)+'"]');if(el){el.classList.toggle('expanded',!!openDiaryStudentId);const b=el.querySelector('.diary-student-toggle');b.setAttribute('aria-expanded',String(!!openDiaryStudentId));}break;}case 'openDiaryForStudent':{const s=studentById(id);if(!s)return;filters.classDiary=s.classId;openDiaryStudentId=id;setPage('diary');break;}case 'openDiaryForClass':{filters.classDiary=id;openDiaryStudentId='';setPage('diary');break;}case 'newGrade':gradeForm();break;case 'editGrade':gradeForm(id);break;case 'newClass':classForm();break;case 'editClass':classForm(id);break;case 'goGrades':setPage('grades');break;case 'openAttendance':setPage('attendance');break;case 'openAttendanceDate':{if(!/^\d{4}-\d{2}-\d{2}$/.test(id||''))return;if(attendanceDirty&&!confirm('Descartar mudanças não salvas desta chamada?'))return;filters.attendanceDate=id;filters.attendanceMonth=id.slice(0,7);clearAttendanceDraft();render();break;}case 'attendanceForClass':filters.attendanceClass=id;clearAttendanceDraft();setPage('attendance');break;case 'goClasses':setPage('classes');break;case 'goDiary':setPage('diary');break;case 'reportStudent':filters.reportStudentId=id;setPage('reports');break;case 'printReport':if(window.AndroidBridge&&typeof AndroidBridge.printReport==='function')AndroidBridge.printReport();else window.print();break;case 'toggleAttendance':{if(!attendanceDraft||!(id in attendanceDraft))return;attendanceDraft[id]=!attendanceDraft[id];attendanceDirty=true;render();break;}case 'saveAttendance':{if(!filters.attendanceClass||!db.students.some(s=>s.classId===filters.attendanceClass)){toast('Cadastre estudantes nesta turma primeiro.',true);return;}const key=draftKey(),existing=storedAttendance(filters.attendanceClass,filters.attendanceDate),saved=existing?{...existing,records:{...existing.records}}:null;const record={id:existing?.id||uid(),classId:filters.attendanceClass,date:filters.attendanceDate,records:{...attendanceDraft},updatedAt:now()};if(existing)Object.assign(existing,record);else db.attendance.push(record);if(!persist()){if(existing)Object.assign(existing,saved);else db.attendance=db.attendance.filter(a=>a.id!==record.id);toast('Não foi possível salvar a chamada. Faça backup e libere espaço.',true);return;}attendanceDirty=false;render();toast('Chamada salva com sucesso!');break;}case 'deleteAttendance':{const saved=storedAttendance(filters.attendanceClass,filters.attendanceDate);if(!saved)return;if(!confirm(`Excluir a chamada salva em ${filters.attendanceDate}? Isto alterará a frequência e a média mensal.`))return;db.attendance=db.attendance.filter(x=>x.id!==saved.id);persist();clearAttendanceDraft();render();toast('Chamada excluída.');break;}case 'deleteStudent':{const s=studentById(id);if(!s)return;if(!confirm(`Excluir ${s.name}, TODAS as notas e registros de frequência desse aluno? Esta ação não pode ser desfeita.`))return;db.students=db.students.filter(x=>x.id!==id);db.grades=db.grades.filter(g=>g.studentId!==id);db.attendance.forEach(a=>{if(a.records)delete a.records[id];});if(filters.reportStudentId===id)filters.reportStudentId='';persist();render();toast('Aluno, notas e frequências excluídos.');break;}case 'deleteGrade':{const g=db.grades.find(x=>x.id===id);if(!g)return;if(!confirm(`Excluir a nota ${g.assessment} (${fmt(g.score)}) de ${studentName(g.studentId)}? Esta ação não pode ser desfeita sem backup.`))return;db.grades=db.grades.filter(g=>g.id!==id);persist();render();toast('Nota excluída.');break;}case 'deleteClass':{const c=classById(id);if(!c)return;if(db.students.some(s=>s.classId===id)){toast('Mova ou exclua os alunos desta turma antes de excluí-la.',true);return;}if(!confirm(`Excluir a turma ${c.name}?`))return;db.classes=db.classes.filter(c=>c.id!==id);db.attendance=db.attendance.filter(a=>a.classId!==id);clearAttendanceDraft();persist();render();toast('Turma e chamadas excluídas.');break;}case 'publishGrade':{const g=db.grades.find(x=>x.id===id);if(!g)return;g.published=true;persist();render();toast('Nota publicada no boletim!');break;}case 'unpublishGrade':{const g=db.grades.find(x=>x.id===id);if(!g)return;g.published=false;persist();render();toast('Nota voltou para rascunho.');break;}case 'publishFiltered':{const drafts=matchingGrades().filter(g=>!g.published);if(!drafts.length)return;if(!confirm(`Publicar ${drafts.length} nota(s) em rascunho que estão visíveis nos filtros?`))return;drafts.forEach(g=>g.published=true);persist();render();toast(`${drafts.length} nota(s) publicada(s)!`);break;}case 'exportAttendance':{const rows=[['Turma','Data','Aluno','Frequência'],...db.attendance.flatMap(a=>Object.entries(a.records||{}).map(([sid,ok])=>[className(a.classId),a.date,studentName(sid),ok?'Presente':'Falta']))];downloadCSV('EduClass-frequencia.csv',rows);toast('Frequência exportada!');break;}case 'downloadBackup':downloadFile('EduClass-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');toast('Backup baixado!');break;case 'importBackup':$('#importFile').click();break;case 'exportStudents':{const rows=[['Nome','Turma','Ano','Matrícula','Média geral'],...db.students.map(s=>[s.name,className(s.classId),classById(s.classId)?.year||'',s.enrollment||'',studentAvg(s.id)===null?'':fmt(studentAvg(s.id))])];downloadCSV('EduClass-alunos.csv',rows);toast('Lista de alunos exportada!');break;}case 'exportGrades':{const rows=[['Aluno','Turma','Disciplina','Avaliação','Nota','Peso','Situação'],...db.grades.map(g=>[studentName(g.studentId),className(studentById(g.studentId)?.classId),g.subject,g.assessment,fmt(g.score),g.weight,g.published?'Publicada':'Rascunho'])];downloadCSV('EduClass-notas.csv',rows);toast('Notas exportadas!');break;}case 'resetData':{if(!confirm('ATENÇÃO: deseja Apagar todos os alunos, notas, frequências, turmas e configurações? Faça um backup antes.'))return;if(!confirm('Confirma a exclusão definitiva dos dados deste navegador?'))return;db=defaultData();filters={studentsSearch:'',studentsClass:'',classDiary:'',gradesSearch:'',gradesClass:'',gradesSubject:'',gradesStatus:'',reportStudentId:'',attendanceClass:'',attendanceDate:localDate(),attendanceMonth:localMonth(),reportMonth:localMonth()};clearAttendanceDraft();openDiaryStudentId='';persist();setPage('dashboard');toast('Dados reiniciados.');break;}}}
+function downloadFile(name,content,mime){if(window.AndroidBridge&&typeof AndroidBridge.saveFile==='function'){AndroidBridge.saveFile(name,content,mime);return;}const blob=new Blob([content],{type:mime});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function downloadCSV(name,rows){const str=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');downloadFile(name,'\ufeff'+str,'text/csv;charset=utf-8');}
+function handleSearchInput(el){const key=el.dataset.filter;if(!key)return;filters[key]=el.value;const pos=el.selectionStart;const pageScroll=window.scrollY;render();const newEl=$(`[data-filter="${key}"]`);if(newEl){newEl.focus({preventScroll:true});try{newEl.setSelectionRange(pos,pos);}catch(e){}}window.scrollTo(0,pageScroll);}
+document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav){setPage(nav.dataset.page);return;}const act=e.target.closest('[data-action]');if(act)doAction(act.dataset.action,act.dataset.id);});
+document.addEventListener('input',e=>{if(e.target.matches('[data-filter][type="search"]'))handleSearchInput(e.target);});
+document.addEventListener('change',e=>{if(e.target.matches('select[data-filter],input[data-filter][type="date"],input[data-filter][type="month"]')){const name=e.target.dataset.filter;if((name==='attendanceClass'||name==='attendanceDate')&&attendanceDirty&&!confirm('Você ainda não salvou as alterações desta chamada. Descartar alterações?')){e.target.value=filters[name];return;}filters[name]=e.target.value;if(name==='attendanceClass'||name==='attendanceDate')clearAttendanceDraft();render();}});
+$('#mobileBackdrop').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#mobileBackdrop').classList.remove('open')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();$('#sidebar').classList.remove('open');$('#mobileBackdrop').classList.remove('open');}});
+document.addEventListener('submit',e=>{if(e.target.id!=='settingsForm')return;e.preventDefault();const fd=new FormData(e.target);const teacher=String(fd.get('teacher')).trim(),school=String(fd.get('school')).trim(),pass=Number(fd.get('pass')),attendanceWeight=Number(fd.get('attendanceWeight'));const subjects=[...new Set(String(fd.get('subjects')).split(',').map(x=>x.trim()).filter(Boolean))];if(!teacher||!school||!Number.isFinite(pass)||pass<0||pass>10||!Number.isFinite(attendanceWeight)||attendanceWeight<0||attendanceWeight>50||!subjects.length){toast('Preencha corretamente todos os campos.',true);return;}db.settings={...db.settings,teacher,school,pass,attendanceWeight,subjects};persist();render();toast('Configurações salvas!');});
+$('#importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>15*1024*1024)throw Error('Arquivo muito grande (máximo 15 MB).');const data=JSON.parse(await f.text());if(!validData(data)||!data.settings||!Array.isArray(data.settings.subjects))throw Error('Arquivo de backup inválido.');if(!confirm('Restaurar este backup? Os dados atuais serão substituídos.'))return;const sane={version:2,settings:{teacher:String(data.settings.teacher||'Professor(a)').slice(0,100),school:String(data.settings.school||'Minha escola').slice(0,100),pass:Number(data.settings.pass)>=0&&Number(data.settings.pass)<=10?Number(data.settings.pass):6,theme:data.settings.theme==='dark'?'dark':'light',attendanceWeight:Number(data.settings.attendanceWeight)>=0&&Number(data.settings.attendanceWeight)<=50?Number(data.settings.attendanceWeight):20,subjects:data.settings.subjects.filter(s=>typeof s==='string').map(s=>s.slice(0,100)).slice(0,100)},classes:data.classes.filter(c=>c&&typeof c.id==='string'&&typeof c.name==='string').map(c=>({id:c.id,name:c.name.slice(0,100),year:Number(c.year)||new Date().getFullYear(),photo:safePhoto(c.photo)})).slice(0,2000),students:data.students.filter(s=>s&&typeof s.id==='string'&&typeof s.name==='string'&&typeof s.classId==='string').map(s=>({id:s.id,name:s.name.slice(0,100),classId:s.classId,enrollment:String(s.enrollment||'').slice(0,40),photo:safePhoto(s.photo),createdAt:s.createdAt||now()})).slice(0,20000),grades:data.grades.filter(g=>g&&typeof g.id==='string'&&typeof g.studentId==='string'&&typeof g.subject==='string'&&typeof g.assessment==='string'&&Number(g.score)>=0&&Number(g.score)<=10).map(g=>({id:g.id,studentId:g.studentId,subject:g.subject.slice(0,100),assessment:g.assessment.slice(0,100),score:Number(g.score),weight:[1,2,3,4,5].includes(Number(g.weight))?Number(g.weight):1,date:/^\d{4}-\d{2}-\d{2}$/.test(g.date||'')?g.date:String(g.createdAt||'').slice(0,10),published:!!g.published,createdAt:g.createdAt||now()})).slice(0,100000),attendance:Array.isArray(data.attendance)?data.attendance.filter(a=>a&&typeof a.classId==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(a.date||'')&&(a.records||a.presences)&&typeof (a.records||a.presences)==='object'&&!Array.isArray(a.records||a.presences)).map(a=>({id:typeof a.id==='string'?a.id:uid(),classId:a.classId,date:a.date,records:Object.fromEntries(Object.entries(a.records||a.presences).filter(([k,v])=>typeof k==='string'&&typeof v==='boolean').slice(0,20000)),updatedAt:a.updatedAt||now()})).slice(0,50000):[],modifiedAt:now()};if(!sane.settings.subjects.length)sane.settings.subjects=defaultData().settings.subjects;db=sane;filters={studentsSearch:'',studentsClass:'',classDiary:'',gradesSearch:'',gradesClass:'',gradesSubject:'',gradesStatus:'',reportStudentId:'',attendanceClass:'',attendanceDate:localDate(),attendanceMonth:localMonth(),reportMonth:localMonth()};clearAttendanceDraft();openDiaryStudentId='';persist();render();toast('Backup restaurado com sucesso!');}catch(err){toast(err.message||'Não foi possível ler o backup.',true);}finally{e.target.value='';}});
+if(storageEnabled){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){storageEnabled=false;}}
+render();
+window.EduClassTeacher={
+ getData:()=>JSON.parse(JSON.stringify(db)),
+ setData:(incoming)=>{if(!validData(incoming))throw Error('Os dados recebidos não são válidos.');db={...defaultData(),...incoming,attendance:Array.isArray(incoming.attendance)?incoming.attendance:[],settings:{...defaultData().settings,...incoming.settings}};clearAttendanceDraft();openDiaryStudentId='';persist();render();},
+ showCloud:()=>{if(page==='cloud')render();},
+ toast,download:downloadFile
+};
+window.educlassHandleBack=()=>{if($('#modalRoot').children.length){closeModal();return true;}if($('#sidebar').classList.contains('open')){$('#sidebar').classList.remove('open');$('#mobileBackdrop').classList.remove('open');return true;}if(page!=='dashboard'){setPage('dashboard');return true;}return false;};
+})();
+</script>
+
+<script>
+/* EduClass Connect — cliente Supabase REST, sem SDK externo */
+(function(){
+'use strict';
+const PREFIX='educlass-connect-config-v1';
+function storage(name){return 'educlass-connect-'+name+'-session-v1';}
+function load(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}}
+const failMsg=(obj,status)=>String(obj?.message||obj?.error_description||obj?.error||obj?.msg||`Erro HTTP ${status}`);
+class EduCloud {
+ constructor(role){this.role=role;this.config=load(PREFIX);this.session=load(storage(role));}
+ get configured(){return !!(this.config?.url&&this.config?.key);}
+ configure(url,key){url=String(url||'').trim().replace(/\/+$/,'');key=String(key||'').trim();if(!/^https:\/\/[\w.-]+(?::\d+)?$/.test(url))throw Error('Use a URL HTTPS do projeto Supabase.');if(key.length<20||key.toLowerCase().includes('service_role'))throw Error('Informe a chave pública anon/publishable, nunca a service_role.');const changed=url!==this.config?.url||key!==this.config?.key;this.config={url,key};localStorage.setItem(PREFIX,JSON.stringify(this.config));if(changed)this.logout();}
+ get userId(){return this.session?.user?.id||null;}
+ get loggedIn(){return !!this.session?.access_token;}
+ logout(){this.session=null;localStorage.removeItem(storage(this.role));}
+ setSession(session){if(session?.access_token){this.session={...session,expires_at:Date.now()+Number(session.expires_in||3600)*1000};localStorage.setItem(storage(this.role),JSON.stringify(this.session));}}
+ async request(path,{method='GET',body=null,auth=true,extra={}}={}){
+  if(!this.configured)throw Error('Configure o servidor Supabase primeiro.');
+  if(auth)await this.ensureToken();
+  const headers={'apikey':this.config.key,'Authorization':'Bearer '+(auth?this.session.access_token:this.config.key),...extra};
+  if(body!==null)headers['Content-Type']='application/json';
+  let res;
+  try{res=await fetch(this.config.url+path,{method,headers,body:body===null?undefined:JSON.stringify(body),cache:'no-store'});}catch(e){throw Error('Sem conexão com o servidor. Verifique a internet e o endereço.');}
+  const raw=await res.text();let result=null;try{result=raw?JSON.parse(raw):null;}catch{result=raw;}
+  if(!res.ok)throw Error(failMsg(result,res.status));
+  return result;
+ }
+ async ensureToken(){
+  if(!this.session?.access_token)throw Error('Entre na sua conta para continuar.');
+  if(Number(this.session.expires_at)>Date.now()+60000)return;
+  if(!this.session.refresh_token)throw Error('Sessão expirada. Entre novamente.');
+  let res;
+  try{res=await fetch(this.config.url+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':this.config.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:this.session.refresh_token})});}catch{throw Error('Sem internet para renovar a sessão.');}
+  const data=await res.json();if(!res.ok){this.logout();throw Error(failMsg(data,res.status));}
+  this.setSession(data);
+ }
+ async login(email,password){const session=await this.request('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password},auth:false});this.setSession(session);return session;}
+ async register(email,password){const out=await this.request('/auth/v1/signup',{method:'POST',body:{email,password},auth:false});if(out?.access_token)this.setSession(out);return out;}
+ async getSchool(){if(!this.userId)throw Error('Entre na sua conta.');const res=await this.request('/rest/v1/educlass_schools?owner_id=eq.'+encodeURIComponent(this.userId)+'&select=id,data,updated_at&limit=1');return res?.[0]||null;}
+ async createSchool(data){const rows=await this.request('/rest/v1/educlass_schools',{method:'POST',body:{owner_id:this.userId,data},extra:{Prefer:'return=representation'}});return rows?.[0]||null;}
+ async saveSchool(id,data){const rows=await this.request('/rest/v1/educlass_schools?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:{data,updated_at:new Date().toISOString()},extra:{Prefer:'return=representation'}});if(!rows?.length)throw Error('Escola não encontrada no servidor.');return rows[0];}
+ async getInvites(id){return await this.request('/rest/v1/educlass_invites?school_id=eq.'+encodeURIComponent(id)+'&select=id,student_id,code,user_id&order=created_at.asc');}
+ async makeInvite(schoolId,studentId){const code='EC-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%32]).join('');const rows=await this.request('/rest/v1/educlass_invites',{method:'POST',body:{school_id:schoolId,student_id:studentId,code},extra:{Prefer:'return=representation'}});return rows?.[0];}
+ async resetInvite(id){const code='EC-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%32]).join('');const rows=await this.request('/rest/v1/educlass_invites?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:{code,user_id:null},extra:{Prefer:'return=representation'}});return rows?.[0];}
+ async claim(code){return this.request('/rest/v1/rpc/educlass_claim_invite',{method:'POST',body:{p_code:String(code).trim().toUpperCase()}});}
+ async snapshot(){return this.request('/rest/v1/rpc/educlass_student_snapshot',{method:'POST',body:{}});}
+ pairing(){if(!this.configured)throw Error('Configure o servidor.');return 'EDUCLASS-CONNECT:'+btoa(JSON.stringify(this.config));}
+ acceptPairing(code){const text=String(code||'').trim();if(!text.startsWith('EDUCLASS-CONNECT:'))throw Error('Código do servidor inválido.');let obj;try{obj=JSON.parse(atob(text.slice('EDUCLASS-CONNECT:'.length)));}catch{throw Error('Código do servidor incompleto.');}this.configure(obj.url,obj.key);}
+}
+window.EduCloud=EduCloud;
+})();
+
+</script>
+<script>
+/* EduClass Professor 5.0 — página de sincronização */
+(function(){
+'use strict';
+const API=new EduCloud('teacher');
+let remote=null, invites=[],syncActive=false,applying=false,sending=false,scheduled=null;
+let msg='Para conectar dois celulares, configure um projeto Supabase gratuito e faça login.';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app=()=>window.EduClassTeacher;
+const get=()=>app().getData();
+function note(s,error=false){msg=s;const el=document.querySelector('#cloudMessage');if(el){el.textContent=s;el.style.color=error?'#e45c65':'';}app()?.toast?.(s,error);}
+function copy(s){if(navigator.clipboard&&window.isSecureContext){return navigator.clipboard.writeText(s).then(()=>note('Copiado!'),()=>prompt('Selecione e copie:',s));}prompt('Selecione e copie:',s);}
+async function refresh(){remote=await API.getSchool();invites=remote?await API.getInvites(remote.id):[];}
+async function push(){if(!syncActive||!API.loggedIn||!remote||applying)return;
+ if(sending){scheduled=setTimeout(push,1200);return;}
+ sending=true;try{remote=await API.saveSchool(remote.id,get());msg='Dados sincronizados com a nuvem em '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'.';}catch(e){msg='Falha ao enviar: '+e.message+' Os dados permanecem salvos neste aparelho.';}finally{sending=false;if(document.querySelector('#cloudMessage'))document.querySelector('#cloudMessage').textContent=msg;}}
+function schedulePush(){if(!syncActive||applying||!API.loggedIn)return;clearTimeout(scheduled);scheduled=setTimeout(push,1600);}
+async function attach(){if(!API.loggedIn)return;await refresh();syncActive=false;}
+async function saveSnapshot(studentId){
+ const d=get(),student=d.students.find(s=>s.id===studentId);if(!student)throw Error('Aluno não encontrado.');
+ const cl=d.classes.find(c=>c.id===student.classId);
+ const snap={school:d.settings.school,teacher:d.settings.teacher,pass:d.settings.pass,attendanceWeight:d.settings.attendanceWeight,student,class:cl||null,
+ grades:d.grades.filter(g=>g.studentId===studentId&&g.published),
+ attendance:d.attendance.filter(x=>x.classId===student.classId&&Object.prototype.hasOwnProperty.call(x.records||{},studentId)).map(x=>({date:x.date,present:x.records[studentId]})),
+ updatedAt:new Date().toISOString()};
+ app().download('EduClass-Aluno-'+student.name.trim().replace(/[^a-zÀ-ÿ0-9_-]+/gi,'-')+'.json',JSON.stringify(snap,null,2),'application/json');note('Boletim individual exportado sem informações de outros alunos.');
+}
+function studentsHtml(){const students=get().students||[];if(!students.length)return '<p>Cadastre alunos primeiro na aba Alunos.</p>';return students.map(s=>{const inv=invites.find(i=>i.student_id===s.id);return `<div class="cloud-student"><div style="flex:1;min-width:0"><strong>${esc(s.name)}</strong><small>${esc((get().classes.find(c=>c.id===s.classId)||{}).name||'Sem turma')}</small>${inv?`<small>${inv.user_id?'Conta vinculada':'Aguardando aluno'}</small>`:''}</div><button class="cloud-btn cloud-btn-light" data-edcloud="export" data-id="${esc(s.id)}">Boletim</button>${remote?inv?`<button class="cloud-btn cloud-btn-light" data-edcloud="copy" data-id="${esc(s.id)}">Copiar código</button><button class="cloud-btn cloud-btn-light" data-edcloud="reset" data-id="${esc(s.id)}">Novo código</button>`:`<button class="cloud-btn" data-edcloud="invite" data-id="${esc(s.id)}">Gerar convite</button>`:''}</div>`}).join('');}
+function render(){return `
+<div class="section-heading"><div><span class="eyebrow">SINCRONIZAÇÃO SEGURA</span><h1 class="h1">EduClass Connect</h1><p class="sub">Conecte o Professor 5.0 ao Aluno 1.0. Cada estudante vê somente seu próprio boletim.</p></div></div>
+<div class="cloud-layout">
+<section class="card cloud-panel"><span class="cloud-kicker">01 / SERVIDOR</span><h2>Conectar ao Supabase</h2><p>Crie um projeto no Supabase e execute o arquivo <b>CONFIGURAR_BANCO_SUPABASE.sql</b>. Cole a URL HTTPS e a chave pública <b>anon</b>. Nunca use a chave <b>service_role</b>.</p><label>URL do projeto</label><input id="cloudUrl" class="field" type="url" placeholder="https://seu-projeto.supabase.co" value="${esc(API.config?.url||'')}"><label>Chave pública anon</label><input id="cloudKey" class="field" type="text" autocomplete="off" placeholder="Chave pública do Supabase" value="${esc(API.config?.key||'')}"><div class="cloud-actions"><button class="cloud-btn" data-edcloud="config">Salvar conexão</button>${API.configured?'<button class="cloud-btn cloud-btn-light" data-edcloud="pair">Copiar conexão do aluno</button>':''}</div></section>
+<section class="card cloud-panel"><span class="cloud-kicker">02 / CONTA DO PROFESSOR</span><h2>${API.loggedIn?'Conta conectada':'Entrar ou criar conta'}</h2>${API.loggedIn?`<p>Autenticado como <b>${esc(API.session?.user?.email||'professor')}</b>.</p><div class="cloud-actions"><button class="cloud-btn cloud-btn-light" data-edcloud="logout">Sair da conta</button><button class="cloud-btn" data-edcloud="refresh">Verificar conexão</button></div>`:`<p>Use uma conta própria de professor. O aluno terá outra conta.</p><label>E-mail</label><input id="cloudEmail" class="field" type="email" autocomplete="email" placeholder="professor@exemplo.com"><label>Senha (mínimo 6 caracteres)</label><input id="cloudPassword" class="field" type="password" autocomplete="current-password" placeholder="Sua senha"><div class="cloud-actions"><button class="cloud-btn" data-edcloud="login">Entrar</button><button class="cloud-btn cloud-btn-light" data-edcloud="signup">Criar conta</button></div>`}</section>
+<section class="card cloud-panel"><span class="cloud-kicker">03 / DADOS DA ESCOLA</span><h2>Sincronização</h2><p id="cloudMessage" aria-live="polite">${esc(msg)}</p>${API.loggedIn?`${remote?`<div class="cloud-status">Escola conectada: ${esc(remote.data?.settings?.school||'Escola')} · ${syncActive?'Sincronização automática ativada':'Sincronização pausada'}</div><div class="cloud-actions"><button class="cloud-btn" data-edcloud="pull">Baixar dados da nuvem</button><button class="cloud-btn cloud-btn-light" data-edcloud="publish">Enviar dados atuais</button><button class="cloud-btn cloud-btn-light" data-edcloud="sync">Sincronizar agora</button></div>`:`<p>Este professor ainda não tem dados na nuvem. Você pode enviar suas turmas e notas locais.</p><button class="cloud-btn" data-edcloud="publish">Criar escola online e publicar dados</button>`}`:'<p>Faça login primeiro. Os dados locais não serão enviados sem sua autorização.</p>'}<small>Após baixar ou enviar os dados, as próximas alterações serão enviadas automaticamente quando houver internet. Backups locais continuam recomendados.</small></section>
+<section class="card cloud-panel cloud-wide"><span class="cloud-kicker">04 / CONVIDAR ALUNOS</span><h2>Códigos individuais</h2><p>Envie ao estudante dois códigos: <b>Conexão do servidor</b> e <b>convite individual</b>. Ele cria sua própria conta no EduClass Aluno, informa o convite e vê só suas informações. Você também pode exportar um boletim individual offline.</p>${studentsHtml()}</section>
+</div>`;}
+function redraw(){if(document.querySelector('#content')&&document.querySelector('[data-page="cloud"].active'))app().showCloud();}
+async function handle(action,id){
+ try{
+  if(action==='config'){const url=document.querySelector('#cloudUrl').value,key=document.querySelector('#cloudKey').value;API.configure(url,key);remote=null;syncActive=false;invites=[];note('Servidor salvo. Agora entre com sua conta do professor.');redraw();return;}
+  if(action==='pair'){await copy(API.pairing());return;}
+  if(action==='login'||action==='signup'){
+   const email=document.querySelector('#cloudEmail')?.value?.trim(),password=document.querySelector('#cloudPassword')?.value;
+   if(!email||!password||password.length<6)throw Error('Informe e-mail e senha com pelo menos 6 caracteres.');
+   if(action==='signup'){const result=await API.register(email,password);if(!API.loggedIn){note('Conta criada! Confirme o e-mail recebido e então entre na conta.');redraw();return;}}
+   else await API.login(email,password);
+   await attach();note('Conta conectada. Escolha baixar ou enviar os dados.');redraw();return;
+  }
+  if(action==='logout'){API.logout();remote=null;syncActive=false;invites=[];note('Você saiu da sua conta. Os dados locais continuam no aparelho.');redraw();return;}
+  if(action==='refresh'){await attach();note('Conexão verificada. Escolha o sentido da sincronização.');redraw();return;}
+  if(action==='pull'){
+   if(!remote)throw Error('Ainda não há dados para baixar.');
+   if(!confirm('Substituir os dados LOCAIS pelos dados do servidor? Faça backup antes se necessário.'))return;
+   applying=true;try{app().setData(remote.data);}finally{applying=false;}
+   syncActive=true;note('Dados online carregados! A sincronização automática está ativa.');redraw();return;
+  }
+  if(action==='publish'){
+   if(remote&&!confirm('ATENÇÃO: isto SUBSTITUIRÁ os dados da nuvem pelos dados deste aparelho. Prosseguir?'))return;
+   remote=remote?await API.saveSchool(remote.id,get()):await API.createSchool(get());
+   if(!remote)throw Error('Não foi possível criar a escola no servidor.');invites=await API.getInvites(remote.id);syncActive=true;note('Turmas, notas e chamadas publicadas no servidor.');redraw();return;
+  }
+  if(action==='sync'){if(!remote)throw Error('Crie a escola online primeiro.');syncActive=true;await push();redraw();return;}
+  if(action==='invite'){
+   if(!remote)throw Error('Envie seus dados para a nuvem primeiro.');const item=await API.makeInvite(remote.id,id);invites.push(item);note('Convite criado. Copie e envie para o aluno.');redraw();await copy(item.code);return;
+  }
+  if(action==='copy'){const item=invites.find(i=>i.student_id===id);if(!item)throw Error('Convite não encontrado.');await copy(item.code);return;}
+  if(action==='reset'){const item=invites.find(i=>i.student_id===id);if(!item)return;if(!confirm('Gerar outro convite? A conta do estudante que já usou o convite perderá o acesso.'))return;const next=await API.resetInvite(item.id);invites=invites.map(i=>i.id===item.id?next:i);note('Convite renovado.');redraw();await copy(next.code);return;}
+  if(action==='export'){await saveSnapshot(id);return;}
+ }catch(e){note(e.message||'Ocorreu um erro de conexão.',true);redraw();}
+}
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-edcloud]');if(!btn)return;e.preventDefault();handle(btn.dataset.edcloud,btn.dataset.id||'');});
+window.EduCloudTeacher={render,schedulePush,skipNextPush:()=>{applying=true;setTimeout(()=>applying=false,0);}};
+if(API.loggedIn&&API.configured)attach().then(()=>{msg='Conta recuperada. Baixe ou envie os dados para ativar a sincronização.';redraw();}).catch(e=>{msg=e.message;redraw();});
+window.addEventListener('online',()=>{if(syncActive)schedulePush();});
+})();
+
+</script>
+</body>
+</html>

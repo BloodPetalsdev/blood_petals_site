@@ -7,3 +7,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = 'EduClass'
 include ':app'
+
+include ':student'

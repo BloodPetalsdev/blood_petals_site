@@ -14,6 +14,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceResponse;
+import java.io.IOException;
 import android.widget.Toast;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -46,10 +48,21 @@ public final class MainActivity extends Activity {
         s.setAllowUniversalAccessFromFileURLs(false);
         s.setSupportZoom(false);
         webView.setWebViewClient(new WebViewClient() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                if ("https".equals(uri.getScheme()) && "appassets.androidplatform.net".equals(uri.getHost()) && "/index.html".equals(uri.getPath())) {
+                    try { return new WebResourceResponse("text/html", "UTF-8", getAssets().open("index.html")); }
+                    catch (IOException ignored) { return null; }
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
-                return !"file".equals(uri.getScheme()) ||
-                       !uri.toString().startsWith("file:///android_asset/");
+                if ("https".equals(uri.getScheme()) && "appassets.androidplatform.net".equals(uri.getHost()) && "/index.html".equals(uri.getPath())) return false;
+                if ("https".equals(uri.getScheme())) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (Exception ignored) {}
+                }
+                return true;
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
@@ -70,7 +83,7 @@ public final class MainActivity extends Activity {
             }
         });
         webView.addJavascriptInterface(new EduClassBridge(), "AndroidBridge");
-        webView.loadUrl("file:///android_asset/index.html");
+        webView.loadUrl("https://appassets.androidplatform.net/index.html");
     }
 
     public final class EduClassBridge {

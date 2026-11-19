@@ -1,0 +1,39 @@
+name: Compilar EduClass Connect (Professor + Aluno)
+on:
+  push:
+    branches: [educlass-connect-v5]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compilar ambos APKs
+        run: gradle --no-daemon --stacktrace :app:assembleDebug :student:assembleDebug
+      - name: Publicar Professor
+        uses: actions/upload-artifact@v4
+        with:
+          name: EduClass-Professor-5.0-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Publicar Aluno
+        uses: actions/upload-artifact@v4
+        with:
+          name: EduClass-Aluno-1.0-APK
+          path: android/student/build/outputs/apk/debug/student-debug.apk
+          if-no-files-found: error
