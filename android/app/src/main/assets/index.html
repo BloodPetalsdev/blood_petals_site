@@ -648,7 +648,7 @@ class EduCloud {
  async request(path,{method='GET',body=null,auth=true,extra={}}={}){
   if(!this.configured)throw Error('Configure o servidor Supabase primeiro.');
   if(auth)await this.ensureToken();
-  const headers={'apikey':this.config.key,'Authorization':'Bearer '+(auth?this.session.access_token:this.config.key),...extra};
+  const headers={'apikey':this.config.key,...(auth?{'Authorization':'Bearer '+this.session.access_token}:{}),...extra};
   if(body!==null)headers['Content-Type']='application/json';
   let res;
   try{res=await fetch(this.config.url+path,{method,headers,body:body===null?undefined:JSON.stringify(body),cache:'no-store'});}catch(e){throw Error('Sem conexão com o servidor. Verifique a internet e o endereço.');}
